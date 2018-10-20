@@ -1,0 +1,30 @@
+const app = require('../src/app')
+var http = require('http');
+
+var server = http.createServer(app);
+var port = normalizePort(process.env.PORT || '8090');
+app.set('port', port);
+
+server.listen(port, ()=>{
+  console.log('R0 Server is running on http://localhost:8090')
+});
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+process.on('unhandledRejection', (reason, p) =>
+  console.log('Unhandled Rejection at: Promise ', p, reason)
+);

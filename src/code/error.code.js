@@ -1,0 +1,41 @@
+const APIError = require('./api.error')
+const RAW_CODE = {
+  NOT_FOUND: {text:"没有找到页面", http: 404},
+  NO_SUCH_USER: {text:"没有找到用户", http: 400},
+  NEED_PHONE: {text:"请输入手机号", http: 400},
+  NEED_PASSWORD: {text:"请输入密码", http: 400},
+  PHONE_REGISTERED: {text:"手机号已注册", http:400},
+  PASSWORD_MISMATCH: {text:'用户名或密码错误',http:400},
+  // NEED_TITLE: {text:"标题不能为空", http: 400},
+  CREDENTIALS_REQUIRED: {text:"缺少校验凭证", http: 400},
+  NO_SUCH_NOTE: {text:"没有找到记事", http: 400},
+  NEED_CONTENT: {text:"内容不能为空", http: 400},
+  DUPLICATED_CONTENT: {text:"内容重复", http: 400},
+  NO_SUCH_GROUP: {text:"没有找到群组", http: 400},
+  NO_GROUP_ID: {text:"没有群组ID", http:400},
+  ALREADY_IN_GROUP: {text:"已经加入该群组", http: 400},
+}
+
+const ERR = Object.keys(RAW_CODE).map((name)=>{
+  return {
+    name:name,
+    text:RAW_CODE[name].text,
+    http:RAW_CODE[name].http,
+  }
+}).reduce((res,item,idx)=>{
+  Object.defineProperty(res, item.name, {
+    get() { 
+      return new APIError(item.text, item.name, item.http)
+    },
+  })
+  return res
+}, {})
+
+const ERR_CODE = Object.keys(RAW_CODE).map((name)=>{
+  return name
+}).reduce((res,item,idx)=>{
+  res[item] = item
+  return res
+}, {})
+
+module.exports = { ERR, ERR_CODE }
