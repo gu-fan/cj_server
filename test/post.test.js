@@ -72,7 +72,7 @@ describe('user tests', () => {
     // }
     // expect(res.data.err).toBe('no_title')
     try {
-      res = await http.post('/post/new', post)
+      res = await http.post('/post', post)
     } catch (e) {
       res = e.response
     }
@@ -82,7 +82,7 @@ describe('user tests', () => {
     }
 
     try {
-      res = await http.post('/post/new', post2)
+      res = await http.post('/post/', post2)
     } catch (e) {
       res = e.response
     }
@@ -107,6 +107,37 @@ describe('user tests', () => {
       res = await http.get('/user/'+uid)
       expect(res.data.user.posts[0].title).toBe('hello')
       expect(res.data.user.posts[1].title).toBe('hello222')
+    } catch (e) {
+      console.log(e)
+      
+    }
+
+  })
+  test('update pos', async () => {
+    try {
+      res = await http.put('/post/'+pid, {title:'aaa'})
+      console.log(res.data)
+    } catch (e) {
+      console.log(e)
+      
+    }
+
+  })
+  test('delete pos', async () => {
+    try {
+      res = await http.delete('/post/'+pid)
+      console.log(res.data)
+    } catch (e) {
+      console.log(e)
+      
+    }
+
+  })
+  test('get users post', async () => {
+    try {
+      res = await http.get('/user/'+uid)
+      console.log(res.data.user.posts)
+      expect(res.data.user.posts.length).toBe(1)
     } catch (e) {
       console.log(e)
       

@@ -8,7 +8,7 @@ const {uid, slug}= require('../../models/mixin/_uid')
 
 const {Post, User}  = require('../../models')
 
-router.use('/new', jwt.auth(), wrap(async function(req, res, next) {
+router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
   // var post = {
   //   author: req.user.sub,
@@ -38,7 +38,7 @@ router.use('/new', jwt.auth(), wrap(async function(req, res, next) {
 
 }))
 
-router.use('/:pid', jwt.auth(), wrap(async function(req, res, next) {
+router.get('/:pid', jwt.auth(), wrap(async function(req, res, next) {
 
   var post = await Post.query()
                         .findById(req.params.pid)
@@ -53,5 +53,44 @@ router.use('/:pid', jwt.auth(), wrap(async function(req, res, next) {
   })
 
 }))
+router.put('/:pid', jwt.auth(), wrap(async function(req, res, next) {
+
+  var post = await Post.query()
+                        .findById(req.params.pid)
+                        .eager('author')
+  if (post == undefined) throw ERR.NO_SUCH_NOTE
+const updatedPost = await Post
+  .query()
+  .patchAndFetchById(req.params.pid, {title: req.body.title,content:req.body.content});
+  
+
+  res.json({
+      msg:"post patch",
+      updatedPost,
+      code:0,
+  })
+
+}))
+
+router.delete('/:pid', jwt.auth(), wrap(async function(req, res, next) {
+
+  var post = await Post.query()
+                        .findById(req.params.pid)
+                        .eager('author')
+  if (post == undefined) throw ERR.NO_SUCH_NOTE
+  
+const numberOfDeletedRows = await Post
+  .query()
+  .deleteById(req.params.pid)
+
+
+  res.json({
+      msg:"post delete",
+      numberOfDeletedRows,
+      code:0,
+  })
+
+}))
+
 
 module.exports = router
