@@ -8,7 +8,7 @@
     "debug": "DEBUG=route:* nodemon",
     "test": "jest --runInBand --watch",
     "cover": "jest --coverage",
-    "dev": "nodemon index.js"
+    "dev": "nodemon bin/www"
   },
   "dependencies": {
     "axios": "^0.18.0",

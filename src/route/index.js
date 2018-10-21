@@ -4,6 +4,7 @@ const config = require('config')
 
 const auth = require('../services/auth/auth.service')
 const user  = require('../services/user/user.service')
+const post  = require('../services/post/post.service')
 
 module.exports = app => {
   router.get('/', function(req, res, next) {
@@ -16,6 +17,7 @@ module.exports = app => {
   app.use(jwt({secret: config.key}))
 
   app.use('/user', user)
+  app.use('/post', post)
 
 }
 

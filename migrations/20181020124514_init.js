@@ -15,6 +15,27 @@ exports.up = function(knex, Promise) {
       table.unique('phone')
       table.timestamps()
     })
+    // POST
+    .createTable('post', table=>{
+      table.string('id').primary()
+
+      table.string('title')
+      table.string('content')
+
+      table.integer('total_likes').unsigned().defaultTo(0)
+
+      table
+        .string('author_id')
+        .references('id')
+        .inTable('user');
+
+      table
+        .string('group_id')
+        .references('id')
+        .inTable('group');
+
+      table.timestamps()
+    })
   ])
   
 };
