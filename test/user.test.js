@@ -9,7 +9,6 @@ const Knex = require('knex')
 const {raw, Model } = require('objection')
 const {User} = require('../src/models')
 
-
 const jwt = require('../src/common/jwt-auth')
 const port = 3013
 const http = axios.create({
@@ -19,7 +18,6 @@ const http = axios.create({
 const { signup, signupAndLogin,  getRes } = require('./common')(http)
 
 const sinon = require('sinon')
-
 
 describe('user tests', () => {
   let session

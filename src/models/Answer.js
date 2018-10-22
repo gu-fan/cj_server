@@ -4,10 +4,10 @@ const { Model, mixin } = require('objection');
 const timestamp = require('./mixin/timestamp')
 const uid = require('./mixin/uid')
 
-class Post extends mixin(Model, [timestamp,uid()]) {
+class Answer extends mixin(Model, [timestamp,uid()]) {
 
   static get tableName(){
-     return 'post'
+     return 'answer'
   } 
 
   static get jsonSchema() {
@@ -30,27 +30,35 @@ class Post extends mixin(Model, [timestamp,uid()]) {
       //   relation: Model.ManyToManyRelation,
       //   modelClass: __dirname + '/User',
       //   join: {
-      //     from: 'post.id',
+      //     from: 'answer.id',
       //     through: {
-      //       from: 'user_like_post.pid',
-      //       to: 'user_like_post.uid'
+      //       from: 'user_like_answer.pid',
+      //       to: 'user_like_answer.uid'
       //     },
       //     to: 'user.id'
       //   }
       // },
-      // comments: {
-      //   relation: Model.HasManyRelation,
-      //   modelClass: __dirname + '/Comment',
-      //   join: {
-      //     from: 'post.id',
-      //     to: 'comment.post_id'
-      //   }
-      // },
+      comments: {
+        relation: Model.HasManyRelation,
+        modelClass: __dirname + '/Comment',
+        join: {
+          from: 'answer.id',
+          to: 'comment.answer_id'
+        }
+      },
+      question: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: __dirname + '/Question',
+        join: {
+          from: 'answer.question_id',
+          to: 'question.id'
+        }
+      },
       author: {
         relation: Model.BelongsToOneRelation,
         modelClass: __dirname + '/User',
         join: {
-          from: 'post.author_id',
+          from: 'answer.author_id',
           to: 'user.id'
         }
       },
@@ -58,7 +66,7 @@ class Post extends mixin(Model, [timestamp,uid()]) {
       //   relation: Model.BelongsToOneRelation,
       //   modelClass: __dirname + '/Group',
       //   join: {
-      //     from: 'post.group_id',
+      //     from: 'answer.group_id',
       //     to: 'group.id'
       //   }
       // }
@@ -68,4 +76,4 @@ class Post extends mixin(Model, [timestamp,uid()]) {
 
 };
 
-module.exports = Post;
+module.exports = Answer;

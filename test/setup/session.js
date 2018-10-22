@@ -16,7 +16,9 @@ class Session {
             .dropTableIfExists('knex_migrations_lock')
 
             .dropTableIfExists('user')
-            .dropTableIfExists('post')
+            .dropTableIfExists('question')
+            .dropTableIfExists('answer')
+            .dropTableIfExists('comment')
 
     await knex.migrate.latest()
 

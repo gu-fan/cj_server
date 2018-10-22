@@ -16,7 +16,7 @@ exports.up = function(knex, Promise) {
       table.timestamps()
     })
     // POST
-    .createTable('post', table=>{
+    .createTable('question', table=>{
       table.string('id').primary()
 
       table.string('title')
@@ -29,13 +29,49 @@ exports.up = function(knex, Promise) {
         .references('id')
         .inTable('user');
 
+      table.timestamps()
+    })
+    .createTable('answer', table=>{
+      table.string('id').primary()
+
+      table.string('content')
+
+      table.integer('total_zhichi').unsigned().defaultTo(0)
+      table.integer('total_fandui').unsigned().defaultTo(0)
+
       table
-        .string('group_id')
+        .string('question_id')
         .references('id')
-        .inTable('group');
+        .inTable('question');
+
+      table
+        .string('author_id')
+        .references('id')
+        .inTable('user');
+
+      table.timestamps()
+
+    })
+    .createTable('comment', table=>{
+      table.string('id').primary()
+
+      table.string('content')
+
+      table.integer('total_likes').unsigned().defaultTo(0)
+
+      table
+        .string('answer_id')
+        .references('id')
+        .inTable('answer');
+
+      table
+        .string('author_id')
+        .references('id')
+        .inTable('user');
 
       table.timestamps()
     })
+    
   ])
   
 };
@@ -44,6 +80,7 @@ exports.down = function(knex, Promise) {
   return Promise.all([
     knex.schema
     .dropTableIfExists('user')
+    .dropTableIfExists('question')
   ])
   
 };

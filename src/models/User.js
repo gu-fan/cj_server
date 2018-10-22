@@ -34,12 +34,12 @@ class User extends mixin(Model, [
 
   static get relationMappings() {
     return {
-      posts: {
+      questions: {
         relation: Model.HasManyRelation,
-        modelClass: __dirname + '/Post',
+        modelClass: __dirname + '/Question',
         join: {
           from: 'user.id',
-          to: 'post.author_id'
+          to: 'question.author_id'
         }
       },
       // answers: {

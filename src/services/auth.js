@@ -1,14 +1,14 @@
 const router = require('express').Router()  // main
 
 // model
-const User = require('../../models/User')
+const User = require('../models/User')
 
 // app specific
-const jwt = require('../../common/jwt-auth')
-const {ERR, MSG} = require('../../code')
+const jwt = require('../common/jwt-auth')
+const {ERR, MSG} = require('../code')
 
 // help functions
-const {wrap, delay} = require('../../common/promise')
+const {wrap, delay} = require('../common/promise')
 const isEmpty = require('lodash').isEmpty
 
 /** Signup
