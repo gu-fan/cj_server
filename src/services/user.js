@@ -22,16 +22,29 @@ router.use('/.ping', jwt.auth(), wrap(async function(req, res, next) {
   })
 }))
 
-router.use('/:uid', jwt.auth(), wrap(async function(req, res, next) {
+router.get('/:uid', jwt.auth(), wrap(async function(req, res, next) {
   var user = await User.query()
-                        .findById(req.params.uid)
-                        .eager('questions')
+                .findById(req.params.uid)
   
   res.json({
     msg:'user valid',
     user,
     code:0
   })
+}))
+router.delete('/:uid', jwt.auth(), wrap(async function(req, res, next) {
+  var user = await User.query()
+                .findById(req.params.uid)
+  const numberOfDeletedRows = await User  
+          .query()
+          .deleteById(req.params.uid)
+
+  res.json({
+      msg:"user delete",
+      numberOfDeletedRows,
+      code:0,
+  })
+  
 }))
 
 

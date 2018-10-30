@@ -176,13 +176,14 @@ describe('user tests', () => {
       console.log(e.response)
     }
   })
-  var aid
+  var aid,aid2
   test('get ans', async () => {
     try {
       res = await http.get('/question/'+pid2+'/a')
       console.log(res.data.answers)
       expect(res.data.answers.length).toBe(2)
       aid = res.data.answers[0].id
+      aid2 = res.data.answers[1].id
       
     } catch (e) {
       console.log(e.response)
@@ -200,7 +201,7 @@ describe('user tests', () => {
 
   test('delete ans', async () => {
     try {
-      res = await http.delete('/question/'+pid2+'/a/' + aid)
+      res = await http.delete('/question/'+pid2+'/a/' + aid2)
       console.log(res.data.numberOfDeletedRows)
     } catch (e) {
       console.log(e.response)
@@ -208,15 +209,57 @@ describe('user tests', () => {
   })
 
   test('get question ans', async () => {
-    try {
       res = await http.get('/question/'+pid2+'/a')
       console.log(res.data.answers)
       expect(res.data.answers.length).toBe(1)
+
+  })
+
+  test('create comment', async () => {
+      res = await http.post('/question/'+pid2+'/a/'+aid+'/c', {content:'hello comment'})
+      console.log(res.data.newComment)
+
+  })
+  var cid
+  test('get cmt', async () => {
+    try {
+      res = await http.get('/question/'+pid2+'/a/'+aid+'/c')
+      console.log(res.data)
+      expect(res.data.comments.length).toBe(1)
+      cid = res.data.comments[0].id
     } catch (e) {
       console.log(e.response)
     }
-
+      
   })
+  test('patch cmt', async () => {
+    try {
+      res = await http.put('/question/'+pid2+'/a/' + aid+'/c/'+cid, {content:'CMT PATCH'})
+      console.log(res.data.updatedComment)
+    } catch (e) {
+      console.log(e.response)
+    }
+  })
+
+  test('delete cmt', async () => {
+    try {
+      res = await http.delete('/question/'+pid2+'/a/' + aid2+'/c/'+cid)
+      console.log(res.data.numberOfDeletedRows)
+    } catch (e) {
+      console.log(e.response)
+    }
+  })
+  test('get cmt', async () => {
+    try {
+      res = await http.get('/question/'+pid2+'/a/'+aid+'/c')
+      console.log(res.data)
+      expect(res.data.comments.length).toBe(0)
+    } catch (e) {
+      console.log(e.response)
+    }
+      
+  })
+
 
 
 })

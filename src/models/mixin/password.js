@@ -8,7 +8,7 @@ module.exports = (options) => {
 
     // Provide good defaults for the options if possible.
     options = Object.assign({
-        allowEmptyPassword: false,
+        allowEmptyPassword: true,
         passwordField: 'password',
         rounds: RECOMMENDED_ROUNDS
     }, options);

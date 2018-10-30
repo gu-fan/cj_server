@@ -8,6 +8,8 @@ const {uid, slug}= require('../models/mixin/_uid')
 
 const {Question, User, Answer}  = require('../models')
 
+const commentRoute = require('./comment')
+
 router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 
   var question = await Question.query()
@@ -107,6 +109,7 @@ router.delete('/:aid', jwt.auth(), wrap(async function(req, res, next) {
 
 }))
 
+router.use('/:aid/c', commentRoute);
 
 module.exports = router
 

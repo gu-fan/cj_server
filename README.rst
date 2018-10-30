@@ -110,3 +110,9 @@ post/:pid/update
 
 
 
+secrects
+========
+AppID(小程序ID) wx40ff346e15e8d454
+AppSecret(小程序密钥) c68cb819032df23248de5278015a4c77 复制
+
+

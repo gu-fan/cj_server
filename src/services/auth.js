@@ -1,4 +1,5 @@
 const router = require('express').Router()  // main
+var fly=require("flyio")
 
 // model
 const User = require('../models/User')
@@ -98,4 +99,71 @@ router.get('/check', jwt.auth(), wrap(async function(req, res, next) {
   res.json({code:0, msg:MSG.USER_VALID})
 }))
 
+
+const APPID='wx40ff346e15e8d454'
+const SECRECT='c68cb819032df23248de5278015a4c77'
+router.use('/wx_code', wrap(async function(req, res, next) {
+    var response = await fly.get(`https://api.weixin.qq.com/sns/jscode2session?appid=${APPID}&secret=${SECRECT}&js_code=${req.query.code}&grant_type=authorization_code`)
+    var data = JSON.parse(response.data)
+    console.log(data)
+    if (data.openid) {
+
+      // get user from database
+      // if has user info, use it.
+      // else ask user to bind it.
+
+      var u = await User.query().findOne({wx_id:data.openid})
+
+      if (u == null) {
+        u = await User
+          .query()
+          .insert({
+            wx_id: data.openid
+          })
+
+        var t = await jwt.signId(u.id)
+        res.json({
+          need_profile: true,
+          user: u,
+          t,
+          code: 0
+        })
+      } else {
+        var t = await jwt.signId(u.id)
+        if (isEmpty(u.avatar)) {  
+          // no user info as no avatar
+          res.json({
+            need_profile: true,
+            t,
+            user: u,
+            code: 0
+          })
+
+        } else {
+          // got the user info
+          res.json({
+            need_profile: false,
+            t,
+            user: u,
+            code: 0
+          })
+        }
+      }
+
+      // res.json({
+      //   id:data.openid,
+      //   ss:data.session_key,
+      //   code:0
+      // })
+    } else {
+      res.json({
+        msg: data.errMsg,
+        code:data.errcode
+      })
+    }
+}))
+
+
+
 module.exports = router
+

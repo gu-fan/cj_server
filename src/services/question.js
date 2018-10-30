@@ -95,8 +95,8 @@ router.delete('/:pid', jwt.auth(), wrap(async function(req, res, next) {
   if (question == undefined) throw ERR.NO_SUCH_NOTE
   
   const numberOfDeletedRows = await Question
-  .query()
-  .deleteById(req.params.pid)
+            .query()
+            .deleteById(req.params.pid)
 
   res.json({
       msg:"question delete",
