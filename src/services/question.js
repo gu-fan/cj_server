@@ -12,11 +12,13 @@ const answerRoute = require('./answer')
 
 router.get('/', jwt.auth(), wrap(async function(req, res, next) {
   var all = await Question.query().count()
+  var questions = await Question.query().limit(5)
   // console.log(all[0])
 
   res.json({
       msg:"question list",
       code:0,
+      questions,
       count:all[0]['count(*)'],
   })
 
@@ -57,7 +59,7 @@ router.get('/:pid', jwt.auth(), wrap(async function(req, res, next) {
 
   var question = await Question.query()
                         .findById(req.params.pid)
-                        .eager('author')
+                        .eager('[author, answers]')
   if (question == undefined) throw ERR.NO_SUCH_NOTE
   
 

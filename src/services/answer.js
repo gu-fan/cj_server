@@ -49,7 +49,7 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
   res.json({
       msg:"answer create",
-      newAnswer,
+      answer:newAnswer,
       code:0,
   })
 
@@ -59,7 +59,7 @@ router.get('/:aid', jwt.auth(), wrap(async function(req, res, next) {
 
   var answer = await Answer.query()
                         .findById(req.params.aid)
-                        .eager('[author, question]')
+                        .eager('[author, question, comments.[author,answer.question, reply_to.author]]')
 
   if (answer == undefined) throw ERR.NO_SUCH_NOTE
   
@@ -104,6 +104,139 @@ router.delete('/:aid', jwt.auth(), wrap(async function(req, res, next) {
   res.json({
       msg:"answer delete",
       numberOfDeletedRows,
+      code:0,
+  })
+
+}))
+
+router.get('/:aid/like', jwt.auth(), wrap(async function(req, res, next) {
+
+  var answer = await Answer.query()
+                        .findById(req.params.aid)
+  if (answer == undefined) throw ERR.NO_SUCH_NOTE
+
+  var u = await answer.$relatedQuery('liked_users')
+                  .findById(req.user.sub)
+  var liked = 0
+  if (u==null) {
+    liked = 0
+  } else {
+    liked = u.num
+  }
+  // check if user is liked
+  var liked_users = await answer.$relatedQuery('liked_users')
+
+  
+  res.json({
+      msg:"answer like got",
+      answer,
+      liked,
+      liked_users,
+      code:0,
+  })
+
+}))
+router.post('/:aid/like', jwt.auth(), wrap(async function(req, res, next) {
+
+  var answer = await Answer.query()
+                        .findById(req.params.aid)
+
+  if (answer == undefined) throw ERR.NO_SUCH_NOTE
+
+  var u = await answer.$relatedQuery('liked_users')
+                  .findById(req.user.sub)
+  if (u==null) {
+    await answer.$relatedQuery('liked_users')
+    .relate({
+      id: req.user.sub,
+      num: 1,
+    });
+    await answer.$query()
+          .increment('total_zhichi', 1)
+  } else {
+    if (u.num == -1) {
+      await answer.$relatedQuery('liked_users')
+        .update({num:0})
+        .where('uid', req.user.sub);
+      await answer.$query()
+            .decrement('total_fandui', 1)
+      await answer.$query()
+            .increment('total_zhichi', 1)
+    } else if (u.num == 1) {
+      // do nothing
+    } else {        // = 0
+      await answer.$relatedQuery('liked_users')
+        .update({num:1})
+        .where('uid', req.user.sub);
+      await answer.$query()
+            .increment('total_zhichi', 1)
+    }
+  }
+
+  var liked_users = await answer.$relatedQuery('liked_users')
+  answer = await Answer.query()
+                      .findById(req.params.aid)
+
+  res.json({
+      msg:"answer like set",
+      answer,
+      liked_users,
+      code:0,
+  })
+
+}))
+
+router.post('/:aid/dislike', jwt.auth(), wrap(async function(req, res, next) {
+
+  var answer = await Answer.query()
+                        .findById(req.params.aid)
+
+  if (answer == undefined) throw ERR.NO_SUCH_NOTE
+
+  var u = await answer.$relatedQuery('liked_users')
+                  .findById(req.user.sub)
+  var user
+  if (u==null) {
+    await answer.$relatedQuery('liked_users')
+    .relate({
+      id: req.user.sub,
+      num: -1,
+    });
+    await answer.$query()
+          .increment('total_fandui', 1)
+  } else {
+    if (u.num == 1) {
+      await answer.$relatedQuery('liked_users')
+        .update({num:0})
+        .where('uid', req.user.sub);
+      await answer.$query()
+            .increment('total_fandui', 1)
+      await answer.$query()
+            .decrement('total_zhichi', 1)
+
+      
+    } else if (u.num == -1) {
+      // do nothing
+    } else {        // = 0
+      await answer.$relatedQuery('liked_users')
+        .update({num:-1})
+        .where('uid', req.user.sub);
+      await answer.$query()
+            .increment('total_fandui', 1)
+      
+    }
+  }
+
+  var liked_users = await answer.$relatedQuery('liked_users')
+
+  answer = await Answer.query()
+                      .findById(req.params.aid)
+  
+  res.json({
+      msg:"answer dislike set",
+      user,
+      answer,
+      liked_users,
       code:0,
   })
 

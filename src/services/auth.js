@@ -164,6 +164,44 @@ router.use('/wx_code', wrap(async function(req, res, next) {
 }))
 
 
+router.use('/wx_code_fake', wrap(async function(req, res, next) {
+      var u = await User.query().findOne({wx_id:req.body.wx_id})
+      if (u == null) {
+        u = await User
+          .query()
+          .insert({
+            wx_id: req.body.wx_id
+          })
+
+        var t = await jwt.signId(u.id)
+        res.json({
+          need_profile: true,
+          user: u,
+          t,
+          code: 0
+        })
+      } else {
+        var t = await jwt.signId(u.id)
+        if (isEmpty(u.avatar)) {  
+          // no user info as no avatar
+          res.json({
+            need_profile: true,
+            t,
+            user: u,
+            code: 0
+          })
+        } else {
+          // got the user info
+          res.json({
+            need_profile: false,
+            t,
+            user: u,
+            code: 0
+          })
+        }
+      }
+
+}))
 
 module.exports = router
 

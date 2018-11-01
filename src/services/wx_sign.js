@@ -21,7 +21,6 @@ router.use('/bind', jwt.auth(),
   if (isEmpty(req.body.userInfo)) {
       res.json({code:1, msg:"NEED_USER_AUTH"})
   } else {
-
     const updateUser = await User
       .query()
       .patchAndFetchById(req.user.sub, {avatar: req.body.userInfo.avatarUrl,name:req.body.userInfo.nickName});

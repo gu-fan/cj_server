@@ -6,6 +6,7 @@ const wx_sign = require('../services/wx_sign')
 const auth = require('../services/auth')
 const user  = require('../services/user')
 const question  = require('../services/question')
+const pub  = require('../services/public')
 
 module.exports = app => {
   router.get('/.ping', function(req, res, next) {
@@ -14,6 +15,7 @@ module.exports = app => {
   app.use(router)
 
   app.use('/auth', auth)
+  app.use('/public', pub)
 
   app.use(jwt({secret: config.key}))
 

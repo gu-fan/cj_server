@@ -52,6 +52,20 @@ exports.up = function(knex, Promise) {
       table.timestamps()
 
     })
+    .createTable('user_like_answer', table=>{
+      table.string('id').primary()
+      table.integer('num').defaultTo(0)
+      table
+        .string('uid')
+        .references('id')
+        .inTable('user')
+        .onDelete('CASCADE');
+      table
+        .string('aid')
+        .references('id')
+        .inTable('answer')
+        .onDelete('CASCADE');
+    })
     .createTable('comment', table=>{
       table.string('id').primary()
 
@@ -65,12 +79,34 @@ exports.up = function(knex, Promise) {
         .inTable('answer');
 
       table
+        .string('reply_id')
+        .references('id')
+        .inTable('comment');
+
+      table
         .string('author_id')
         .references('id')
         .inTable('user');
 
       table.timestamps()
     })
+    .createTable('user_like_comment', table=>{
+      table.increments('id').primary();
+
+      table.integer('num').defaultTo(0)
+
+      table
+        .string('uid')
+        .references('id')
+        .inTable('user')
+        .onDelete('CASCADE');
+      table
+        .string('cid')
+        .references('id')
+        .inTable('comment')
+        .onDelete('CASCADE');
+    })
+
     
   ])
   
@@ -81,6 +117,10 @@ exports.down = function(knex, Promise) {
     knex.schema
     .dropTableIfExists('user')
     .dropTableIfExists('question')
+    .dropTableIfExists('answer')
+    .dropTableIfExists('user_like_answer')
+    .dropTableIfExists('comment')
+    .dropTableIfExists('user_like_comment')
   ])
   
 };

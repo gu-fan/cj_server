@@ -171,7 +171,7 @@ describe('user tests', () => {
       res = await http.post('/question/'+pid2+'/a', {content:'ANS'})
       res = await http.post('/question/'+pid2+'/a', {content:'ANS2'})
       console.log(res.data)
-      expect(res.data.newAnswer.content).toBe('ANS2')
+      expect(res.data.answer.content).toBe('ANS2')
     } catch (e) {
       console.log(e.response)
     }
@@ -217,7 +217,7 @@ describe('user tests', () => {
 
   test('create comment', async () => {
       res = await http.post('/question/'+pid2+'/a/'+aid+'/c', {content:'hello comment'})
-      console.log(res.data.newComment)
+      console.log(res.data.comment)
 
   })
   var cid
@@ -260,6 +260,53 @@ describe('user tests', () => {
       
   })
 
+  test('like ans', async () => {
+    try {
+      res = await http.get('/question/'+pid2+'/a/'+aid+'/like')
+      // console.log(res.data)
+      expect(res.data.answer.total_zhichi).toBe(0)
+    } catch (e) {
+      console.log(e.response)
+    }
+      
+  })
+  test('like ans set', async () => {
+    try {
+      res = await http.post('/question/'+pid2+'/a/'+aid+'/like')
+      expect(res.data.answer.total_zhichi).toBe(1)
+    } catch (e) {
+      console.log(e.response)
+    }
+      
+  })
 
+  test('get like ans', async () => {
+    try {
+      res = await http.get('/question/'+pid2+'/a/'+aid+'/like')
+      expect(res.data.answer.total_zhichi).toBe(1)
+    } catch (e) {
+      console.log(e.response)
+    }
+      
+  })
+  test('dislike ans 2', async () => {
+    try {
+      res = await http.post('/question/'+pid2+'/a/'+aid+'/dislike')
+      expect(res.data.answer.total_zhichi).toBe(0)
+      expect(res.data.answer.total_fandui).toBe(1)
+    } catch (e) {
+      console.log(e.response)
+    }
+      
+  })
+  test('get like ans', async () => {
+    try {
+      res = await http.get('/question/'+pid2+'/a/'+aid+'/like')
+      expect(res.data.answer.total_fandui).toBe(1)
+    } catch (e) {
+      console.log(e.response)
+    }
+      
+  })
 
 })

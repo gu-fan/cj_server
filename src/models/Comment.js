@@ -26,26 +26,35 @@ class Comment extends mixin(Model, [timestamp,uid()]) {
 
   static get relationMappings() {
     return {
-      // liked_users: {
-      //   relation: Model.ManyToManyRelation,
-      //   modelClass: __dirname + '/User',
-      //   join: {
-      //     from: 'comment.id',
-      //     through: {
-      //       from: 'user_like_comment.pid',
-      //       to: 'user_like_comment.uid'
-      //     },
-      //     to: 'user.id'
-      //   }
-      // },
-      // comments: {
-      //   relation: Model.HasManyRelation,
-      //   modelClass: __dirname + '/Comment',
-      //   join: {
-      //     from: 'comment.id',
-      //     to: 'comment.comment_id'
-      //   }
-      // },
+      liked_users: {
+        relation: Model.ManyToManyRelation,
+        modelClass: __dirname + '/User',
+        join: {
+          from: 'comment.id',
+          through: {
+            from: 'user_like_comment.cid',
+            extra: ["num"],
+            to: 'user_like_comment.uid'
+          },
+          to: 'user.id'
+        }
+      },
+      reply_to: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: __dirname + '/Comment',
+        join: {
+          from: 'comment.reply_id',
+          to: 'comment.id',
+        }
+      },
+      comments: {
+        relation: Model.HasManyRelation,
+        modelClass: __dirname + '/Comment',
+        join: {
+          from: 'comment.id',
+          to: 'comment.reply_id'
+        }
+      },
       author: {
         relation: Model.BelongsToOneRelation,
         modelClass: __dirname + '/User',

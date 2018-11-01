@@ -31,6 +31,7 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
   var comments = await Comment.query().insertGraph([{
     content: req.body.content, 
+    reply_id: req.body.reply_id,
     answer:{
       id: req.params.aid,
     },
@@ -40,13 +41,13 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
   }], {
     relate: true
   })
-    .eager('[author, answer]');
+    .eager('[author, answer, reply_to]');
 
-  var newComment = comments[0]
+  var comment = comments[0]
 
   res.json({
       msg:"comment create",
-      newComment,
+      comment,
       code:0,
   })
 
@@ -56,7 +57,7 @@ router.get('/:cid', jwt.auth(), wrap(async function(req, res, next) {
 
   var comment = await Comment.query()
                         .findById(req.params.cid)
-                        .eager('[author, question]')
+                        .eager('[author, reply_to, comments, answer.question]')
 
   if (comment == undefined) throw ERR.NO_SUCH_NOTE
   
@@ -105,6 +106,111 @@ router.delete('/:cid', jwt.auth(), wrap(async function(req, res, next) {
   })
 
 }))
+
+
+router.get('/:cid/like', jwt.auth(), wrap(async function(req, res, next) {
+
+  var comment = await Comment.query()
+                        .findById(req.params.cid)
+  if (comment == undefined) throw ERR.NO_SUCH_NOTE
+
+  var u = await comment.$relatedQuery('liked_users')
+                  .findById(req.user.sub)
+  var liked = 0
+  if (u==null) {
+    liked = 0
+  } else {
+    liked = 1
+  }
+  // check if user is liked
+  var liked_users = await comment.$relatedQuery('liked_users')
+  
+  res.json({
+      msg:"answer like got",
+      comment,
+      liked,
+      liked_users,
+      code:0,
+  })
+
+}))
+router.post('/:cid/like', jwt.auth(), wrap(async function(req, res, next) {
+
+  var comment = await Comment.query()
+                        .findById(req.params.cid)
+
+  if (comment == undefined) throw ERR.NO_SUCH_NOTE
+
+  var u = await comment.$relatedQuery('liked_users')
+                        .findById(req.user.sub)
+  if (u==null) {
+    await comment.$relatedQuery('liked_users')
+    .relate({
+      id: req.user.sub,
+    });
+    await comment.$query()
+          .increment('total_likes', 1)
+
+    comment = await Comment.query()
+                        .findById(req.params.cid)
+  } else {
+    // do nothing
+  }
+
+  var liked_users = await comment.$relatedQuery('liked_users')
+
+  res.json({
+      msg:"comment like set",
+      comment,
+      liked_users,
+      code:0,
+  })
+
+}))
+
+router.post('/:cid/dislike', jwt.auth(), wrap(async function(req, res, next) {
+
+  var comment = await Comment.query()
+                        .findById(req.params.cid)
+
+  if (comment == undefined) throw ERR.NO_SUCH_NOTE
+
+  var u = await comment.$relatedQuery('liked_users')
+                        .findById(req.user.sub)
+
+  if (u==null) {
+    // do nothing
+  } else {
+      await comment.$relatedQuery('liked_users')
+        .unrelate()
+        .where('uid', req.user.sub);
+      await comment.$query()
+            .decrement('total_likes', 1)
+      comment = await Comment.query()
+                          .findById(req.params.cid)
+  }
+
+  var liked_users = await comment.$relatedQuery('liked_users')
+
+  res.json({
+      msg:"comment like set",
+      comment,
+      liked_users,
+      code:0,
+  })
+
+
+}))
+
+
+
+
+
+
+
+
+
+
 
 
 module.exports = router

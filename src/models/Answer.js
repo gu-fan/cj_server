@@ -19,25 +19,27 @@ class Answer extends mixin(Model, [timestamp,uid()]) {
         id: { type: 'string' },
         title: { type: 'string'},
         content: { type: 'string'},
-        total_likes: { type: 'integer'},
+        total_zhichi: { type: 'integer'},
+        total_fandui: { type: 'integer'},
       },
     };
   }
 
   static get relationMappings() {
     return {
-      // liked_users: {
-      //   relation: Model.ManyToManyRelation,
-      //   modelClass: __dirname + '/User',
-      //   join: {
-      //     from: 'answer.id',
-      //     through: {
-      //       from: 'user_like_answer.pid',
-      //       to: 'user_like_answer.uid'
-      //     },
-      //     to: 'user.id'
-      //   }
-      // },
+      liked_users: {
+        relation: Model.ManyToManyRelation,
+        modelClass: __dirname + '/User',
+        join: {
+          from: 'answer.id',
+          through: {
+            from: 'user_like_answer.aid',
+            extra: ["num"],
+            to: 'user_like_answer.uid'
+          },
+          to: 'user.id'
+        }
+      },
       comments: {
         relation: Model.HasManyRelation,
         modelClass: __dirname + '/Comment',

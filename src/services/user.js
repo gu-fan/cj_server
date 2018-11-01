@@ -16,8 +16,11 @@ const auth = require('express-jwt')
 const {Question, User}  = require('../models')
 
 router.use('/.ping', jwt.auth(), wrap(async function(req, res, next) {
+  var user = await User.query()
+                .findById(req.user.sub)
   res.json({
     msg:'user valid',
+    user,
     code:0
   })
 }))
@@ -27,7 +30,7 @@ router.get('/:uid', jwt.auth(), wrap(async function(req, res, next) {
                 .findById(req.params.uid)
   
   res.json({
-    msg:'user valid',
+    msg:'user got',
     user,
     code:0
   })
