@@ -41,7 +41,7 @@ describe('user tests', () => {
     
   })
 
-  var pid,uid,pid2
+  var qid,uid,qid2
   test('create question', async () => {
 
     var phone = 'hello'
@@ -57,49 +57,35 @@ describe('user tests', () => {
       content: "HELLO WORLD"
     }
 
-    // try {
-    //   res = await http.post('/question/new', {title:'Miss Content'})
-    // } catch (e) {
-    //   res = e.response
-    // }
-
-    // expect(res.data.err).toBe('no_content')
-
-    // try {
-    //   res = await http.post('/question/new', {content:'Miss Title'})
-    // } catch (e) {
-    //   res = e.response
-    // }
-    // expect(res.data.err).toBe('no_title')
     try {
-      res = await http.post('/question', question)
+      res = await http.post('/q', question)
     } catch (e) {
       res = e.response
     }
-    pid2 = res.data.question.id
+    qid2 = res.data.question.id
     var question2 = {
       title: "hello222",
       content: "HELLO WORLD222"
     }
 
     try {
-      res = await http.post('/question/', question2)
+      res = await http.post('/q/', question2)
     } catch (e) {
       res = e.response
     }
-    pid = res.data.question.id
+    qid = res.data.question.id
     uid = res.data.question.author_id
     expect(res.data.code).toBe(0)
 
 
-    res = await http.get('/question')
+    res = await http.get('/q')
     console.log(res.data)
     
   })
 
   test('get question', async () => {
     try {
-      res = await http.get('/question/'+pid)
+      res = await http.get('/q/'+qid)
       expect(res.data.question.title).toBe('hello222')
       
     } catch (e) {
@@ -111,7 +97,7 @@ describe('user tests', () => {
   })
   test('get users question', async () => {
     try {
-      res = await http.get('/user/'+uid)
+      res = await http.get('/u/'+uid)
       expect(res.data.user.questions[0].title).toBe('hello')
       expect(res.data.user.questions[1].title).toBe('hello222')
     } catch (e) {
@@ -123,7 +109,7 @@ describe('user tests', () => {
   })
   test('update pos', async () => {
     try {
-      res = await http.put('/question/'+pid, {title:'aaa'})
+      res = await http.put('/q/'+qid, {title:'aaa'})
       console.log(res.data)
     } catch (e) {
       console.log(e.response)
@@ -135,7 +121,7 @@ describe('user tests', () => {
 
   test('delete pos', async () => {
     try {
-      res = await http.delete('/question/'+pid)
+      res = await http.delete('/q/'+qid)
       console.log(res.data)
     } catch (e) {
       console.log(e.response)
@@ -147,7 +133,7 @@ describe('user tests', () => {
 
   test('get users question', async () => {
     try {
-      res = await http.get('/user/'+uid)
+      res = await http.get('/u/'+uid)
       console.log(res.data.user.questions)
       expect(res.data.user.questions.length).toBe(1)
     } catch (e) {
@@ -155,11 +141,11 @@ describe('user tests', () => {
     }
 
   })
-  test('get question ans', async () => {
+  test('get total ans', async () => {
     try {
-      res = await http.get('/question/'+pid2+'/a')
-      console.log(res.data.answers)
-      expect(res.data.answers.length).toBe(0)
+      res = await http.get('/a')
+      console.log(res.data.count)
+      expect(res.data.count).toBe(0)
     } catch (e) {
       console.log(e.response)
     }
@@ -168,8 +154,8 @@ describe('user tests', () => {
 
   test('create ans', async () => {
     try {
-      res = await http.post('/question/'+pid2+'/a', {content:'ANS'})
-      res = await http.post('/question/'+pid2+'/a', {content:'ANS2'})
+      res = await http.post('/a', {qid:qid2, content:'ANS'})
+      res = await http.post('/a', {qid:qid2, content:'ANS2'})
       console.log(res.data)
       expect(res.data.answer.content).toBe('ANS2')
     } catch (e) {
@@ -177,22 +163,22 @@ describe('user tests', () => {
     }
   })
   var aid,aid2
-  test('get ans', async () => {
+  test('get qs', async () => {
     try {
-      res = await http.get('/question/'+pid2+'/a')
-      console.log(res.data.answers)
-      expect(res.data.answers.length).toBe(2)
-      aid = res.data.answers[0].id
-      aid2 = res.data.answers[1].id
-      
+      res = await http.get('/q/'+qid2)
+      console.log(res.data.question.answers)
+      expect(res.data.question.answers.length).toBe(2)
+      aid = res.data.question.answers[0].id
+      aid2 = res.data.question.answers[1].id
     } catch (e) {
       console.log(e.response)
 
     }
   })
+
   test('patch ans', async () => {
     try {
-      res = await http.put('/question/'+pid2+'/a/' + aid, {content:'ANS PATCH'})
+      res = await http.put('/a/' + aid, {content:'ANS PATCH'})
       console.log(res.data.updatedAnswer)
     } catch (e) {
       console.log(e.response)
@@ -201,32 +187,30 @@ describe('user tests', () => {
 
   test('delete ans', async () => {
     try {
-      res = await http.delete('/question/'+pid2+'/a/' + aid2)
+      res = await http.delete('/a/' + aid2)
       console.log(res.data.numberOfDeletedRows)
     } catch (e) {
       console.log(e.response)
     }
   })
 
-  test('get question ans', async () => {
-      res = await http.get('/question/'+pid2+'/a')
-      console.log(res.data.answers)
-      expect(res.data.answers.length).toBe(1)
-
+  test('get ans count', async () => {
+      res = await http.get('/a')
+      expect(res.data.count).toBe(1)
   })
 
-  test('create comment', async () => {
-      res = await http.post('/question/'+pid2+'/a/'+aid+'/c', {content:'hello comment'})
-      console.log(res.data.comment)
-
-  })
   var cid
+  test('create comment', async () => {
+      res = await http.post('/c', {aid:aid, content:'hello comment'})
+      console.log(res.data.comment)
+      cid = res.data.comment.id
+
+  })
   test('get cmt', async () => {
     try {
-      res = await http.get('/question/'+pid2+'/a/'+aid+'/c')
+      res = await http.get('/c')
       console.log(res.data)
-      expect(res.data.comments.length).toBe(1)
-      cid = res.data.comments[0].id
+      expect(res.data.count).toBe(1)
     } catch (e) {
       console.log(e.response)
     }
@@ -234,7 +218,7 @@ describe('user tests', () => {
   })
   test('patch cmt', async () => {
     try {
-      res = await http.put('/question/'+pid2+'/a/' + aid+'/c/'+cid, {content:'CMT PATCH'})
+      res = await http.put('/c/'+cid, {content:'CMT PATCH'})
       console.log(res.data.updatedComment)
     } catch (e) {
       console.log(e.response)
@@ -243,7 +227,7 @@ describe('user tests', () => {
 
   test('delete cmt', async () => {
     try {
-      res = await http.delete('/question/'+pid2+'/a/' + aid2+'/c/'+cid)
+      res = await http.delete('/c/'+cid)
       console.log(res.data.numberOfDeletedRows)
     } catch (e) {
       console.log(e.response)
@@ -251,9 +235,8 @@ describe('user tests', () => {
   })
   test('get cmt', async () => {
     try {
-      res = await http.get('/question/'+pid2+'/a/'+aid+'/c')
-      console.log(res.data)
-      expect(res.data.comments.length).toBe(0)
+      res = await http.get('/c')
+      expect(res.data.count).toBe(0)
     } catch (e) {
       console.log(e.response)
     }
@@ -262,9 +245,9 @@ describe('user tests', () => {
 
   test('like ans', async () => {
     try {
-      res = await http.get('/question/'+pid2+'/a/'+aid+'/like')
+      res = await http.get('/a/'+aid+'/like')
       // console.log(res.data)
-      expect(res.data.answer.total_zhichi).toBe(0)
+      expect(res.data.total_zhichi).toBe(0)
     } catch (e) {
       console.log(e.response)
     }
@@ -272,8 +255,10 @@ describe('user tests', () => {
   })
   test('like ans set', async () => {
     try {
-      res = await http.post('/question/'+pid2+'/a/'+aid+'/like')
-      expect(res.data.answer.total_zhichi).toBe(1)
+      res = await http.post('/a/'+aid+'/like')
+      expect(res.data.total_zhichi).toBe(1)
+
+      
     } catch (e) {
       console.log(e.response)
     }
@@ -282,8 +267,10 @@ describe('user tests', () => {
 
   test('get like ans', async () => {
     try {
-      res = await http.get('/question/'+pid2+'/a/'+aid+'/like')
-      expect(res.data.answer.total_zhichi).toBe(1)
+      res = await http.get('/a/'+aid+'/like')
+      expect(res.data.total_zhichi).toBe(1)
+      expect(res.data.is_zhichi).toBe(true)
+      expect(res.data.is_fandui).toBe(false)
     } catch (e) {
       console.log(e.response)
     }
@@ -291,20 +278,36 @@ describe('user tests', () => {
   })
   test('dislike ans 2', async () => {
     try {
-      res = await http.post('/question/'+pid2+'/a/'+aid+'/dislike')
-      expect(res.data.answer.total_zhichi).toBe(0)
-      expect(res.data.answer.total_fandui).toBe(1)
+      res = await http.post('/a/'+aid+'/dislike')
+      expect(res.data.total_zhichi).toBe(0)
+      expect(res.data.total_fandui).toBe(0)
+      expect(res.data.is_zhichi).toBe(false)
+      expect(res.data.is_fandui).toBe(false)
     } catch (e) {
-      console.log(e.response)
+      console.log(e)
     }
       
   })
+
+  test('dislike ans 3', async () => {
+    try {
+      res = await http.post('/a/'+aid+'/dislike')
+      expect(res.data.total_zhichi).toBe(0)
+      expect(res.data.total_fandui).toBe(1)
+    } catch (e) {
+      console.log(e)
+    }
+
+  })
+
   test('get like ans', async () => {
     try {
-      res = await http.get('/question/'+pid2+'/a/'+aid+'/like')
-      expect(res.data.answer.total_fandui).toBe(1)
+      res = await http.get('/a/'+aid+'/like')
+      expect(res.data.total_fandui).toBe(1)
+      expect(res.data.is_zhichi).toBe(false)
+      expect(res.data.is_fandui).toBe(true)
     } catch (e) {
-      console.log(e.response)
+      console.log(e)
     }
       
   })

@@ -4,11 +4,30 @@ const { Model, mixin } = require('objection');
 const timestamp = require('./mixin/timestamp')
 const uid = require('./mixin/uid')
 
+const Question = require('./Question')
+
 class Answer extends mixin(Model, [timestamp,uid()]) {
 
   static get tableName(){
      return 'answer'
   } 
+
+  async $beforeInsert(queryContext) {
+    await super.$beforeInsert(queryContext);
+    await Question
+      .query(queryContext.transaction)
+      .increment('total_answers', 1)
+      .where('id', this.question_id)
+
+  }
+  async $beforeDelete(queryContext) {
+    await super.$beforeDelete(queryContext);
+    await Question
+      .query(queryContext.transaction)
+      .decrement('total_answers', 1)
+      .where('id', this.question_id)
+  }
+
 
   static get jsonSchema() {
     return {
@@ -20,6 +39,7 @@ class Answer extends mixin(Model, [timestamp,uid()]) {
         title: { type: 'string'},
         content: { type: 'string'},
         total_zhichi: { type: 'integer'},
+        total_comments: { type: 'integer'},
         total_fandui: { type: 'integer'},
       },
     };

@@ -8,7 +8,7 @@ const RAW_CODE = {
   PASSWORD_MISMATCH: {text:'用户名或密码错误',http:400},
   // NEED_TITLE: {text:"标题不能为空", http: 400},
   CREDENTIALS_REQUIRED: {text:"缺少校验凭证", http: 400},
-  NO_SUCH_NOTE: {text:"没有找到记事", http: 400},
+  NO_SUCH_TARGET: {text:"没有找到记事", http: 400},
   NEED_CONTENT: {text:"内容不能为空", http: 400},
   DUPLICATED_CONTENT: {text:"内容重复", http: 400},
   NO_SUCH_GROUP: {text:"没有找到群组", http: 400},

@@ -59,7 +59,7 @@ describe('user tests', () => {
   test('login valid after 100s', async()=>{
     clock = sinon.useFakeTimers(1529344005000) // exp + 5s
 
-      res = await http.get('/user/.ping')
+      res = await http.get('/u/.ping')
     expect(res.status).toBe(200)
     expect(res.data.msg).toBe('user valid')
     
@@ -70,7 +70,7 @@ describe('user tests', () => {
     try {
       clock = sinon.useFakeTimers(1539549005000) // exp +604800s = 24*60*60*7
 
-      res = await http.get('/user/.ping')
+      res = await http.get('/u/.ping')
     } catch (e) {
       res = e.response
     }

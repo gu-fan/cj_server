@@ -10,6 +10,7 @@ class User extends mixin(Model, [
     uid(),
     uid({field:'name', type:'slug'}),
 ]) {
+
   static get tableName() {
     return 'user';
   }
@@ -28,6 +29,11 @@ class User extends mixin(Model, [
         wx_id: { type:[ 'string', 'null']},
         created_at: { type:[ 'string', 'null']},
 
+        total_answer_fandui: { type: 'integer'},
+        total_answer_zhichi: { type: 'integer'},
+        total_answer_thanks: { type: 'integer'},
+        total_points: { type: 'integer'},
+
       },
     };
   }
@@ -42,14 +48,14 @@ class User extends mixin(Model, [
           to: 'question.author_id'
         }
       },
-      // answers: {
-      //   relation: Model.HasManyRelation,
-      //   modelClass: __dirname + '/Answer',
-      //   join: {
-      //     from: 'user.id',
-      //     to: 'answer.author_id'
-      //   }
-      // },
+      answers: {
+        relation: Model.HasManyRelation,
+        modelClass: __dirname + '/Answer',
+        join: {
+          from: 'user.id',
+          to: 'answer.author_id'
+        }
+      },
       // following: {
       //   relation: Model.ManyToManyRelation,
       //   modelClass: __dirname + '/User',

@@ -28,13 +28,46 @@ router.use('/.ping', jwt.auth(), wrap(async function(req, res, next) {
 router.get('/:uid', jwt.auth(), wrap(async function(req, res, next) {
   var user = await User.query()
                 .findById(req.params.uid)
+                .eager('[questions(count), answers(count)]',{
+                  count:(builder)=>{
+                      builder.count()
+                  }
+                })
   
+  user.total_questions = user.questions[0]['count(*)']
+  user.total_answers = user.answers[0]['count(*)']
+  delete user.questions
+  delete user.answers
+
   res.json({
     msg:'user got',
     user,
     code:0
   })
 }))
+router.get('/:uid/questions', jwt.auth(), wrap(async function(req, res, next) {
+  var user = await User.query()
+                .findById(req.params.uid)
+                .eager('[questions.author]')
+  
+  res.json({
+    msg:'user questions got',
+    questions:user.questions,
+    code:0
+  })
+}))
+router.get('/:uid/answers', jwt.auth(), wrap(async function(req, res, next) {
+  var user = await User.query()
+                .findById(req.params.uid)
+                .eager('answers.[question, author]')
+  
+  res.json({
+    msg:'user answers got',
+    answers:user.answers,
+    code:0
+  })
+}))
+
 router.delete('/:uid', jwt.auth(), wrap(async function(req, res, next) {
   var user = await User.query()
                 .findById(req.params.uid)

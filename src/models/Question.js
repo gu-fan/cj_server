@@ -19,6 +19,7 @@ class Question extends mixin(Model, [timestamp,uid()]) {
         id: { type: 'string' },
         title: { type: 'string'},
         content: { type: 'string'},
+        total_answers: { type: 'integer'},
         total_likes: { type: 'integer'},
       },
     };

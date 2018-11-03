@@ -113,6 +113,12 @@ router.use('/wx_code', wrap(async function(req, res, next) {
       // else ask user to bind it.
 
       var u = await User.query().findOne({wx_id:data.openid})
+                .eager('[questions(count), answers(count)]',{
+                  count:(builder)=>{
+                      builder.count()
+                  }
+                })
+      
 
       if (u == null) {
         u = await User
@@ -129,6 +135,11 @@ router.use('/wx_code', wrap(async function(req, res, next) {
           code: 0
         })
       } else {
+        u.total_questions = u.questions[0]['count(*)']
+        u.total_answers = u.answers[0]['count(*)']
+        delete u.questions
+        delete u.answers
+        
         var t = await jwt.signId(u.id)
         if (isEmpty(u.avatar)) {  
           // no user info as no avatar
@@ -166,6 +177,11 @@ router.use('/wx_code', wrap(async function(req, res, next) {
 
 router.use('/wx_code_fake', wrap(async function(req, res, next) {
       var u = await User.query().findOne({wx_id:req.body.wx_id})
+                .eager('[questions(count), answers(count)]',{
+                  count:(builder)=>{
+                      builder.count()
+                  }
+                })
       if (u == null) {
         u = await User
           .query()
@@ -182,6 +198,12 @@ router.use('/wx_code_fake', wrap(async function(req, res, next) {
         })
       } else {
         var t = await jwt.signId(u.id)
+
+        u.total_questions = u.questions[0]['count(*)']
+        u.total_answers = u.answers[0]['count(*)']
+        delete u.questions
+        delete u.answers
+
         if (isEmpty(u.avatar)) {  
           // no user info as no avatar
           res.json({

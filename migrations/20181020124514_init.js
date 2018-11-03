@@ -11,6 +11,12 @@ exports.up = function(knex, Promise) {
       table.string('password')
       table.string('wx_id')
 
+      table.integer('total_answer_fandui').unsigned().defaultTo(0)
+      table.integer('total_answer_zhichi').unsigned().defaultTo(0)
+
+      table.integer('total_answer_thanks').unsigned().defaultTo(0)
+      table.integer('total_points').unsigned().defaultTo(0)
+
       table.unique('wx_id')
       table.unique('phone')
       table.timestamps()
@@ -23,6 +29,8 @@ exports.up = function(knex, Promise) {
       table.string('content')
 
       table.integer('total_likes').unsigned().defaultTo(0)
+
+      table.integer('total_answers').unsigned().defaultTo(0)
 
       table
         .string('author_id')
@@ -38,6 +46,8 @@ exports.up = function(knex, Promise) {
 
       table.integer('total_zhichi').unsigned().defaultTo(0)
       table.integer('total_fandui').unsigned().defaultTo(0)
+
+      table.integer('total_comments').unsigned().defaultTo(0)
 
       table
         .string('question_id')

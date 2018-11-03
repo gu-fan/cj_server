@@ -13,7 +13,6 @@ const answerRoute = require('./answer')
 router.get('/', jwt.auth(), wrap(async function(req, res, next) {
   var all = await Question.query().count()
   var questions = await Question.query().limit(5)
-  // console.log(all[0])
 
   res.json({
       msg:"question list",
@@ -27,13 +26,6 @@ router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 
 router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
-  // var question = {
-  //   author: req.user.sub,
-  //   title: req.body.title,
-  //   content: req.body.content,
-  // }
-
-  // question = await Question.query().insert(question)
   var question = await Question.query().insertGraph([{
     title: req.body.title,
     content: req.body.content, 
@@ -44,7 +36,8 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
   }], {
     relate: true
   })
-    .eager('author');
+  .eager('author');
+
   question = question[0]
 
   res.json({
@@ -55,14 +48,14 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
 }))
 
-router.get('/:pid', jwt.auth(), wrap(async function(req, res, next) {
+router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
 
   var question = await Question.query()
-                        .findById(req.params.pid)
-                        .eager('[author, answers]')
-  if (question == undefined) throw ERR.NO_SUCH_NOTE
-  
+                        .findById(req.params.qid)
+                        .eager('[author, answers.[question, author]]')
 
+  if (question == undefined) throw ERR.NO_SUCH_TARGET
+  
   res.json({
       msg:"question got",
       question,
@@ -70,17 +63,18 @@ router.get('/:pid', jwt.auth(), wrap(async function(req, res, next) {
   })
 
 }))
-router.put('/:pid', jwt.auth(), wrap(async function(req, res, next) {
+router.put('/:qid', jwt.auth(), wrap(async function(req, res, next) {
 
   var question = await Question.query()
-                        .findById(req.params.pid)
+                        .findById(req.params.qid)
                         .eager('author')
-  if (question == undefined) throw ERR.NO_SUCH_NOTE
-const updatedQuestion = await Question
-  .query()
-  .patchAndFetchById(req.params.pid, {title: req.body.title,content:req.body.content});
-  
+  if (question == undefined) throw ERR.NO_SUCH_TARGET
 
+  const updatedQuestion = await Question
+    .query()
+    .patchAndFetchById(req.params.qid, 
+            {title: req.body.title,content:req.body.content});
+  
   res.json({
       msg:"question patch",
       updatedQuestion,
@@ -89,16 +83,16 @@ const updatedQuestion = await Question
 
 }))
 
-router.delete('/:pid', jwt.auth(), wrap(async function(req, res, next) {
+router.delete('/:qid', jwt.auth(), wrap(async function(req, res, next) {
 
   var question = await Question.query()
-                        .findById(req.params.pid)
+                        .findById(req.params.qid)
                         .eager('author')
-  if (question == undefined) throw ERR.NO_SUCH_NOTE
+  if (question == undefined) throw ERR.NO_SUCH_TARGET
   
   const numberOfDeletedRows = await Question
             .query()
-            .deleteById(req.params.pid)
+            .deleteById(req.params.qid)
 
   res.json({
       msg:"question delete",
@@ -108,8 +102,9 @@ router.delete('/:pid', jwt.auth(), wrap(async function(req, res, next) {
 
 }))
 
+// this is too cumbersome
 // you can nest routers by attaching them as middleware:
-router.use('/:pid/a', answerRoute);
+// router.use('/:qid/a', answerRoute);
 
 
 module.exports = router
