@@ -98,8 +98,7 @@ describe('user tests', () => {
   test('get users question', async () => {
     try {
       res = await http.get('/u/'+uid)
-      expect(res.data.user.questions[0].title).toBe('hello')
-      expect(res.data.user.questions[1].title).toBe('hello222')
+      expect(res.data.user.total_questions).toBe(2)
     } catch (e) {
       console.log(e.response)
 
@@ -134,10 +133,10 @@ describe('user tests', () => {
   test('get users question', async () => {
     try {
       res = await http.get('/u/'+uid)
-      console.log(res.data.user.questions)
-      expect(res.data.user.questions.length).toBe(1)
+      console.log(res.data.user.total_questions)
+      expect(res.data.user.total_questions).toBe(1)
     } catch (e) {
-      console.log(e.response)
+      console.log(e)
     }
 
   })
@@ -166,12 +165,12 @@ describe('user tests', () => {
   test('get qs', async () => {
     try {
       res = await http.get('/q/'+qid2)
-      console.log(res.data.question.answers)
-      expect(res.data.question.answers.length).toBe(2)
-      aid = res.data.question.answers[0].id
-      aid2 = res.data.question.answers[1].id
+      console.log(res.data.answers)
+      expect(res.data.answers.results.length).toBe(2)
+      aid = res.data.answers.results[0].id
+      aid2 = res.data.answers.results[1].id
     } catch (e) {
-      console.log(e.response)
+      console.log(e)
 
     }
   })
@@ -179,9 +178,9 @@ describe('user tests', () => {
   test('patch ans', async () => {
     try {
       res = await http.put('/a/' + aid, {content:'ANS PATCH'})
-      console.log(res.data.updatedAnswer)
+      console.log(res.data.answer)
     } catch (e) {
-      console.log(e.response)
+      console.log(e)
     }
   })
 

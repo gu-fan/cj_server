@@ -45,15 +45,18 @@ describe('user tests', () => {
     this.server = app.listen(port)
     await this.server.once('listening', () =>{} )
 
+    clock = sinon.useFakeTimers(new Date(2000,1,1,8));
+
   })
 
   afterAll(()=>{
     this.server.close()
+    clock.restore()
     http = null 
     
   })
   var qid, aid, cid
-  test('create user1', async () => {
+  test('like test all', async () => {
       await SignupAndLogin(1)
       await BindUser(1)
 
@@ -73,8 +76,14 @@ describe('user tests', () => {
       res = await http.post('/q', question)
       qid = res.data.question.id
 
+    try {
+      
       await SignupAndLogin(2)
       res = await http.post('/a', {qid, content:'ANS'})
+    } catch (e) {
+      console.log(e.response)
+      
+    }
 
       await SignupAndLogin(3)
       res = await http.post('/a', {qid, content:'ANS2'})
@@ -94,9 +103,16 @@ describe('user tests', () => {
       res = await http.post('/a/'+aid+'/dislike')
       expect(res.data.total_zhichi).toBe(2)
       expect(res.data.total_fandui).toBe(1)
-    
-      console.log(res.data)
 
+
+
+      // author zhichi count
+      await SignupAndLogin(3)
+      res = await http.get('/u/.ping')
+      console.log(res.data)
+      expect(res.data.user.total_answer_zhichi).toBe(2)
+      expect(res.data.user.total_answer_fandui).toBe(1)
+    
       // COMMENT
       try {
         
@@ -148,28 +164,28 @@ describe('user tests', () => {
       res = await http.get('/a/'+aid)
       // liked by me
       console.log("comments like")
-      console.log(res.data.answer.comments)
-      for (var i = 0; i < res.data.answer.comments.length; ++i) {
-        console.log(res.data.answer.comments[i].liked_users)
+      console.log(res.data.comments)
+      for (var i = 0; i < res.data.comments.results.length; ++i) {
+        // console.log(res.data.answer.comments[i].liked_users)
       }
       // expect(res.data.answer.comments[0].liked_users.length).toBe(1)
       // expect(res.data.answer.comments[1].liked_users.length).toBe(0)
-      expect(res.data.answer.comments[0].is_like).toBe(true)
-      expect(res.data.answer.comments[1].is_like).toBe(true)
-      expect(res.data.answer.comments[2].is_like).toBe(false)
+      expect(res.data.comments.results[0].is_like).toBe(true)
+      expect(res.data.comments.results[1].is_like).toBe(true)
+      expect(res.data.comments.results[2].is_like).toBe(false)
 
       await SignupAndLogin(3)
       // not liked by me
       res = await http.get('/a/'+aid)
       console.log("comments not like")
       // console.log(res.data.answer.comments)
-      for (var i = 0; i < res.data.answer.comments.length; ++i) {
+      for (var i = 0; i < res.data.comments.results.length; ++i) {
         // console.log(res.data.answer.comments[i].liked_users)
       }
       // expect(res.data.answer.comments[0].liked_users.length).toBe(0)
       // expect(res.data.answer.comments[1].liked_users.length).toBe(0)
-      expect(res.data.answer.comments[0].is_like).toBe(false)
-      expect(res.data.answer.comments[1].is_like).toBe(false)
+      expect(res.data.comments.results[0].is_like).toBe(false)
+      expect(res.data.comments.results[1].is_like).toBe(false)
 
       await SignupAndLogin(3)
       res = await http.post('/c/'+cid +'/like')
@@ -190,5 +206,65 @@ describe('user tests', () => {
 
   })
   
+  test('send points ', async () => {
+    try {
+      
+      await SignupAndLogin(1)
+      res = await http.get('/u/.ping')
+      var u1 = res.data.user.id
+        
+      await SignupAndLogin(2)
+      res = await http.get('/u/.ping')
+      var u2 = res.data.user.id
+      res = await http.post('/u/'+u1+'/thank10')
+      console.log(res.data)
+
+      res = await http.get('/u/'+u1)
+      console.log(res.data.user.total_points)
+      expect(res.data.user.total_points).toBe(30)
+      expect(res.data.user.total_answer_thanks).toBe(1)
+
+      res = await http.get('/u/'+u2)
+      console.log(res.data.user.total_points)
+      console.log(res.data)
+      expect(res.data.user.total_points).toBe(10)
+
+      res = await http.get('/u/checkpoint')
+      console.log(res.data)
+      expect(res.data.user.total_points).toBe(11)
+
+      res = await http.get('/u/checkpoint')
+      expect(res.data.user.total_points).toBe(11)
+
+      clock = sinon.useFakeTimers(new Date(2000,1,1,10))
+      res = await http.get('/u/checkpoint')
+      console.log(res.data.user)
+      expect(res.data.user.total_points).toBe(11)
+
+      // NOTE: seems utc issue made it's not the right time
+      clock = sinon.useFakeTimers(new Date(2000,1,2, 8))
+
+      res = await http.get('/u/checkpoint')
+      console.log(res.data.user)
+      expect(res.data.user.total_points).toBe(12)
+      clock = sinon.useFakeTimers(new Date(2000,1,2, 18))
+
+      res = await http.get('/u/checkpoint')
+      expect(res.data.user.total_points).toBe(12)
+
+      clock = sinon.useFakeTimers(new Date(2000,1,10, 8))
+      await SignupAndLogin(2)
+      res = await http.get('/u/checkpoint')
+      console.log(res.data.user)
+      expect(res.data.user.total_points).toBe(13)
+
+
+    } catch (e) {
+      console.log(e)
+      
+    }
+
+
+  })
 })
 

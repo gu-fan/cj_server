@@ -27,12 +27,12 @@ class User extends mixin(Model, [
         phone: { type:[ 'string', 'null']},
         password: { type: 'string'},
         wx_id: { type:[ 'string', 'null']},
-        created_at: { type:[ 'string', 'null']},
 
         total_answer_fandui: { type: 'integer'},
         total_answer_zhichi: { type: 'integer'},
         total_answer_thanks: { type: 'integer'},
         total_points: { type: 'integer'},
+        checkpoint_at: { type:[ 'string', 'null']},
 
       },
     };

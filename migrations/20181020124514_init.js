@@ -13,9 +13,10 @@ exports.up = function(knex, Promise) {
 
       table.integer('total_answer_fandui').unsigned().defaultTo(0)
       table.integer('total_answer_zhichi').unsigned().defaultTo(0)
-
       table.integer('total_answer_thanks').unsigned().defaultTo(0)
-      table.integer('total_points').unsigned().defaultTo(0)
+
+      table.integer('total_points').unsigned().defaultTo(20)
+      table.timestamp('checkpoint_at')
 
       table.unique('wx_id')
       table.unique('phone')

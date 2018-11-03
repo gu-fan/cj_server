@@ -63,22 +63,31 @@ router.get('/:aid', jwt.auth(), wrap(async function(req, res, next) {
                         //       .count()
                         //       .as('total_comment'),
                         // ])
-                        .eager('[author, question, comments(sort).[author, answer.question, reply_to.author, liked_users(byMe)]]',
-                        {
-                          byMe: (builder)=>{
-                              builder.where('uid', req.user.sub)
-                          },
-                          sort: (builder)=>{
-                              builder.orderBy('created_at')
-                          }
+                        // .eager('[author, question, comments(sort).[author, answer.question, reply_to.author, liked_users(byMe)]]',
+                        // {
+                        //   byMe: (builder)=>{
+                        //       builder.where('uid', req.user.sub)
+                        //   },
+                        //   sort: (builder)=>{
+                        //       builder.orderBy('created_at')
+                        //   }
                               
-                        })
+                        // })
+                        .eager('[author, question]')
 
 
   if (answer == undefined) throw ERR.NO_SUCH_TARGET
+  var comments = await answer.$relatedQuery('comments')
+                        .eager('[author, answer.question, reply_to.author, liked_users(byMe)]',         {
+                          byMe: (builder)=>{
+                              builder.where('uid', req.user.sub)
+                          },
+                        })
+                        .orderBy('created_at')
+                        .page(req.query.page||0,5)
 
   // remap is_like by me
-  answer.comments.map((comment)=>{
+  comments.results.map((comment)=>{
     if (comment.liked_users.length>0) {
       comment.is_like = true
     } else {
@@ -106,6 +115,7 @@ router.get('/:aid', jwt.auth(), wrap(async function(req, res, next) {
   res.json({
       msg:"answer got",
       answer,
+      comments,
       code:0,
   })
 
@@ -117,14 +127,14 @@ router.put('/:aid', jwt.auth(), wrap(async function(req, res, next) {
                         .findById(req.params.aid)
                         .eager('author')
   if (answer == undefined) throw ERR.NO_SUCH_TARGET
-  const updatedAnswer = await Answer
+  answer = await Answer
     .query()
     .patchAndFetchById(req.params.aid, {content:req.body.content});
     
 
   res.json({
       msg:"answer patch",
-      updatedAnswer,
+      answer,
       code:0,
   })
 
@@ -189,20 +199,22 @@ router.post('/:aid/like', jwt.auth(), wrap(async function(req, res, next) {
                         .findById(req.params.aid)
 
   if (answer == undefined) throw ERR.NO_SUCH_TARGET
+
   var author = await User.query()
                         .findById(answer.author_id)
 
-  var u = await answer.$relatedQuery('liked_users')
+  var u = await answer
+                  .$relatedQuery('liked_users')
                   .findById(req.user.sub)
 
   var is_zhichi=true, is_fandui=false
 
   if (u==null || u==undefined) {
     await answer.$relatedQuery('liked_users')
-    .relate({
-      id: req.user.sub,
-      num: 1,
-    });
+          .relate({
+            id: req.user.sub,
+            num: 1,
+          });
 
     await answer.$query()
           .increment('total_zhichi', 1)

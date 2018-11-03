@@ -11,6 +11,7 @@ const {ERR, MSG} = require('../code')
 // help functions
 const {wrap, delay} = require('../common/promise')
 const isEmpty = require('lodash').isEmpty
+const {normalizeUser} =require('../common')
 
 /** Signup
  * @post /auth/signup
@@ -111,6 +112,8 @@ router.use('/wx_code', wrap(async function(req, res, next) {
       // get user from database
       // if has user info, use it.
       // else ask user to bind it.
+      //   id:data.openid,
+      //   ss:data.session_key,
 
       var u = await User.query().findOne({wx_id:data.openid})
                 .eager('[questions(count), answers(count)]',{
@@ -135,10 +138,8 @@ router.use('/wx_code', wrap(async function(req, res, next) {
           code: 0
         })
       } else {
-        u.total_questions = u.questions[0]['count(*)']
-        u.total_answers = u.answers[0]['count(*)']
-        delete u.questions
-        delete u.answers
+
+        var user = normalizeUser(u)
         
         var t = await jwt.signId(u.id)
         if (isEmpty(u.avatar)) {  
@@ -146,7 +147,7 @@ router.use('/wx_code', wrap(async function(req, res, next) {
           res.json({
             need_profile: true,
             t,
-            user: u,
+            user,
             code: 0
           })
 
@@ -155,17 +156,12 @@ router.use('/wx_code', wrap(async function(req, res, next) {
           res.json({
             need_profile: false,
             t,
-            user: u,
+            user,
             code: 0
           })
         }
       }
 
-      // res.json({
-      //   id:data.openid,
-      //   ss:data.session_key,
-      //   code:0
-      // })
     } else {
       res.json({
         msg: data.errMsg,
@@ -199,17 +195,14 @@ router.use('/wx_code_fake', wrap(async function(req, res, next) {
       } else {
         var t = await jwt.signId(u.id)
 
-        u.total_questions = u.questions[0]['count(*)']
-        u.total_answers = u.answers[0]['count(*)']
-        delete u.questions
-        delete u.answers
+        var user = normalizeUser(u)
 
         if (isEmpty(u.avatar)) {  
           // no user info as no avatar
           res.json({
             need_profile: true,
             t,
-            user: u,
+            user,
             code: 0
           })
         } else {
@@ -217,7 +210,7 @@ router.use('/wx_code_fake', wrap(async function(req, res, next) {
           res.json({
             need_profile: false,
             t,
-            user: u,
+            user,
             code: 0
           })
         }
