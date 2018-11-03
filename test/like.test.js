@@ -216,8 +216,11 @@ describe('user tests', () => {
       await SignupAndLogin(2)
       res = await http.get('/u/.ping')
       var u2 = res.data.user.id
-      res = await http.post('/u/'+u1+'/thank10')
+      res = await http.post('/u/'+u1+'/thank',{aid, count:10})
       console.log(res.data)
+      res = await http.get('/a/'+aid)
+      expect(res.data.answer.total_thanks).toBe(1)
+      
 
       res = await http.get('/u/'+u1)
       console.log(res.data.user.total_points)

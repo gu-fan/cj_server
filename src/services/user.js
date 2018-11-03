@@ -14,7 +14,7 @@ const isEmpty = require('lodash').isEmpty
 const key = require('config').key
 const auth = require('express-jwt')
 
-const {Question, User}  = require('../models')
+const {Question, Answer, User}  = require('../models')
 const {normalizeUser} =require('../common')
 async function getUser(id){
   var user = await User.query()
@@ -132,11 +132,10 @@ router.delete('/:uid', jwt.auth(), wrap(async function(req, res, next) {
   
 }))
 
-router.post('/:uid/thank10', jwt.auth(), wrap(async function(req, res, next) {
+router.post('/:uid/thank', jwt.auth(), wrap(async function(req, res, next) {
   if (req.user.sub == req.params.uid) {
     return  res.json({
-            msg:'target not valid',
-            points:sender.total_points,
+            msg:'TARGET_SHOULD_VARY',
             code:2
           })
   }
@@ -149,7 +148,9 @@ router.post('/:uid/thank10', jwt.auth(), wrap(async function(req, res, next) {
   
   if (user == undefined) throw ERR.NO_SUCH_TARGET
 
-  if (sender.total_points < 10 ){
+  var count = req.body.count
+  if (count > 50 || count < 0) throw ERR.EXCEED_RANGE
+  if (sender.total_points < count ){
     return  res.json({
             msg:'not enough pints',
             points:sender.total_points,
@@ -157,9 +158,14 @@ router.post('/:uid/thank10', jwt.auth(), wrap(async function(req, res, next) {
           })
   }
 
-  await sender.$query().decrement('total_points', 10)
+  var answer = await Answer.query()
+                .findById(req.body.aid)
+  if (answer == undefined) throw ERR.NO_SUCH_TARGET
+
+  await sender.$query().decrement('total_points', count)
   await user.$query().increment('total_answer_thanks', 1)
-  await user.$query().increment('total_points', 10)
+  await user.$query().increment('total_points', count)
+  await answer.$query().increment('total_thanks', 1)
   
   sender = await User.query()
                 .findById(req.user.sub)

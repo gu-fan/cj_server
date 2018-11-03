@@ -45,6 +45,7 @@ exports.up = function(knex, Promise) {
 
       table.string('content')
 
+      table.integer('total_thanks').unsigned().defaultTo(0)
       table.integer('total_zhichi').unsigned().defaultTo(0)
       table.integer('total_fandui').unsigned().defaultTo(0)
 

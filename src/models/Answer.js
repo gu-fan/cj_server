@@ -39,6 +39,7 @@ class Answer extends mixin(Model, [timestamp,uid()]) {
         title: { type: 'string'},
         content: { type: 'string'},
         total_zhichi: { type: 'integer'},
+        total_thanks: { type: 'integer'},
         total_comments: { type: 'integer'},
         total_fandui: { type: 'integer'},
       },

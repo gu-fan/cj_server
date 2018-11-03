@@ -1,6 +1,7 @@
 const APIError = require('./api.error')
 const RAW_CODE = {
   NOT_FOUND: {text:"没有找到页面", http: 404},
+  EXCEED_RANGE: {text:"超出范围", http: 400},
   NO_SUCH_USER: {text:"没有找到用户", http: 400},
   NEED_PHONE: {text:"请输入手机号", http: 400},
   NEED_PASSWORD: {text:"请输入密码", http: 400},
