@@ -83,7 +83,7 @@ router.get('/:aid', jwt.auth(), wrap(async function(req, res, next) {
                               builder.where('uid', req.user.sub)
                           },
                         })
-                        .orderBy('created_at')
+                        .orderBy('created_at', 'desc')
                         .page(req.query.page||0,5)
 
   // remap is_like by me

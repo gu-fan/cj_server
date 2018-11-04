@@ -13,7 +13,7 @@ router.get('/answers', wrap(async function(req, res, next) {
   var page = req.query.page || 0
   var new_answers = await Answer.query().limit(5)
           .eager('[author, question]')
-          .orderBy('created_at')
+          .orderBy('created_at', 'desc')
           .page(page, 10);
 
   var hot_answers = await Answer.query().limit(5)
@@ -36,7 +36,7 @@ router.get('/new_answers', wrap(async function(req, res, next) {
 
   var new_answers = await Answer.query().limit(5)
           .eager('[author, question]')
-          .orderBy('total_zhichi', 'desc')
+          .orderBy('created_at', 'desc')
           .page(page, 10);
   
   res.json({

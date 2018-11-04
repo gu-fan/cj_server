@@ -57,7 +57,7 @@ router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
   if (question == undefined) throw ERR.NO_SUCH_TARGET
   var answers = await question.$relatedQuery('answers')
                         .eager('[question, author]')
-                        .orderBy('created_at')
+                        .orderBy('created_at', 'desc')
                         .page(req.query.page||0,5)
   
   res.json({
