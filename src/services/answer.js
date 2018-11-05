@@ -52,6 +52,31 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
   })
 
 }))
+router.get('/:aid/verify', jwt.auth(), wrap(async function(req, res, next) {
+
+  var user = await User.query()
+                    .findById(req.user.sub)
+
+  if (user == undefined) throw ERR.NO_SUCH_TARGET
+  if (!/verify/.test(user.permission)) {
+
+      throw ERR.NO_PERMISSION
+  }
+
+  var answer = await Answer.query()
+                        .patchAndFetchById(req.params.aid, {
+                          "verify": "pass"
+                        })
+
+  if (answer == undefined) throw ERR.NO_SUCH_TARGET
+  
+  res.json({
+      msg:"question verify",
+      verify: answer.verify,
+      code:0,
+  })
+
+}))
 
 router.get('/:aid', jwt.auth(), wrap(async function(req, res, next) {
 

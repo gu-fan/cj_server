@@ -11,6 +11,7 @@ const {Question, User, Answer}  = require('../models')
 
 router.get('/answers', wrap(async function(req, res, next) {
   var page = req.query.page || 0
+
   var new_answers = await Answer.query().limit(5)
           .eager('[author, question]')
           .orderBy('created_at', 'desc')
@@ -21,7 +22,6 @@ router.get('/answers', wrap(async function(req, res, next) {
           .orderBy('total_zhichi', 'desc')
           .page(page, 10);
   
-
   res.json({
       msg:"answerlist",
       code:0,

@@ -32,7 +32,10 @@ class User extends mixin(Model, [
         total_answer_zhichi: { type: 'integer'},
         total_answer_thanks: { type: 'integer'},
         total_points: { type: 'integer'},
+
         checkpoint_at: { type:[ 'string', 'null']},
+
+        permission: { type:[ 'string', 'null']},
 
       },
     };

@@ -16,30 +16,54 @@ const auth = require('express-jwt')
 
 const {Question, Answer, User}  = require('../models')
 const {normalizeUser} =require('../common')
-async function getUser(id){
-  var user = await User.query()
-                .findById(id)
-                .eager('[questions(count), answers(count)]',{
-                  count:(builder)=>{
-                      builder.count()
-                  }
-                })
-  if (user == undefined) throw ERR.NO_SUCH_TARGET
-  
-  user = normalizeUser(user)
+function getUser(id){
+return new Promise((resolve, reject)=>{
+  User.query()
+        .findById(id)
+        .eager('[questions(count), answers(count)]',{
+          count:(builder)=>{
+              builder.count()
+          }
+        })
+  .then((user)=>{
+    if (user == undefined) reject(ERR.NO_SUCH_TARGET)
+    else {
+      resolve(normalizeUser(user))
+    }
 
-  return user
+  })
+  .catch((e)=>{
+    reject(e)
+  })
+
+})
+  
 }
 router.use('/.ping', jwt.auth(), wrap(async function(req, res, next) {
 
   var user = await getUser(req.user.sub)
 
   res.json({
-    msg:'user valid',
+    msg:'user ping valid',
     user,
     code:0
   })
 }))
+router.post('/.grant', jwt.auth(), wrap(async function(req, res, next) {
+
+  if (req.body.uid == undefined ) throw ERR.NEED_ARGUMENT
+  var user = await getUser(req.body.uid)
+
+  user = await user.$query()
+        .patchAndFetch({'permission': 'verify'})
+
+  res.json({
+    msg:'user granted',
+    user,
+    code:0
+  })
+}))
+
 router.get('/checkpoint', jwt.auth(), wrap(async function(req, res, next) {
   var user = await User.query()
                 .findById(req.user.sub)
@@ -88,6 +112,7 @@ router.get('/:uid', jwt.auth(), wrap(async function(req, res, next) {
     user,
     code:0
   })
+
 }))
 
 router.get('/:uid/questions', jwt.auth(), wrap(async function(req, res, next) {
@@ -102,6 +127,7 @@ router.get('/:uid/questions', jwt.auth(), wrap(async function(req, res, next) {
     code:0
   })
 }))
+
 router.get('/:uid/answers', jwt.auth(), wrap(async function(req, res, next) {
   var user = await User.query()
                 .findById(req.params.uid)
@@ -133,6 +159,8 @@ router.delete('/:uid', jwt.auth(), wrap(async function(req, res, next) {
 }))
 
 router.post('/:uid/thank', jwt.auth(), wrap(async function(req, res, next) {
+
+  if (req.body.aid == undefined) throw ERR.NEED_ARGUMENT
   if (req.user.sub == req.params.uid) {
     return  res.json({
             msg:'TARGET_SHOULD_VARY',
@@ -157,6 +185,7 @@ router.post('/:uid/thank', jwt.auth(), wrap(async function(req, res, next) {
             code:1
           })
   }
+
 
   var answer = await Answer.query()
                 .findById(req.body.aid)

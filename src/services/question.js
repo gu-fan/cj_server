@@ -48,8 +48,36 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
 }))
 
-router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
 
+// XXX
+// this should put ahead /:qid
+router.get('/:qid/verify', jwt.auth(), wrap(async function(req, res, next) {
+
+  var user = await User.query()
+                    .findById(req.user.sub)
+
+  if (user == undefined) throw ERR.NO_SUCH_TARGET
+  if (!/verify/.test(user.permission)) {
+
+      throw ERR.NO_PERMISSION
+  }
+
+  var question = await Question.query()
+                        .patchAndFetchById(req.params.qid, {
+                          "verify": "pass"
+                        })
+
+  if (question == undefined) throw ERR.NO_SUCH_TARGET
+  
+  res.json({
+      msg:"question verify",
+      verify: question.verify,
+      code:0,
+  })
+
+}))
+
+router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
   var question = await Question.query()
                         .findById(req.params.qid)
                         .eager('[author]')

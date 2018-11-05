@@ -20,6 +20,7 @@ class Answer extends mixin(Model, [timestamp,uid()]) {
       .where('id', this.question_id)
 
   }
+
   async $beforeDelete(queryContext) {
     await super.$beforeDelete(queryContext);
     await Question
@@ -42,8 +43,10 @@ class Answer extends mixin(Model, [timestamp,uid()]) {
         total_thanks: { type: 'integer'},
         total_comments: { type: 'integer'},
         total_fandui: { type: 'integer'},
+
+        verify: { type: 'string'},
       },
-    };
+    }
   }
 
   static get relationMappings() {

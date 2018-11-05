@@ -50,20 +50,23 @@ describe('user tests', () => {
     }
 
   })
+
   let token
   test('login with username and password', async()=>{
     clock = sinon.useFakeTimers(1529344000000) // exp in : 7d
     var res = await signupAndLogin('TIME', http)
     token = res.data.t
   })
+
   test('login valid after 100s', async()=>{
     clock = sinon.useFakeTimers(1529344005000) // exp + 5s
 
       res = await http.get('/u/.ping')
     expect(res.status).toBe(200)
-    expect(res.data.msg).toBe('user valid')
+    expect(res.data.msg).toBe('user ping valid')
     
   }, 10000)
+
   test('login expire after 7d', async ()=>{
     var res
 

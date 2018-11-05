@@ -1,6 +1,8 @@
 const APIError = require('./api.error')
 const RAW_CODE = {
   NOT_FOUND: {text:"没有找到页面", http: 404},
+  NEED_ARGUMENT: {text:"需要参数", http: 400},
+  NO_PERMISSION: {text:"没有权限", http: 403},
   EXCEED_RANGE: {text:"超出范围", http: 400},
   NO_SUCH_USER: {text:"没有找到用户", http: 400},
   NEED_PHONE: {text:"请输入手机号", http: 400},
@@ -9,7 +11,7 @@ const RAW_CODE = {
   PASSWORD_MISMATCH: {text:'用户名或密码错误',http:400},
   // NEED_TITLE: {text:"标题不能为空", http: 400},
   CREDENTIALS_REQUIRED: {text:"缺少校验凭证", http: 400},
-  NO_SUCH_TARGET: {text:"没有找到记事", http: 400},
+  NO_SUCH_TARGET: {text:"没有找到目标", http: 400},
   NEED_CONTENT: {text:"内容不能为空", http: 400},
   DUPLICATED_CONTENT: {text:"内容重复", http: 400},
   NO_SUCH_GROUP: {text:"没有找到群组", http: 400},

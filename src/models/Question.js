@@ -21,6 +21,9 @@ class Question extends mixin(Model, [timestamp,uid()]) {
         content: { type: 'string'},
         total_answers: { type: 'integer'},
         total_likes: { type: 'integer'},
+
+        verify: { type: 'string'},
+
       },
     };
   }
@@ -47,12 +50,22 @@ class Question extends mixin(Model, [timestamp,uid()]) {
           to: 'answer.question_id'
         }
       },
+
       author: {
         relation: Model.BelongsToOneRelation,
         modelClass: __dirname + '/User',
         join: {
           from: 'question.author_id',
           to: 'user.id'
+        }
+      },
+
+      control_track: {
+        relation: Model.HasManyRelation,
+        modelClass: __dirname + '/ControlQ',
+        join: {
+          from: 'question.id',
+          to: 'control_q.question_id'
         }
       },
       // group: {

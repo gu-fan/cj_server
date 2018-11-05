@@ -1,5 +1,5 @@
 function getCount(object){
-    return object.length ? object[0]['count(*)'] : 0 
+    return (object && object.length) ? object[0]['count(*)'] : 0 
 }
 module.exports = {
   getCount,
