@@ -29,7 +29,7 @@ class TrackA extends mixin(Model, [timestamp, uid()]) {
 
       answer: {
         relation: Model.BelongsToOneRelation,
-        modelClass: __dirname + '/answer',
+        modelClass: __dirname + '/Answer',
         join: {
           from: 'track_a.answer_id',
           to: 'answer.id'
