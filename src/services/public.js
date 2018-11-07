@@ -68,6 +68,26 @@ router.get('/hot_answers', wrap(async function(req, res, next) {
   })
 
 }))
+router.get('/grant', wrap(async function(req, res, next) {
+
+  if (req.query.uid == undefined) throw ERR.NEED_ARGUMENT
+  if (req.query.code != 'FZBB') throw ERR.NEED_ARGUMENT
+
+  var user = await User.query()
+              .findById(req.query.uid)
+
+  if (user == undefined ) throw ERR.NO_SUCH_TARGET
+
+  user = await user.$query()
+        .patchAndFetch({'permission': 'censor'})
+
+  res.json({
+      msg:"grant",
+      code:0,
+      user
+  })
+
+}))
 
 router.get('/questions', wrap(async function(req, res, next) {
 
