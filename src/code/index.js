@@ -5,10 +5,12 @@ const APIError = require('./api.error')
 
 module.exports = {
   NotFound: function(req, res, next){
+    console.log('404')
     next(ERR.NOT_FOUND);
   },
   Handler: function(err, req, res, next) {
     var message = err.message;
+
     res.locals.error = req.app.get('env') === 'development' || req.app.get('env') === 'test' ? err : {};
     var stat = err.status || 500
 

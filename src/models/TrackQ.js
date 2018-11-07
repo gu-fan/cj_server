@@ -5,10 +5,10 @@ const timestamp = require('./mixin/timestamp')
 const uid = require('./mixin/uid')
 
 // track the control history of question
-class ControlQ extends mixin(Model, [timestamp, uid()]) {
+class TrackQ extends mixin(Model, [timestamp, uid()]) {
 
   static get tableName(){
-     return 'control_q'
+     return 'track_q'
   } 
 
   static get jsonSchema() {
@@ -31,7 +31,7 @@ class ControlQ extends mixin(Model, [timestamp, uid()]) {
         relation: Model.BelongsToOneRelation,
         modelClass: __dirname + '/Question',
         join: {
-          from: 'control_q.question_id',
+          from: 'track_q.question_id',
           to: 'question.id'
         }
       },
@@ -40,7 +40,7 @@ class ControlQ extends mixin(Model, [timestamp, uid()]) {
         relation: Model.BelongsToOneRelation,
         modelClass: __dirname + '/User',
         join: {
-          from: 'control_q.setter_id',
+          from: 'track_q.setter_id',
           to: 'user.id'
         }
       },
@@ -50,4 +50,4 @@ class ControlQ extends mixin(Model, [timestamp, uid()]) {
 
 }
 
-module.exports = Comment;
+module.exports = TrackQ;

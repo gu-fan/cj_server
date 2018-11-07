@@ -55,7 +55,7 @@ describe('user tests', () => {
     http = null 
     
   })
-  var qid, aid, cid
+  var qid, aid, cid, uid, aid3
   test('like test all', async () => {
       await SignupAndLogin(1)
       await BindUser(1)
@@ -76,19 +76,71 @@ describe('user tests', () => {
       res = await http.post('/q', question)
       qid = res.data.question.id
 
-    try {
-      
-      await SignupAndLogin(2)
-      res = await http.post('/a', {qid, content:'ANS'})
-    } catch (e) {
-      console.log(e.response)
-      
-    }
+      res = await http.get('/u/.ping')
+      console.log(res.data)
+      uid = res.data.user.id
+      res = await http.post('/u/.grant', {uid})
+      console.log(res.data)
+      res = await http.post('/censor/q/'+qid,{
+        action:'pass'
+      })
 
+      try {
+        
+        await SignupAndLogin(2)
+        res = await http.post('/a', {qid, content:'ANS'})
+        aid3 = res.data.answer.id
+      } catch (e) {
+        console.log( e)
+      }
+     
+      try {
+        await SignupAndLogin(1)
+        res = await http.post('/censor/a/'+aid3,{
+          action:'pass'
+        })
+      } catch (e) {
+        expect(e.response.data.code).toBe('NO_PERMISSION')
+      }
+
+      try {
+        
+        res = await http.get('/censor/a/'+aid3)
+        console.log(res.data)
+      } catch (e) {
+          expect(e.response.data.code).toBe('NO_PERMISSION')
+      }
+
+      await SignupAndLogin(2)
+      res = await http.post('/censor/a/'+aid3,{
+        action:'pass'
+      })
+      expect(res.data.answer.censor_status).toBe('pass')
+        
       await SignupAndLogin(3)
       res = await http.post('/a', {qid, content:'ANS2'})
       aid = res.data.answer.id
       expect(res.data.answer.question.total_answers).toBe(2)
+
+      try {
+        
+        await SignupAndLogin(4)
+        res = await http.post('/c', {aid, content:'hello comment'})
+
+      } catch (e) {
+          expect(e.response.data.code).toBe('CENSOR_NOT_PASS')
+
+      }
+    
+
+      await SignupAndLogin(2)
+      res = await http.post('/censor/a/'+aid,{
+        action:'pass'
+      })
+      expect(res.data.answer.censor_status).toBe('pass')
+
+
+
 
       // LIKE ANSWER
       await SignupAndLogin(1)
@@ -103,7 +155,6 @@ describe('user tests', () => {
       res = await http.post('/a/'+aid+'/dislike')
       expect(res.data.total_zhichi).toBe(2)
       expect(res.data.total_fandui).toBe(1)
-
 
 
       // author zhichi count
@@ -146,9 +197,7 @@ describe('user tests', () => {
         expect(res.data.answer.total_comments).toBe(3)
       } catch (e) {
         console.log(e.response)
-        
       }
-
 
       await SignupAndLogin(1)
       res = await http.post('/c/'+cid +'/like')
@@ -262,11 +311,11 @@ describe('user tests', () => {
       expect(res.data.user.total_points).toBe(13)
 
 
+
     } catch (e) {
       console.log(e)
       
     }
-
 
   })
 })

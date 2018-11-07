@@ -60,12 +60,12 @@ class Question extends mixin(Model, [timestamp,uid()]) {
         }
       },
 
-      control_track: {
+      tracks: {
         relation: Model.HasManyRelation,
-        modelClass: __dirname + '/ControlQ',
+        modelClass: __dirname + '/TrackQ',
         join: {
           from: 'question.id',
-          to: 'control_q.question_id'
+          to: 'track_q.question_id'
         }
       },
       // group: {

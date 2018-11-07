@@ -25,9 +25,14 @@ router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 
 router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
-  var question = Question.query().findById(req.body.qid)
+  var question = await Question.query().findById(req.body.qid)
 
   if (question == undefined) throw ERR.NO_SUCH_TARGET
+  if (question.lock_status == 'lock' ) {
+     throw ERR.TARGET_LOCKED
+  } else if ( question.censor_status == 'reject' || question.censor_status == undefined  ) {
+     throw ERR.CENSOR_NOT_PASS
+  }
 
   var answers = await Answer.query().insertGraph([{
     content: req.body.content, 
@@ -42,37 +47,11 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
   })
     .eager('[author, question]');
 
-
   var newAnswer = answers[0]
 
   res.json({
       msg:"answer create",
       answer:newAnswer,
-      code:0,
-  })
-
-}))
-router.get('/:aid/verify', jwt.auth(), wrap(async function(req, res, next) {
-
-  var user = await User.query()
-                    .findById(req.user.sub)
-
-  if (user == undefined) throw ERR.NO_SUCH_TARGET
-  if (!/verify/.test(user.permission)) {
-
-      throw ERR.NO_PERMISSION
-  }
-
-  var answer = await Answer.query()
-                        .patchAndFetchById(req.params.aid, {
-                          "verify": "pass"
-                        })
-
-  if (answer == undefined) throw ERR.NO_SUCH_TARGET
-  
-  res.json({
-      msg:"question verify",
-      verify: answer.verify,
       code:0,
   })
 

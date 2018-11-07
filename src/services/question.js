@@ -6,7 +6,7 @@ const {ERR, MSG} = require('../code')
 
 const {uid, slug}= require('../models/mixin/_uid')
 
-const {Question, User, Answer}  = require('../models')
+const {TrackQ, Question, User, Answer}  = require('../models')
 
 const answerRoute = require('./answer')
 
@@ -49,68 +49,92 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 }))
 
 
-// XXX
-// this should put ahead /:qid
-router.get('/:qid/verify', jwt.auth(), wrap(async function(req, res, next) {
 
-  var user = await User.query()
-                    .findById(req.user.sub)
+router.get('/:qid/tracks', jwt.auth(), wrap(async function(req, res, next) {
 
-  if (user == undefined) throw ERR.NO_SUCH_TARGET
-  if (!/verify/.test(user.permission)) {
+  var tracks = await TrackQ.query()
+                        .where('question_id', req.params.qid)
 
-      throw ERR.NO_PERMISSION
-  }
-
-  var question = await Question.query()
-                        .patchAndFetchById(req.params.qid, {
-                          "verify": "pass"
-                        })
-
-  if (question == undefined) throw ERR.NO_SUCH_TARGET
-  
   res.json({
-      msg:"question verify",
-      verify: question.verify,
+      msg:"tracks got",
+      tracks,
       code:0,
   })
 
 }))
 
 router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
-  var question = await Question.query()
-                        .findById(req.params.qid)
-                        .eager('[author]')
 
-  if (question == undefined) throw ERR.NO_SUCH_TARGET
-  var answers = await question.$relatedQuery('answers')
-                        .eager('[question, author]')
-                        .orderBy('created_at', 'desc')
-                        .page(req.query.page||0,5)
-  
-  res.json({
-      msg:"question got",
-      question,
-      answers,
-      code:0,
-  })
+  if (req.query.t == 'edit') {
+    var question = await Question.query()
+                          .findById(req.params.qid)
+
+    if (question == undefined) throw ERR.NO_SUCH_TARGET
+    res.json({
+        msg:"question got",
+        question,
+        code:0,
+    })
+  } else {
+    var question = await Question.query()
+                          .findById(req.params.qid)
+                          .eager('[author, tracks(desc).setter]',{
+                            desc:(builder)=>{
+                              builder.orderBy('created_at', 'desc')
+                            }
+                          })
+    if (question == undefined) throw ERR.NO_SUCH_TARGET
+    var user = await User.query()
+                          .findById(req.user.sub)
+
+    var answers = await question.$relatedQuery('answers')
+                          .eager('[question, author]')
+                          .orderBy('created_at', 'desc')
+                          .where('censor_status', 'pass')
+                          .page(req.query.page||0,5)
+    delete user.password
+    delete user.phone
+    
+    res.json({
+        msg:"question got",
+        question,
+        answers,
+        user,
+        code:0,
+    })
+  }
+
+
+
 
 }))
+
 router.put('/:qid', jwt.auth(), wrap(async function(req, res, next) {
 
   var question = await Question.query()
                         .findById(req.params.qid)
                         .eager('author')
   if (question == undefined) throw ERR.NO_SUCH_TARGET
+  if (req.user.sub != question.author_id) throw ERR.NOT_AUTHOR
 
-  const updatedQuestion = await Question
+  var status 
+  if (question.censor_status == 'reject') {
+        status = 'reject_review'
+  } else {
+        status = question.censor_status
+  }
+
+  await question.$relatedQuery('tracks')
+       .insertAndFetch({content:'edit', setter_id:req.user.sub})
+
+  question = await Question
     .query()
     .patchAndFetchById(req.params.qid, 
-            {title: req.body.title,content:req.body.content});
+            {title:req.body.title, content:req.body.content, censor_status:status})
   
   res.json({
       msg:"question patch",
-      updatedQuestion,
+      question,
       code:0,
   })
 

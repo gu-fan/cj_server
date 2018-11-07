@@ -14,11 +14,13 @@ router.get('/answers', wrap(async function(req, res, next) {
 
   var new_answers = await Answer.query().limit(5)
           .eager('[author, question]')
+          .where('censor_status', 'pass')
           .orderBy('created_at', 'desc')
           .page(page, 10);
 
   var hot_answers = await Answer.query().limit(5)
           .eager('[author, question]')
+          .where('censor_status', 'pass')
           .orderBy('total_zhichi', 'desc')
           .page(page, 10);
   
@@ -36,6 +38,7 @@ router.get('/new_answers', wrap(async function(req, res, next) {
 
   var new_answers = await Answer.query().limit(5)
           .eager('[author, question]')
+          .where('censor_status', 'pass')
           .orderBy('created_at', 'desc')
           .page(page, 10);
   
@@ -53,6 +56,7 @@ router.get('/hot_answers', wrap(async function(req, res, next) {
 
   var hot_answers = await Answer.query().limit(5)
           .eager('[author, question]')
+          .where('censor_status', 'pass')
           .orderBy('total_zhichi', 'desc')
           .page(page, 10);
   
@@ -66,9 +70,11 @@ router.get('/hot_answers', wrap(async function(req, res, next) {
 }))
 
 router.get('/questions', wrap(async function(req, res, next) {
+
   var all = await Question.query().count()
   var questions = await Question.query()
           .limit(10)
+          .where('censor_status', 'pass')
           .eager('[author]')
 
   res.json({

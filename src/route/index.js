@@ -9,6 +9,7 @@ const user  = require('../services/user')
 const question  = require('../services/question')
 const answer  = require('../services/answer')
 const comment  = require('../services/comment')
+const censor  = require('../services/censor')
 
 module.exports = app => {
 
@@ -30,6 +31,7 @@ module.exports = app => {
   app.use('/q', question)
   app.use('/a', answer)
   app.use('/c', comment)
+  app.use('/censor', censor)
 
 
 }

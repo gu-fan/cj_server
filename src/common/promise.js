@@ -11,8 +11,46 @@ module.exports = {
               resolve()
             }, time);
           }),
-  wrap: fn => (...args) =>
-  {
-        fn(...args).catch(args[2])
+  wrap: fn => (req, res, next) => {
+        fn(req,res,next)
+        .catch((err)=>{
+          // XXX:
+          // next(err)
+          // is not handled by handler 
+         
+          // copy from err.handler
+          var message = err.message;
+
+          res.locals.error = req.app.get('env') === 'development' || req.app.get('env') === 'test' ? err : {};
+          var stat = err.status || 500
+
+          if (err.code == "SQLITE_CONSTRAINT") {
+            message = "已存在相同内容"
+          }
+
+          res.status(stat);
+          res.json({
+            code: err.code || stat,
+            msg: message,
+            stack: res.locals.error.stack || undefined,
+          });
+          
+        })
+  },
+  wrap2: (fn) => {
+  
+    return (request, response, next) => {
+        const promise = fn(request, response, next);
+        if (!promise.catch) {
+             return;
+        }
+        promise.catch((error) => {
+            console.log("error");
+            console.log(error);
+            response.sendStatus(error.status);
+        });
+
+    };
   }
+  
 }

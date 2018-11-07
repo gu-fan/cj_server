@@ -72,39 +72,75 @@ describe('user tests', () => {
       console.log(res.data)
       uid = res.data.user.id
 
-
-        
       var question = {
         title: "hello",
         content: "HELLO WORLD"
       }
       res = await http.post('/q', question)
-      console.log(res.data)
-      expect(res.data.question.verify).toBe(undefined)
       qid = res.data.question.id
 
+      res = await http.get('/pub/questions')
+      expect(res.data.questions.length).toBe(0)
+
+      res = await http.get('/censor/questions')
+      expect(res.data.questions.results.length).toBe(1)
+
       try {
-        
-      res = await http.get('/q/'+qid+'/verify')
-      console.log(res.data)
+        res = await http.get('/censor/q/'+qid)
+        console.log(res.data)
       } catch (e) {
         expect(e.response.data.code).toBe('NO_PERMISSION')
-        
       }
 
       res = await http.post('/u/.grant', {uid})
       console.log(res.data)
 
-      res = await http.get('/q/'+qid+'/verify')
+      res = await http.post('/censor/q/'+qid, {
+        action:'reject',
+        reason:'MISLEADING'
+      })
       console.log(res.data)
 
-      res = await http.post('/a/', {qid, content:'ANS'})
+      res = await http.put('/q/'+qid, {title:'hello', content:'LLLLLOLLLL'})
       console.log(res.data)
-      aid = res.data.answer.id
 
-      expect(res.data.answer.verify).toBe(undefined)
-      res = await http.get('/a/'+aid+'/verify')
+      try {
+      
+        res = await http.post('/a', {qid, content:'ANS'})
+        console.log(res.data)
+        // expect(res.data.code).toBe('TARGET_LOCKED')
+      } catch (e) {
+        expect(e.response.data.code).toBe('CENSOR_NOT_PASS')
+      
+      }
+
+      res = await http.post('/censor/q/'+qid,{
+        action:'pass'
+      })
       console.log(res.data)
+
+      res = await http.get('/pub/questions')
+      expect(res.data.questions.length).toBe(1)
+
+      res = await http.get('/censor/questions')
+      expect(res.data.questions.results.length).toBe(0)
+
+      console.log("SHOULD PASS")
+      res = await http.post('/a', {qid, content:'ANS'})
+      console.log(res.data)
+
+      res = await http.get('/q/'+qid+'/tracks')
+      console.log(res.data)
+
+      // try {
+      
+      //   res = await http.post('/a', {qid, content:'ANS'})
+      //   // console.log(res.data)
+      //   // expect(res.data.code).toBe('TARGET_LOCKED')
+      // } catch (e) {
+      //   expect(e.response.data.code).toBe('TARGET_LOCKED')
+      
+      // }
 
 
     } catch (e) {
@@ -112,6 +148,67 @@ describe('user tests', () => {
       
     }
 
+
+  })
+
+  test('permission search', async () => {
+      res = await http.post('/q', {title:'111', content:'222'})
+      var qid2 = res.data.question.id
+      res = await http.post('/q', {title:'社会的发展111', content:'222'})
+      var qid3 = res.data.question.id
+      var q= 'el'
+      res = await http.get('/censor/search?q='+ q)
+      expect(res.data.questions.results.length).toBe(1)
+
+      res = await http.get('/censor/search?q=')
+      expect(res.data.questions.results.length).toBe(3)
+
+      res = await http.get('/censor/search?q=社会')
+      expect(res.data.questions.results.length).toBe(1)
+
+      res = await http.get('/censor/search?q=111')
+      expect(res.data.questions.results.length).toBe(2)
+
+  })
+
+  var aid
+  test('permission answer', async () => {
+    try {
+      
+      res = await http.post('/a', {qid, content:'ANS'})
+      console.log(res.data)
+
+      aid = res.data.answer.id
+
+      try {
+        res = await http.post('/c', {aid, content:'hello comment'})
+      } catch (e) {
+        expect(e.response.data.code).toBe('CENSOR_NOT_PASS')
+      }
+
+      res = await http.post('/censor/a/'+aid, {
+        action:'reject',
+        reason:'MISLEADING'
+      })
+      try {
+        res = await http.post('/c', {aid, content:'hello comment'})
+      } catch (e) {
+        expect(e.response.data.code).toBe('CENSOR_NOT_PASS')
+      }
+
+      expect(res.data.answer.censor_status).toBe('reject')
+
+      res = await http.post('/censor/a/'+aid,{
+        action:'pass'
+      })
+      expect(res.data.answer.censor_status).toBe('pass')
+
+      res = await http.post('/c', {aid, content:'hello comment'})
+      expect(res.data.comment.answer.content).toBe('ANS')
+
+    } catch (e) {
+      console.log(e.response && e.response.data || e)
+    }
 
   })
 })

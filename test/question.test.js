@@ -78,6 +78,19 @@ describe('user tests', () => {
     expect(res.data.code).toBe(0)
 
 
+    // let it pass
+    res = await http.get('/u/.ping')
+    uid = res.data.user.id
+    res = await http.post('/u/.grant', {uid})
+    console.log(res.data)
+    res = await http.post('/censor/q/'+qid,{
+      action:'pass'
+    })
+    res = await http.post('/censor/q/'+qid2,{
+      action:'pass'
+    })
+
+
     res = await http.get('/q')
     console.log(res.data)
     
@@ -200,6 +213,10 @@ describe('user tests', () => {
 
   var cid
   test('create comment', async () => {
+      res = await http.post('/censor/a/'+aid,{
+        action:'pass'
+      })
+    
       res = await http.post('/c', {aid:aid, content:'hello comment'})
       console.log(res.data.comment)
       cid = res.data.comment.id

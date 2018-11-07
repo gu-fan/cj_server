@@ -88,6 +88,15 @@ class Answer extends mixin(Model, [timestamp,uid()]) {
           to: 'user.id'
         }
       },
+
+      tracks: {
+        relation: Model.HasManyRelation,
+        modelClass: __dirname + '/TrackA',
+        join: {
+          from: 'answer.id',
+          to: 'track_a.answer_id'
+        }
+      },
       // group: {
       //   relation: Model.BelongsToOneRelation,
       //   modelClass: __dirname + '/Group',

@@ -22,6 +22,8 @@ class Session {
             .dropTableIfExists('comment')
             .dropTableIfExists('user_like_comment')
             .dropTableIfExists('user_like_answer')
+            .dropTableIfExists('track_q')
+            .dropTableIfExists('track_a')
 
     await knex.migrate.latest()
 

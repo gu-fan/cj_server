@@ -55,7 +55,7 @@ router.post('/.grant', jwt.auth(), wrap(async function(req, res, next) {
   var user = await getUser(req.body.uid)
 
   user = await user.$query()
-        .patchAndFetch({'permission': 'verify'})
+        .patchAndFetch({'permission': 'censor'})
 
   res.json({
     msg:'user granted',

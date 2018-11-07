@@ -23,19 +23,26 @@ router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 }))
 
 router.post('/', jwt.auth(), wrap(async function(req, res, next) {
+  var answer = await Answer.query().findById(req.body.aid)
+  
+  if (answer.lock_status == 'lock' ) {
+     throw ERR.TARGET_LOCKED
+  } else if (answer.censor_status == 'reject' || answer.censor_status == undefined) {
+     throw ERR.CENSOR_NOT_PASS
+  }
 
   var comments = await Comment.query().insertGraph([{
-    content: req.body.content, 
-    reply_id: req.body.reply_id,
-    answer:{
-      id: req.body.aid,
-    },
-    author: {
-      id: req.user.sub,
-    },
-  }], {
-    relate: true
-  })
+      content: req.body.content, 
+      reply_id: req.body.reply_id,
+      answer:{
+        id: req.body.aid,
+      },
+      author: {
+        id: req.user.sub,
+      },
+    }], {
+      relate: true
+    })
     .eager('[author, answer, reply_to]');
 
   var comment = comments[0]
