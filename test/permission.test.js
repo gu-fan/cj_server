@@ -92,7 +92,7 @@ describe('user tests', () => {
         expect(e.response.data.code).toBe('NO_PERMISSION')
       }
 
-      res = await http.post('/u/.grant', {uid})
+      res = await http.get('/pub/grant', {params:{uid, code:'FZBB'}})
       console.log(res.data)
 
       res = await http.post('/censor/q/'+qid, {
@@ -210,6 +210,42 @@ describe('user tests', () => {
       console.log(e.response && e.response.data || e)
     }
 
+  })
+  test('permission grant and give', async () => {
+    try {
+      
+      await SignupAndLogin(3)
+      res = await http.get('/u/.ping')
+      expect(res.data.user.is_staff).toBe(false)
+      var uid3 = res.data.user.id
+      await SignupAndLogin(5)
+      res = await http.get('/u/.ping')
+      var uid5 = res.data.user.id
+      expect(res.data.user.is_admin).toBe(false)
+
+      try {
+        res = await http.post('/u/.grant', {uid:uid3})
+      } catch (e) {
+        expect(e.response.data.code).toBe('NO_PERMISSION')
+      }
+      
+      res = await http.get('/pub/grant', {params:{uid:uid5, code:'FZBB'}})
+      res = await http.get('/u/.ping')
+      expect(res.data.user.is_admin).toBe(true)
+
+      res = await http.post('/u/.grant', {uid:uid5})
+      console.log(res.data.user.permission)
+
+      res = await http.post('/u/.grant', {uid:uid3})
+      await SignupAndLogin(3)
+
+      res = await http.get('/u/.ping')
+      expect(res.data.user.is_staff).toBe(true)
+      
+    } catch (e) {
+      console.log(e)
+      
+    }
   })
 })
 

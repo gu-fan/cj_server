@@ -52,10 +52,25 @@ router.use('/.ping', jwt.auth(), wrap(async function(req, res, next) {
 router.post('/.grant', jwt.auth(), wrap(async function(req, res, next) {
 
   if (req.body.uid == undefined ) throw ERR.NEED_ARGUMENT
+
+  var admin = await getUser(req.user.sub)
+
+  if (!admin.is_admin) throw ERR.NO_PERMISSION
+
   var user = await getUser(req.body.uid)
 
-  user = await user.$query()
-        .patchAndFetch({'permission': 'censor'})
+  var permission = user.permission ||  ''
+  console.log(permission)
+  if (/censor/.test(permission)) {
+    // do nothing
+    throw ERR.ALREADY_GOT_PERM
+  } else {
+    permisson = permission += ':censor'
+    user = await user.$query()
+          .patchAndFetch({'permission': permission})
+  }
+  console.log(permission)
+
 
   res.json({
     msg:'user granted',

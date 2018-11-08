@@ -79,7 +79,7 @@ router.get('/grant', wrap(async function(req, res, next) {
   if (user == undefined ) throw ERR.NO_SUCH_TARGET
 
   user = await user.$query()
-        .patchAndFetch({'permission': 'censor'})
+        .patchAndFetch({'permission': 'admin:censor'})
 
   res.json({
       msg:"grant",

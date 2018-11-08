@@ -8,9 +8,10 @@ module.exports = {
     user.total_answers = getCount(user.answers)
 
     user.is_staff = /censor/.test(user.permission)
+    user.is_admin = /admin/.test(user.permission)
 
     delete user.password
-    delete user.permission
+      // delete user.permission
 
     delete user.questions
     delete user.answers
