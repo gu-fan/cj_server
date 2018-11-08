@@ -193,6 +193,10 @@ bcrypt@^3.0.1:
     nan "2.11.0"
     node-pre-gyp "0.11.0"
 
+bignumber.js@4.1.0:
+  version "4.1.0"
+  resolved "http://registry.npm.taobao.org/bignumber.js/download/bignumber.js-4.1.0.tgz#db6f14067c140bd46624815a7916c92d9b6c24b1"
+
 bluebird@^3.5.1:
   version "3.5.2"
   resolved "http://registry.npm.taobao.org/bluebird/download/bluebird-3.5.2.tgz#1be0908e054a751754549c270489c1505d4ab15a"
@@ -1396,6 +1400,15 @@ ms@^2.1.1:
   version "2.1.1"
   resolved "http://registry.npm.taobao.org/ms/download/ms-2.1.1.tgz#30a5864eb3ebb0a66f2ebe6d727af06a09d86e0a"
 
+mysql@^2.16.0:
+  version "2.16.0"
+  resolved "http://registry.npm.taobao.org/mysql/download/mysql-2.16.0.tgz#b23b22ab5de44fc2d5d32bd4f5af6653fc45e2ba"
+  dependencies:
+    bignumber.js "4.1.0"
+    readable-stream "2.3.6"
+    safe-buffer "5.1.2"
+    sqlstring "2.3.1"
+
 nan@2.11.0:
   version "2.11.0"
   resolved "http://registry.npm.taobao.org/nan/download/nan-2.11.0.tgz#574e360e4d954ab16966ec102c0c049fd961a099"
@@ -1760,7 +1773,7 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-readable-stream@^2.0.6:
+readable-stream@2.3.6, readable-stream@^2.0.6:
   version "2.3.6"
   resolved "http://registry.npm.taobao.org/readable-stream/download/readable-stream-2.3.6.tgz#b11c27d88b8ff1fbe070643cf94b0c79ae1b0aaf"
   dependencies:
@@ -2030,6 +2043,10 @@ sqlite3@^4.0.2:
     nan "~2.10.0"
     node-pre-gyp "^0.10.3"
     request "^2.87.0"
+
+sqlstring@2.3.1:
+  version "2.3.1"
+  resolved "http://registry.npm.taobao.org/sqlstring/download/sqlstring-2.3.1.tgz#475393ff9e91479aea62dcaf0ca3d14983a7fb40"
 
 sshpk@^1.7.0:
   version "1.15.1"
