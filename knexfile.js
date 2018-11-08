@@ -7,8 +7,9 @@ module.exports = {
   test: config.db,
 
   staging: {
-    client: '172.21.0.4',
+    client: 'mysql',
     connection: {
+      host : '172.21.0.4',
       database: 'test',
       user:     'root',
       password: 'lk123456'
