@@ -7,11 +7,11 @@ module.exports = {
   test: config.db,
 
   staging: {
-    client: 'postgresql',
+    client: '172.21.0.4',
     connection: {
-      database: 'staging',
-      user:     'graphql',
-      password: 'graphql'
+      database: 'test',
+      user:     'root',
+      password: 'lk123456'
     },
     pool: {
       min: 2,
