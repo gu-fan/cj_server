@@ -65,7 +65,8 @@ exports.up = function(knex, Promise) {
 
     })
     .createTable('user_like_answer', table=>{
-      table.string('id').primary()
+      table.increments('id').primary();
+      
       table.integer('num').defaultTo(0)
       table
         .string('uid')
