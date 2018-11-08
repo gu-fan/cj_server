@@ -90,7 +90,8 @@ router.get('/checkpoint', jwt.auth(), wrap(async function(req, res, next) {
   if (user.checkpoint_at == null || last.isBefore(today) ) {
     user = await user.$query()
                 .patchAndFetch({
-                  checkpoint_at:new Date().toISOString(),
+                  checkpoint_at:moment().format(),
+                  // checkpoint_at:new Date().toISOString(),
                   total_points:user.total_points+1,
                 })
     res.json({
