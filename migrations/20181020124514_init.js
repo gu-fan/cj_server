@@ -128,12 +128,12 @@ exports.up = function(knex, Promise) {
 exports.down = function(knex, Promise) {
   return Promise.all([
     knex.schema
-    .dropTableIfExists('user')
-    .dropTableIfExists('question')
-    .dropTableIfExists('answer')
     .dropTableIfExists('user_like_answer')
-    .dropTableIfExists('comment')
     .dropTableIfExists('user_like_comment')
+    .dropTableIfExists('comment')
+    .dropTableIfExists('answer')
+    .dropTableIfExists('question')
+    .dropTableIfExists('user')
   ])
   
 };
