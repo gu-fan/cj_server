@@ -59,6 +59,18 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
 router.get('/:aid', jwt.auth(), wrap(async function(req, res, next) {
 
+  if (req.query.t == 'edit') {
+    var answer = await Answer.query()
+                          .findById(req.params.aid)
+                          .eager('question')
+
+    if (answer == undefined) throw ERR.NO_SUCH_TARGET
+    res.json({
+        msg:"answer got",
+        answer,
+        code:0,
+    })
+  } else {
   var answer = await Answer.query()
                         .findById(req.params.aid)
                         // WORKS, but seems use modifyer is too heavy for loading the lists
@@ -122,19 +134,36 @@ router.get('/:aid', jwt.auth(), wrap(async function(req, res, next) {
       comments,
       code:0,
   })
+  }
 
 }))
 
 router.put('/:aid', jwt.auth(), wrap(async function(req, res, next) {
 
+  console.log(1)
   var answer = await Answer.query()
                         .findById(req.params.aid)
-                        .eager('author')
+  console.log(2)
   if (answer == undefined) throw ERR.NO_SUCH_TARGET
+  if (req.user.sub != answer.author_id) throw ERR.NOT_AUTHOR
+  
+  console.log(3)
+  var status 
+  if (answer.censor_status == 'reject') {
+      status = 'reject_review'
+  } else {
+      status = answer.censor_status
+  }
+
+  await answer.$relatedQuery('tracks')
+       .insertAndFetch({content:'edit', setter_id:req.user.sub})
+  console.log(4)
+
   answer = await Answer
     .query()
-    .patchAndFetchById(req.params.aid, {content:req.body.content});
-    
+    .patchAndFetchById(req.params.aid, 
+            {content:req.body.content, censor_status:status})
+      .eager('author')
 
   res.json({
       msg:"answer patch",

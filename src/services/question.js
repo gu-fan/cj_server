@@ -8,7 +8,7 @@ const {uid, slug}= require('../models/mixin/_uid')
 
 const {TrackQ, Question, User, Answer}  = require('../models')
 
-const answerRoute = require('./answer')
+const {normalizeUser} =require('../common')
 
 router.get('/', jwt.auth(), wrap(async function(req, res, next) {
   var all = await Question.query().count()
@@ -86,14 +86,13 @@ router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
     if (question == undefined) throw ERR.NO_SUCH_TARGET
     var user = await User.query()
                           .findById(req.user.sub)
+    user = normalizeUser(user)
 
     var answers = await question.$relatedQuery('answers')
                           .eager('[question, author]')
                           .orderBy('created_at', 'desc')
                           .where('censor_status', 'pass')
                           .page(req.query.page||0,5)
-    delete user.password
-    delete user.phone
     
     res.json({
         msg:"question got",
@@ -113,7 +112,6 @@ router.put('/:qid', jwt.auth(), wrap(async function(req, res, next) {
 
   var question = await Question.query()
                         .findById(req.params.qid)
-                        .eager('author')
   if (question == undefined) throw ERR.NO_SUCH_TARGET
   if (req.user.sub != question.author_id) throw ERR.NOT_AUTHOR
 
@@ -131,6 +129,7 @@ router.put('/:qid', jwt.auth(), wrap(async function(req, res, next) {
     .query()
     .patchAndFetchById(req.params.qid, 
             {title:req.body.title, content:req.body.content, censor_status:status})
+      .eager('author')
   
   res.json({
       msg:"question patch",

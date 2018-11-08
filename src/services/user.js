@@ -111,13 +111,28 @@ router.get('/checkpoint', jwt.auth(), wrap(async function(req, res, next) {
 }))
 
 router.get('/:uid', jwt.auth(), wrap(async function(req, res, next) {
-  var user = await User.query()
+
+  var user
+  if (req.user.sub == req.params.uid) {
+      user = await User.query()
                 .findById(req.params.uid)
                 .eager('[questions(count), answers(count)]',{
                   count:(builder)=>{
                       builder.count()
+                    }
+                })
+  } else {
+      user = await User.query()
+                .findById(req.params.uid)
+                .eager('[questions(count), answers(count)]',{
+                  count:(builder)=>{
+                      builder
+                        .where('censor_status', 'pass')
+                        .count()
                   }
                 })
+  }
+
   if (user == undefined) throw ERR.NO_SUCH_TARGET
   
   user = normalizeUser(user)
@@ -131,26 +146,46 @@ router.get('/:uid', jwt.auth(), wrap(async function(req, res, next) {
 }))
 
 router.get('/:uid/questions', jwt.auth(), wrap(async function(req, res, next) {
-  var user = await User.query()
-                .findById(req.params.uid)
-                .eager('[questions.author]')
+  var user ,questions
+    user = await User.query()
+                  .findById(req.params.uid)
+
   if (user == undefined) throw ERR.NO_SUCH_TARGET
+
+  if (req.user.sub == req.params.uid) {
+    questions = await user.$relatedQuery('questions')
+                    .eager('author')
+  } else {
+    questions = await user.$relatedQuery('questions')
+                    .where('censor_status', 'pass')
+                    .eager('author')
+  }
   
   res.json({
     msg:'user questions got',
-    questions:user.questions,
+    questions,
     code:0
   })
 }))
 
 router.get('/:uid/answers', jwt.auth(), wrap(async function(req, res, next) {
-  var user = await User.query()
-                .findById(req.params.uid)
-                .eager('answers.[question, author]')
+
+  var user ,answers
+    user = await User.query()
+                  .findById(req.params.uid)
+
+  if (req.user.sub == req.params.uid) {
+    answers = await user.$relatedQuery('answers')
+                  .eager('[author, question]')
+  } else {
+    answers = await user.$relatedQuery('answers')
+                .eager('[author, question]')
+                .where('censor_status', 'pass')
+  }
   
   res.json({
     msg:'user answers got',
-    answers:user.answers,
+    answers,
     code:0
   })
 }))
