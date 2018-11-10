@@ -95,18 +95,12 @@ router.get('/checkpoint', jwt.auth(), wrap(async function(req, res, next) {
                   total_points:user.total_points+1,
                 })
     res.json({
-      msg:'checked',
+      msg:'check success',
       user,
       code:0
     })
   } else {
-      // already checked _ today
-        res.json({
-          msg:'has checked today',
-          user,
-          code:1
-        })
-
+    throw ERR.ALREADY_CHECKED
   }
 
 }))

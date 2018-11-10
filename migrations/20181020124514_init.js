@@ -40,6 +40,7 @@ exports.up = function(knex, Promise) {
 
       table.timestamps()
     })
+
     .createTable('answer', table=>{
       table.string('id').primary()
 
@@ -64,6 +65,7 @@ exports.up = function(knex, Promise) {
       table.timestamps()
 
     })
+
     .createTable('user_like_answer', table=>{
       table.increments('id').primary();
       
@@ -79,6 +81,7 @@ exports.up = function(knex, Promise) {
         .inTable('answer')
         .onDelete('CASCADE');
     })
+
     .createTable('comment', table=>{
       table.string('id').primary()
 
@@ -103,6 +106,7 @@ exports.up = function(knex, Promise) {
 
       table.timestamps()
     })
+
     .createTable('user_like_comment', table=>{
       table.increments('id').primary();
 
@@ -113,13 +117,13 @@ exports.up = function(knex, Promise) {
         .references('id')
         .inTable('user')
         .onDelete('CASCADE');
+
       table
         .string('cid')
         .references('id')
         .inTable('comment')
         .onDelete('CASCADE');
     })
-
     
   ])
   
