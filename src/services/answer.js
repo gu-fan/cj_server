@@ -30,8 +30,8 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
   if (question == undefined) throw ERR.NO_SUCH_TARGET
   if (question.lock_status == 'lock' ) {
      throw ERR.TARGET_LOCKED
-  } else if ( question.censor_status == 'reject' || question.censor_status == undefined  ) {
-     throw ERR.CENSOR_NOT_PASS
+  // } else if ( question.censor_status == 'reject' || question.censor_status == undefined  ) {
+  //    throw ERR.CENSOR_NOT_PASS
   }
 
   var answers = await Answer.query().insertGraph([{

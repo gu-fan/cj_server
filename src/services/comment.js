@@ -27,8 +27,8 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
   
   if (answer.lock_status == 'lock' ) {
      throw ERR.TARGET_LOCKED
-  } else if (answer.censor_status == 'reject' || answer.censor_status == undefined) {
-     throw ERR.CENSOR_NOT_PASS
+  // } else if (answer.censor_status == 'reject' || answer.censor_status == undefined) {
+  //    throw ERR.CENSOR_NOT_PASS
   }
 
   var comments = await Comment.query().insertGraph([{
