@@ -94,9 +94,10 @@ router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
 
     var answers = await question.$relatedQuery('answers')
                           .eager('[question, author]')
+                          .orderBy('total_zhichi', 'desc')
                           .orderBy('created_at', 'desc')
                           .where('is_deleted', false)
-                          // .where('censor_status', 'pass')
+                          .where('censor_status', 'pass')
                           .page(req.query.page||0,5)
     
     res.json({
