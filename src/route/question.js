@@ -99,7 +99,7 @@ router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
                           .orderBy('total_zhichi', 'desc')
                           .orderBy('created_at', 'desc')
                           .select('*')
-                          .select(knex.raw('substr(content,1, 500) as content'))
+                          .select(knex.raw('substring(content,1, 500) as content'))
                           .where('is_deleted', false)
                           .where('censor_status', 'pass')
                           .page(req.query.page||0,5)

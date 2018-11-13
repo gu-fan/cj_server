@@ -49,7 +49,7 @@ module.exports = {
           .where('censor_status', 'pass')
           .where('is_deleted', false)
           .select('*')
-          .select(knex.raw('substr(content,1, 500) as content'))
+          .select(knex.raw('substring(content,1, 500) as content'))
 
           .orderBy('created_at', 'desc')
           .page(page, 10)
@@ -69,7 +69,7 @@ module.exports = {
           .where('is_deleted', false)
           .where('is_selected', true)
           .select('*')
-          .select(knex.raw('substr(content,1, 500) as content'))
+          .select(knex.raw('substring(content,1, 500) as content'))
 
           .orderBy('created_at', 'desc')
           .page(page, 5)
