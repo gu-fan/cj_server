@@ -7,6 +7,7 @@ const {ERR, MSG} = require('../code')
 const {uid, slug} = require('../models/mixin/_uid')
 
 const {Question, User, Answer, Comment} = require('../models')
+const {getUser} = require('../services/user')
 
 router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 
@@ -95,15 +96,30 @@ router.delete('/:cid', jwt.auth(), wrap(async function(req, res, next) {
   var comment = await Comment.query()
                         .findById(req.params.cid)
                         .eager('author')
-  if (comment == undefined) throw ERR.NO_SUCH_TARGET
-  
-  const numberOfDeletedRows = await Comment 
-    .query()
-    .deleteById(req.params.cid)
+  var user = await getUser(req.user.sub)
+
+  if (comment.is_deleted) throw ERR.ALREADY_DELETED
+
+  if (!user.is_staff && req.user.sub != answer.author_id) {
+    if (req.user.sub != comment.author_id) throw ERR.NOT_AUTHOR
+    if (!user.is_staff) throw ERR.NO_PERMISSION
+  }
+
+    // await Answer
+    //   .query()
+    //   .decrement('total_comments', 1)
+    //   .where('id', comment.answer_id)
+
+  const deleted = await comment
+          .$query()
+          .patch({'is_deleted': true})
+
+  comment.is_deleted = 1
 
   res.json({
       msg:"comment delete",
-      numberOfDeletedRows,
+      deleted,
+      comment,
       code:0,
   })
 

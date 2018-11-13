@@ -34,6 +34,7 @@ class Comment extends mixin(Model, [timestamp,uid()]) {
       required: ['content'],
       properties: {
         id: { type: 'string' },
+        is_deleted: { type: 'boolean'},
         title: { type: 'string'},
         content: { type: 'string'},
         total_likes: { type: 'integer'},
