@@ -6,6 +6,7 @@
   "scripts": {
     "start": "nodemon bin/www",
     "debug": "DEBUG=route:* nodemon",
+    "migrate": "NODE_ENV=staging knex migrate:latest",
     "test": "jest --runInBand --watch",
     "cover": "jest --coverage",
     "dev": "nodemon bin/www"
