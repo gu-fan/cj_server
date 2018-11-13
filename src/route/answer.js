@@ -28,7 +28,7 @@ router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 
 router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
-  if (req.body.id == null )  throw ERR.NEED_ARGUMENT
+  if (req.body.qid == null )  throw ERR.NEED_ARGUMENT
   if (req.body.content == '')  throw ERR.NEED_CONTENT
 
   var question = await Question.query().findById(req.body.qid)
