@@ -13,6 +13,7 @@ const {TrackQ, Question, User, Answer}  = require('../models')
 const {normalizeUser} =require('../services/user')
 
 const {getUser} = require('../services/user')
+const {normAnswers} = require('../services/answer')
 const {getQuestion} = require('../services/question')
 
 router.get('/', jwt.auth(), wrap(async function(req, res, next) {
@@ -98,12 +99,12 @@ router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
                           .eager('[question, author]')
                           .orderBy('total_zhichi', 'desc')
                           .orderBy('created_at', 'desc')
-                          .select('*')
-                          .select(knex.raw('substring(content,1, 500) as content'))
                           .where('is_deleted', false)
                           .where('censor_status', 'pass')
                           .page(req.query.page||0,5)
     
+    answers = normAnswers(answers)
+
     res.json({
         msg:"question got",
         question,

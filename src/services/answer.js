@@ -4,8 +4,16 @@ const {ERR, MSG} = require('../code')
 const knex = require('knex')
 const moment = require('moment')
 
+function normAnswers(answers){
+  answers.results = answers.results.map((ans)=>{
+    ans.content = ans.content.substring(0, 500)
+    return ans
+  })
+  return answers
+}
 
 module.exports = {
+  normAnswers,
   getAnswer(id){
     return new Promise((resolve, reject)=>{
       Answer.query()
@@ -28,14 +36,12 @@ module.exports = {
           .eager('[author, question]')
           .where('censor_status', 'pass')
           .where('is_deleted', false)
-          .select('*')
-          .select(knex.raw('substr(content,1, 500) as content'))
           .orderBy('total_zhichi', 'desc')
           .orderBy('created_at', 'desc')
           .where('created_at', '>', day_before)
           .page(page, 10)
       .then((answers)=>{
-          resolve(answers)
+          resolve(normAnswers(answers))
       })
       .catch((e)=>{
         reject(e)
@@ -48,13 +54,11 @@ module.exports = {
           .eager('[author, question]')
           .where('censor_status', 'pass')
           .where('is_deleted', false)
-          .select('*')
-          .select(knex.raw('substring(content,1, 500) as content'))
 
           .orderBy('created_at', 'desc')
           .page(page, 10)
       .then((answers)=>{
-          resolve(answers)
+          resolve(normAnswers(answers))
       })
       .catch((e)=>{
         reject(e)
@@ -68,13 +72,13 @@ module.exports = {
           .where('censor_status', 'pass')
           .where('is_deleted', false)
           .where('is_selected', true)
-          .select('*')
-          .select(knex.raw('substring(content,1, 500) as content'))
+          // .select('*')
+          // .select(knex.raw('substring(content,1, 500) as content'))
 
           .orderBy('created_at', 'desc')
           .page(page, 5)
       .then((answers)=>{
-          resolve(answers)
+          resolve(normAnswers(answers))
       })
       .catch((e)=>{
         reject(e)
