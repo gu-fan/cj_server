@@ -27,7 +27,7 @@ exports.up = function(knex, Promise) {
       table.string('id').primary()
 
       table.string('title')
-      table.string('content')
+      table.text('content')
 
       table.integer('total_likes').unsigned().defaultTo(0)
 
@@ -44,7 +44,7 @@ exports.up = function(knex, Promise) {
     .createTable('answer', table=>{
       table.string('id').primary()
 
-      table.string('content')
+      table.text('content')
 
       table.integer('total_thanks').unsigned().defaultTo(0)
       table.integer('total_zhichi').unsigned().defaultTo(0)
@@ -85,7 +85,7 @@ exports.up = function(knex, Promise) {
     .createTable('comment', table=>{
       table.string('id').primary()
 
-      table.string('content')
+      table.string('content', 1024)
 
       table.integer('total_likes').unsigned().defaultTo(0)
 
