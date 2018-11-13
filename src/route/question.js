@@ -1,5 +1,7 @@
 const express = require('express')
 const router = express.Router()
+const knex = require('knex')
+
 const {promisify, wrap, delay} = require('../common/promise')
 const jwt = require('../common/jwt-auth')
 const {ERR, MSG} = require('../code')
@@ -96,6 +98,8 @@ router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
                           .eager('[question, author]')
                           .orderBy('total_zhichi', 'desc')
                           .orderBy('created_at', 'desc')
+                          .select('*')
+                          .select(knex.raw('substr(content,1, 500) as content'))
                           .where('is_deleted', false)
                           .where('censor_status', 'pass')
                           .page(req.query.page||0,5)

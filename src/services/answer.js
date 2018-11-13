@@ -24,11 +24,12 @@ module.exports = {
   getHotAnswers(page){
     return new Promise((resolve, reject)=>{
       var day_before = moment().subtract(7, 'day').format()
-      console.log(day_before)
       Answer.query()
           .eager('[author, question]')
           .where('censor_status', 'pass')
           .where('is_deleted', false)
+          .select('*')
+          .select(knex.raw('substr(content,1, 500) as content'))
           .orderBy('total_zhichi', 'desc')
           .orderBy('created_at', 'desc')
           .where('created_at', '>', day_before)
@@ -47,6 +48,9 @@ module.exports = {
           .eager('[author, question]')
           .where('censor_status', 'pass')
           .where('is_deleted', false)
+          .select('*')
+          .select(knex.raw('substr(content,1, 500) as content'))
+
           .orderBy('created_at', 'desc')
           .page(page, 10)
       .then((answers)=>{
@@ -64,6 +68,9 @@ module.exports = {
           .where('censor_status', 'pass')
           .where('is_deleted', false)
           .where('is_selected', true)
+          .select('*')
+          .select(knex.raw('substr(content,1, 500) as content'))
+
           .orderBy('created_at', 'desc')
           .page(page, 5)
       .then((answers)=>{
