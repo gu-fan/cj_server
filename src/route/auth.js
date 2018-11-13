@@ -11,7 +11,7 @@ const {ERR, MSG} = require('../code')
 // help functions
 const {wrap, delay} = require('../common/promise')
 const isEmpty = require('lodash').isEmpty
-const {normalizeUser} =require('../common')
+const {normalizeUser} =require('../services/user')
 
 /** Signup
  * @post /auth/signup

@@ -9,27 +9,33 @@ const {uid, slug}= require('../models/mixin/_uid')
 
 const {Question, User, Answer}  = require('../models')
 
+const {getHotAnswers, getNewAnswers, getGoldAnswers} = require('../services/answer')
+
 router.get('/answers', wrap(async function(req, res, next) {
   var page = req.query.page || 0
 
-  var new_answers = await Answer.query().limit(5)
-          .eager('[author, question]')
-          .where('censor_status', 'pass')
-          .orderBy('created_at', 'desc')
-          .page(page, 10);
-
-  var hot_answers = await Answer.query().limit(5)
-          .eager('[author, question]')
-          .where('censor_status', 'pass')
-          .orderBy('total_zhichi', 'desc')
-          .orderBy('created_at', 'desc')
-          .page(page, 10);
+  var new_answers = await getNewAnswers(page)
+  var hot_answers = await getHotAnswers(page)
+  var gold_answers = await getGoldAnswers(page)
   
   res.json({
       msg:"answerlist",
       code:0,
       new_answers,
       hot_answers,
+      gold_answers,
+      page,
+  })
+
+}))
+
+router.get('/gold_answers', wrap(async function(req, res, next) {
+  var page = req.query.page || 0
+  var gold_answers = await getGoldAnswers(page);
+  res.json({
+      msg:"answerlist gold",
+      code:0,
+      gold_answers,
       page,
   })
 
@@ -37,14 +43,10 @@ router.get('/answers', wrap(async function(req, res, next) {
 router.get('/new_answers', wrap(async function(req, res, next) {
   var page = req.query.page || 0
 
-  var new_answers = await Answer.query().limit(5)
-          .eager('[author, question]')
-          .where('censor_status', 'pass')
-          .orderBy('created_at', 'desc')
-          .page(page, 10);
+  var new_answers = await getNewAnswers(page);
   
   res.json({
-      msg:"answerlist",
+      msg:"answerlist new",
       code:0,
       new_answers,
       page,
@@ -55,21 +57,17 @@ router.get('/new_answers', wrap(async function(req, res, next) {
 router.get('/hot_answers', wrap(async function(req, res, next) {
   var page = req.query.page || 0
 
-  var hot_answers = await Answer.query().limit(5)
-          .eager('[author, question]')
-          .where('censor_status', 'pass')
-          .orderBy('created_at', 'desc')
-          .orderBy('total_zhichi', 'desc')
-          .page(page, 10);
+  var hot_answers = await getHotAnswers(page);
   
   res.json({
-      msg:"answerlist",
+      msg:"answerlist hot",
       code:0,
       hot_answers,
       page,
   })
 
 }))
+
 router.get('/grant', wrap(async function(req, res, next) {
 
   if (req.query.uid == undefined) throw ERR.NEED_ARGUMENT
@@ -93,17 +91,17 @@ router.get('/grant', wrap(async function(req, res, next) {
 
 router.get('/questions', wrap(async function(req, res, next) {
 
-  var all = await Question.query().count()
+  var page = req.query.page || 0
   var questions = await Question.query()
-          .limit(10)
           .where('censor_status', 'pass')
+          .where('is_deleted', false)
           .eager('[author]')
+          .page(page, 5)
 
   res.json({
       msg:"question list",
       code:0,
       questions,
-      total:all[0]['count(*)'],
   })
 
 }))

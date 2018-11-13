@@ -139,18 +139,19 @@ router.post('/q/:qid', jwt.auth(), wrap(async function(req, res, next) {
 }))
 
 router.post('/a/:aid', jwt.auth(), wrap(async function(req, res, next) {
-
     
+  if (req.body.action == undefined) throw ERR.NEED_ARGUMENT
+
   var user = await User.query()
                     .findById(req.user.sub)
 
   if (user == undefined) throw ERR.NO_SUCH_TARGET
+
   var permission = user.permission || ''
   if (!/censor/.test(permission)) {
       throw ERR.NO_PERMISSION
   }
 
-  if (req.body.action == undefined ) throw ERR.NEED_ARGUMENT
 
   await TrackA.query()
      .insert({
@@ -160,10 +161,14 @@ router.post('/a/:aid', jwt.auth(), wrap(async function(req, res, next) {
            setter_id:req.user.sub
        })
 
-  var answer = await Answer.query()
-      .patchAndFetchById(req.params.aid, {
+  await Answer.query()
+      .findById(req.params.aid)
+      .patch({
         "censor_status": req.body.action
       })
+  var answer = await Answer
+      .query()
+      .findById(req.params.aid)
       .eager('[author,question, tracks(desc).setter]',{
         desc:(builder)=>{
           builder.orderBy('created_at', 'desc')
@@ -251,5 +256,6 @@ router.get('/answer_search', jwt.auth(), wrap(async function(req, res, next) {
   })
 
 }))
+
 module.exports = router
 

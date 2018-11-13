@@ -4,9 +4,9 @@ const {promisify, wrap, delay} = require('../common/promise')
 const jwt = require('../common/jwt-auth')
 const {ERR, MSG} = require('../code')
 
-const {uid, slug}= require('../models/mixin/_uid')
+const {uid, slug} = require('../models/mixin/_uid')
 
-const {Question, User, Answer, Comment}  = require('../models')
+const {Question, User, Answer, Comment} = require('../models')
 
 router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 

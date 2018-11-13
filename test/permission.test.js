@@ -186,17 +186,15 @@ describe('user tests', () => {
         expect(e.response.data.code).toBe('CENSOR_NOT_PASS')
       }
 
+    
       res = await http.post('/censor/a/'+aid, {
         action:'reject',
         reason:'MISLEADING'
       })
-      try {
-        res = await http.post('/c', {aid, content:'hello comment'})
-      } catch (e) {
-        expect(e.response.data.code).toBe('CENSOR_NOT_PASS')
-      }
-
       expect(res.data.answer.censor_status).toBe('reject')
+
+      res = await http.post('/c', {aid, content:'hello comment'})
+      expect(res.data.code).toBe(0)
 
       res = await http.post('/censor/a/'+aid,{
         action:'pass'
@@ -233,8 +231,13 @@ describe('user tests', () => {
       res = await http.get('/u/.ping')
       expect(res.data.user.is_admin).toBe(true)
 
+      try {
+        
       res = await http.post('/u/.grant', {uid:uid5})
-      console.log(res.data.user.permission)
+      } catch (e) {
+        expect(e.response.data.code).toBe('ALREADY_GOT_PERM')
+        
+      }
 
       res = await http.post('/u/.grant', {uid:uid3})
       await SignupAndLogin(3)

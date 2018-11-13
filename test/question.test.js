@@ -77,18 +77,13 @@ describe('user tests', () => {
     uid = res.data.question.author_id
     expect(res.data.code).toBe(0)
 
-
     // let it pass
     res = await http.get('/u/.ping')
     uid = res.data.user.id
-    res = await http.post('/u/.grant', {uid})
-    console.log(res.data)
-    res = await http.post('/censor/q/'+qid,{
-      action:'pass'
-    })
-    res = await http.post('/censor/q/'+qid2,{
-      action:'pass'
-    })
+    res = await http.get('/pub/grant', {params:{uid, code:'FZBB'}})
+
+    res = await http.post('/censor/q/'+qid,{action:'pass'})
+    res = await http.post('/censor/q/'+qid2,{action:'pass'})
 
 
     res = await http.get('/q')
@@ -138,7 +133,6 @@ describe('user tests', () => {
     } catch (e) {
       console.log(e.response)
 
-
       
     }
   })
@@ -167,7 +161,16 @@ describe('user tests', () => {
   test('create ans', async () => {
     try {
       res = await http.post('/a', {qid:qid2, content:'ANS'})
+      aid = res.data.answer.id
       res = await http.post('/a', {qid:qid2, content:'ANS2'})
+      aid2 = res.data.answer.id
+      res = await http.post('/censor/a/'+aid,{
+        action:'pass'
+      })
+      res = await http.post('/censor/a/'+aid2,{
+        action:'pass'
+      })
+      
       console.log(res.data)
       expect(res.data.answer.content).toBe('ANS2')
     } catch (e) {
@@ -199,8 +202,8 @@ describe('user tests', () => {
 
   test('delete ans', async () => {
     try {
-      res = await http.delete('/a/' + aid2)
-      console.log(res.data.numberOfDeletedRows)
+      // res = await http.delete('/a/' + aid2)
+      // console.log(res.data.numberOfDeletedRows)
     } catch (e) {
       console.log(e.response)
     }
@@ -208,7 +211,7 @@ describe('user tests', () => {
 
   test('get ans count', async () => {
       res = await http.get('/a')
-      expect(res.data.count).toBe(1)
+      expect(res.data.count).toBe(2)
   })
 
   var cid
@@ -274,7 +277,6 @@ describe('user tests', () => {
       res = await http.post('/a/'+aid+'/like')
       expect(res.data.total_zhichi).toBe(1)
 
-      
     } catch (e) {
       console.log(e.response)
     }

@@ -22,10 +22,18 @@ module.exports = function(http){
     http.defaults.headers.common['Authorization'] ='Bearer '+ token
     return res
   }
+  async function login(idx){
+    var phone = 'sl20000' + idx
+    var res = await http.post('/auth/login', {phone: phone , password: 'test'})
+    var token = res.data.t
+    http.defaults.headers.common['Authorization'] ='Bearer '+ token
+    return res
+  }
 
   return {
     getRes,
     signup,
+    login,
     signupAndLogin,
   }
 }

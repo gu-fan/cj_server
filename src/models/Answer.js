@@ -38,6 +38,8 @@ class Answer extends mixin(Model, [timestamp,uid()]) {
       properties: {
         id: { type: 'string' },
         title: { type: 'string'},
+        is_deleted: { type: 'boolean'},
+        is_selected: { type: 'boolean'},
         content: { type: 'string'},
         total_zhichi: { type: 'integer'},
         total_thanks: { type: 'integer'},

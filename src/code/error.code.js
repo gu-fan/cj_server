@@ -2,6 +2,7 @@ const APIError = require('./api.error')
 const RAW_CODE = {
   NOT_FOUND: {text:"没有找到页面", http: 404},
   ALREADY_GOT_PERM: {text:"已拥有权限", http: 403},
+  ALREADY_DELETED: {text:"已被删除", http: 400},
   CENSOR_NOT_PASS: {text:"目标未审核", http: 403},
   TARGET_LOCKED: {text:"目标已锁定", http: 400},
   NEED_ARGUMENT: {text:"需要参数", http: 400},

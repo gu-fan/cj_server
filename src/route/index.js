@@ -2,14 +2,14 @@ const router = require('express').Router()
 var jwt = require('express-jwt');
 const config = require('config')
 
-const wx_sign = require('../services/wx_sign')
-const auth = require('../services/auth')
-const pub  = require('../services/public')
-const user  = require('../services/user')
-const question  = require('../services/question')
-const answer  = require('../services/answer')
-const comment  = require('../services/comment')
-const censor  = require('../services/censor')
+const wx_sign = require('./wx_sign')
+const auth = require('./auth')
+const pub  = require('./public')
+const user  = require('./user')
+const question  = require('./question')
+const answer  = require('./answer')
+const comment  = require('./comment')
+const censor  = require('./censor')
 
 module.exports = app => {
 
