@@ -85,7 +85,7 @@ router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
   } else {
     var question = await Question.query()
                           .findById(req.params.qid)
-                          .eager('[author, tracks(desc).setter]',{
+                          .eager('[author, tracks(desc).setter]', {
                             desc:(builder)=>{
                               builder.orderBy('created_at', 'desc')
                             }
