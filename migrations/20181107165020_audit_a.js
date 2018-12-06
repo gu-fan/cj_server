@@ -4,18 +4,18 @@ exports.up = function(knex, Promise) {
     knex.schema
     .createTable('track_a', table=>{
 
-      table.string('id').primary()
+      table.string('id', 50).primary()
 
       table.string('content')    // pass, check, tag, lock
       table.string('reason')     // not enough words
 
       table
-        .string('answer_id')
+        .string('answer_id', 50)
         .references('id')
         .inTable('answer');
 
       table
-        .string('setter_id')
+        .string('setter_id', 50)
         .references('id')
         .inTable('user');
 
