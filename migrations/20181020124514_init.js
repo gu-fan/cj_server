@@ -34,7 +34,7 @@ exports.up = function(knex, Promise) {
       table.integer('total_answers').unsigned().defaultTo(0)
 
       table
-        .string('author_id')
+        .string('author_id', 50)
         .references('id')
         .inTable('user');
 
@@ -53,12 +53,12 @@ exports.up = function(knex, Promise) {
       table.integer('total_comments').unsigned().defaultTo(0)
 
       table
-        .string('question_id')
+        .string('question_id', 50)
         .references('id')
         .inTable('question');
 
       table
-        .string('author_id')
+        .string('author_id', 50)
         .references('id')
         .inTable('user');
 
@@ -71,12 +71,12 @@ exports.up = function(knex, Promise) {
       
       table.integer('num').defaultTo(0)
       table
-        .string('uid')
+        .string('uid', 50)
         .references('id')
         .inTable('user')
         .onDelete('CASCADE');
       table
-        .string('aid')
+        .string('aid', 50)
         .references('id')
         .inTable('answer')
         .onDelete('CASCADE');
@@ -90,17 +90,17 @@ exports.up = function(knex, Promise) {
       table.integer('total_likes').unsigned().defaultTo(0)
 
       table
-        .string('answer_id')
+        .string('answer_id', 50)
         .references('id')
         .inTable('answer');
 
       table
-        .string('reply_id')
+        .string('reply_id', 50)
         .references('id')
         .inTable('comment');
 
       table
-        .string('author_id')
+        .string('author_id', 50)
         .references('id')
         .inTable('user');
 
@@ -113,13 +113,13 @@ exports.up = function(knex, Promise) {
       table.integer('num').defaultTo(0)
 
       table
-        .string('uid')
+        .string('uid', 50)
         .references('id')
         .inTable('user')
         .onDelete('CASCADE');
 
       table
-        .string('cid')
+        .string('cid', 50)
         .references('id')
         .inTable('comment')
         .onDelete('CASCADE');
