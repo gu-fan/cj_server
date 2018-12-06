@@ -4,7 +4,7 @@ exports.up = function(knex, Promise) {
 
     // USER
     .createTable('user', table=>{
-      table.string('id').primary()
+      table.string('id', 40).primary()
       table.string('name', 30)
       table.string('avatar')
       table.string('phone', 30)
