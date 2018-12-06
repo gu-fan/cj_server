@@ -7,6 +7,7 @@
     "start": "nodemon bin/www",
     "debug": "DEBUG=route:* nodemon",
     "migrate": "NODE_ENV=staging knex migrate:latest",
+    "seed": "NODE_ENV=staging ./node_modules/knex/bin/cli.js migrate:latest",
     "test": "jest --runInBand --watch",
     "cover": "jest --coverage",
     "dev": "nodemon bin/www"
