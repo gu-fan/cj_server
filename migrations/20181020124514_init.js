@@ -7,9 +7,9 @@ exports.up = function(knex, Promise) {
       table.string('id', 50).primary()
       table.string('name')
       table.string('avatar')
-      table.string('phone')
+      table.string('phone', 50)
       table.string('password')
-      table.string('wx_id')
+      table.string('wx_id', 50)
 
       table.integer('total_answer_fandui').unsigned().defaultTo(0)
       table.integer('total_answer_zhichi').unsigned().defaultTo(0)
