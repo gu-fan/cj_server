@@ -31,7 +31,7 @@ module.exports = {
   },
   getHotAnswers(page){
     return new Promise((resolve, reject)=>{
-      var day_before = moment().subtract(14, 'day').format()
+      var day_before = moment().subtract(30, 'day').format()
       Answer.query()
           .eager('[author, question]')
           .where('censor_status', 'pass')
