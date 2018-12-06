@@ -5,11 +5,11 @@ exports.up = function(knex, Promise) {
     // USER
     .createTable('user', table=>{
       table.string('id', 50).primary()
-      table.string('name', 30)
+      table.string('name')
       table.string('avatar')
-      table.string('phone', 30)
+      table.string('phone')
       table.string('password')
-      table.string('wx_id', 50)
+      table.string('wx_id')
 
       table.integer('total_answer_fandui').unsigned().defaultTo(0)
       table.integer('total_answer_zhichi').unsigned().defaultTo(0)
