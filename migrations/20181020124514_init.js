@@ -4,12 +4,12 @@ exports.up = function(knex, Promise) {
 
     // USER
     .createTable('user', table=>{
-      table.string('id', 40).primary()
+      table.string('id', 50).primary()
       table.string('name', 30)
       table.string('avatar')
       table.string('phone', 30)
       table.string('password')
-      table.string('wx_id', 40)
+      table.string('wx_id', 50)
 
       table.integer('total_answer_fandui').unsigned().defaultTo(0)
       table.integer('total_answer_zhichi').unsigned().defaultTo(0)
@@ -24,7 +24,7 @@ exports.up = function(knex, Promise) {
     })
     // POST
     .createTable('question', table=>{
-      table.string('id').primary()
+      table.string('id', 50).primary()
 
       table.string('title')
       table.text('content')
@@ -42,7 +42,7 @@ exports.up = function(knex, Promise) {
     })
 
     .createTable('answer', table=>{
-      table.string('id').primary()
+      table.string('id', 50).primary()
 
       table.text('content')
 
@@ -83,7 +83,7 @@ exports.up = function(knex, Promise) {
     })
 
     .createTable('comment', table=>{
-      table.string('id').primary()
+      table.string('id', 50).primary()
 
       table.string('content', 1024)
 
