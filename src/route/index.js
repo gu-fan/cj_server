@@ -6,10 +6,13 @@ const wx_sign = require('./wx_sign')
 const auth = require('./auth')
 const pub  = require('./public')
 const user  = require('./user')
+const staff_auth  = require('./staff_auth')
+const staff_stat  = require('./staff_stat')
 const question  = require('./question')
 const answer  = require('./answer')
 const comment  = require('./comment')
 const censor  = require('./censor')
+const kpass  = require('./kpass')
 
 module.exports = app => {
 
@@ -20,11 +23,15 @@ module.exports = app => {
   app.use(router)
 
   app.use('/auth', auth)
+  app.use('/sa', staff_auth)
   app.use('/pub', pub)
 
   app.use(jwt({secret: config.key}))
 
+  app.use('/sas', staff_stat)
   app.use('/wx', wx_sign)
+
+  app.use('/kpass', kpass)
 
 
   app.use('/u', user)

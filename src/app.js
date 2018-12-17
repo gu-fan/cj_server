@@ -15,6 +15,7 @@ const route = require('./route')
 const code = require('./code')
 
 const app = express()
+const restc = require('restc');
 
 app.use(logger('dev'))
 app.use(helmet());
@@ -23,6 +24,7 @@ app.options('*', cors())
 app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(restc.express());
 
 route(app)
 

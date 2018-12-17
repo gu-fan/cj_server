@@ -2,6 +2,7 @@ const Knex = require('knex')
 const { Model } = require('objection')
 
 const User = require('./User')
+const Staff = require('./Staff')
 const Question = require('./Question')
 const Answer = require('./Answer')
 const Comment = require('./Comment')
@@ -10,6 +11,7 @@ const TrackA = require('./TrackA')
 
 module.exports = {
   User,
+  Staff,
   Question,
   Answer,
   TrackQ,

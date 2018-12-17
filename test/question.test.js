@@ -247,7 +247,7 @@ describe('user tests', () => {
   test('delete cmt', async () => {
     try {
       res = await http.delete('/c/'+cid)
-      console.log(res.data.numberOfDeletedRows)
+      console.log(res.data)
     } catch (e) {
       console.log(e.response)
     }
@@ -255,9 +255,10 @@ describe('user tests', () => {
   test('get cmt', async () => {
     try {
       res = await http.get('/c')
-      expect(res.data.count).toBe(0)
+      console.log(res.data)
+      expect(res.data.count).toBe(1)
     } catch (e) {
-      console.log(e.response)
+      console.log(e)
     }
       
   })

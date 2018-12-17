@@ -15,7 +15,9 @@ module.exports = options => {
 
       async $beforeInsert(...args) {
         await super.$beforeInsert(...args);
-        this[options.field] = options.generateuid(options.type)
+        if (this[options.field] == null ) {
+          this[options.field] = options.generateuid(options.type)
+        }
 
       }
     };

@@ -8,7 +8,8 @@ const config = require('config')
 const key = config.key
 
 module.exports = {
-  auth: ()=>auth({secret:key,
+  auth: ()=>auth({
+          secret:key,
           credentialsRequired: false
         }),     // sync middleware
   sign: (pay,opt)=>sign(pay, key, opt),  // async 

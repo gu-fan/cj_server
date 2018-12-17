@@ -37,6 +37,8 @@ class User extends mixin(Model, [
 
         permission: { type:[ 'string', 'null']},
 
+        r_type: {type:'integer'}, 
+
       },
     };
   }

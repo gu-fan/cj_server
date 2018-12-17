@@ -1764,6 +1764,12 @@ punycode@^2.1.0:
   version "2.1.1"
   resolved "http://registry.npm.taobao.org/punycode/download/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
 
+qcloud-cos-sts@^2.0.5:
+  version "2.0.5"
+  resolved "http://registry.npm.taobao.org/qcloud-cos-sts/download/qcloud-cos-sts-2.0.5.tgz#5462f98d8698dd809bf7f7a5b7a1772e27d84e3d"
+  dependencies:
+    request "^2.88.0"
+
 qs@6.5.2, qs@~6.5.2:
   version "6.5.2"
   resolved "http://registry.npm.taobao.org/qs/download/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
@@ -1847,7 +1853,7 @@ repeat-string@^1.6.1:
   version "1.6.1"
   resolved "http://registry.npm.taobao.org/repeat-string/download/repeat-string-1.6.1.tgz#8dcae470e1c88abc2d600fff4a776286da75e637"
 
-request@^2.85.0, request@^2.87.0:
+request@^2.85.0, request@^2.87.0, request@^2.88.0:
   version "2.88.0"
   resolved "http://registry.npm.taobao.org/request/download/request-2.88.0.tgz#9c2fca4f7d35b592efe57c7f0a55e81052124fef"
   dependencies:
@@ -1888,6 +1894,10 @@ resolve@^1.1.6, resolve@^1.1.7:
   resolved "http://registry.npm.taobao.org/resolve/download/resolve-1.8.1.tgz#82f1ec19a423ac1fbd080b0bab06ba36e84a7a26"
   dependencies:
     path-parse "^1.0.5"
+
+restc@^0.3.2:
+  version "0.3.2"
+  resolved "http://registry.npm.taobao.org/restc/download/restc-0.3.2.tgz#d09d857b6c98904846d8eef2dc04d17219574723"
 
 ret@~0.1.10:
   version "0.1.15"

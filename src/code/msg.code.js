@@ -2,6 +2,7 @@ const MSG_CODE = {
   REGISTER_SUCCESS: {text:"注册成功"},
   LOGIN_SUCCESS: {text:"登录成功"},
   USER_VALID: {text:"用户正常"},
+  STAFF_VALID: {text:"账号正常"},
 
 
   // USER_DISABLED_7: {text:"用户被封禁7天"},

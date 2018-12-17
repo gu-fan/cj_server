@@ -26,6 +26,7 @@ router.use('/.ping', jwt.auth(), wrap(async function(req, res, next) {
     code:0
   })
 }))
+
 router.post('/.grant', jwt.auth(), wrap(async function(req, res, next) {
 
   if (req.body.uid == undefined ) throw ERR.NEED_ARGUMENT
