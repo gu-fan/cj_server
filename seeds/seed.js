@@ -48,7 +48,7 @@ exports.seed = function(knex, Promise) {
     .then(function () {
       var time = mmt("2018-11-28T23:10:10+08:00")
       var questions = _.range(TOTAL_COUNT).map(function(idx){
-        var c_at  = times[idx].add(_.random(2,1500),'m')
+        var c_at  = times[idx].add(_.random(100,2500),'m')
         times2.push(c_at)
         var content = doc[idx].content||doc[idx].title
         return {
@@ -68,7 +68,7 @@ exports.seed = function(knex, Promise) {
     .then(function () {
       var time = mmt("2018-11-29T10:10:10+08:00")
       var answers = _.range(TOTAL_COUNT).map(function(idx){
-        var c_at  = times2[idx].add(_.random(2,1500),'m')
+        var c_at  = times2[idx].add(_.random(100,2500),'m')
         var content = doc[idx].answer
         times3.push(c_at)
         return {

@@ -33,13 +33,11 @@ module.exports = app => {
 
   app.use('/kpass', kpass)
 
-
   app.use('/u', user)
   app.use('/q', question)
   app.use('/a', answer)
   app.use('/c', comment)
   app.use('/censor', censor)
-
 
 }
 
