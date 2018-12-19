@@ -287,11 +287,34 @@ router.get('/answer_search', jwt.auth(), wrap(async function(req, res, next) {
 
 }))
 
+const withQueryName = function(queryBuilder, name) {
+  if (name) {
+    queryBuilder
+      .where('name','like', '%'+name+'%')
+  }
+}
+
+const withQueryType = function(queryBuilder, type) {
+  if (type) {
+    queryBuilder
+      .where('r_type',type)
+  }
+}
+
+const withQueryID = function(queryBuilder, id) {
+  if (id) {
+    queryBuilder
+      .where('id',id)
+  }
+}
 router.get('/users', jwt.auth(),
   hasPermission('censor'),
   wrap(async function(req, res, next) {
 
   var users = await User.query()
+          .modify(withQueryName, req.query.name)
+          .modify(withQueryType, req.query.r_type)
+          .modify(withQueryID, req.query.id)
           .orderBy("created_at", "DESC")
           .page(req.query.page || 0, 10)
 
@@ -327,6 +350,7 @@ router.post('/user', jwt.auth(),
 router.patch('/user/:uid', jwt.auth(),
   hasPermission('censor'),
   wrap(async function(req, res, next) {
+  console.log(req.body)
 
   var user = await User.query()
           .patchAndFetchById(req.params.uid, {

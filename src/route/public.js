@@ -96,6 +96,7 @@ router.get('/questions', wrap(async function(req, res, next) {
           .where('censor_status', 'pass')
           .where('is_deleted', false)
           .eager('[author]')
+          .orderBy('created_at', 'desc')
           .page(page, 5)
 
   res.json({
