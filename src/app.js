@@ -20,7 +20,10 @@ const restc = require('restc');
 app.use(logger('dev'))
 app.use(helmet());
 app.use(cors());
-app.options('*', cors()) 
+
+app.options('*', cors({
+  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+})) 
 app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
