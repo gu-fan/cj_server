@@ -48,6 +48,7 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
     author: {
       id: req.user.sub,
     },
+    censor_status: 'pass',
   }], {
     relate: true
   })
