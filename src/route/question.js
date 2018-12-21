@@ -32,7 +32,7 @@ router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 
 router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
-  if (req.body.title == '' || req.body.content == '')  throw ERR.NEED_CONTENT
+  if (req.body.title == '' || req.body.content == '') throw ERR.NEED_CONTENT
   var question = await Question.query().insertGraph([{
     title: req.body.title,
     content: req.body.content, 
@@ -56,8 +56,8 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 }))
 
 
-
-router.get('/:qid/tracks', jwt.auth(), wrap(async function(req, res, next) {
+router.get('/:qid/tracks', jwt.auth(),
+  wrap(async function(req, res, next) {
 
   var tracks = await TrackQ.query()
                         .where('question_id', req.params.qid)
@@ -70,7 +70,8 @@ router.get('/:qid/tracks', jwt.auth(), wrap(async function(req, res, next) {
 
 }))
 
-router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
+router.get('/:qid', jwt.auth(),
+  wrap(async function(req, res, next) {
 
   if (req.query.t == 'edit') {
     var question = await Question.query()
@@ -83,6 +84,7 @@ router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
         code:0,
     })
   } else {
+
     var question = await Question.query()
                           .findById(req.params.qid)
                           .eager('[author, tracks(desc).setter]', {
@@ -90,6 +92,7 @@ router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
                               builder.orderBy('created_at', 'desc')
                             }
                           })
+
     if (question == undefined) throw ERR.NO_SUCH_TARGET
     var user = await User.query()
                           .findById(req.user.sub)
@@ -119,7 +122,8 @@ router.get('/:qid', jwt.auth(), wrap(async function(req, res, next) {
 
 }))
 
-router.put('/:qid', jwt.auth(), wrap(async function(req, res, next) {
+router.put('/:qid', jwt.auth(),
+  wrap(async function(req, res, next) {
 
   var question = await Question.query()
                         .findById(req.params.qid)
@@ -150,7 +154,8 @@ router.put('/:qid', jwt.auth(), wrap(async function(req, res, next) {
 
 }))
 
-router.delete('/:qid', jwt.auth(), wrap(async function(req, res, next) {
+router.delete('/:qid', jwt.auth(),
+  wrap(async function(req, res, next) {
 
   var question = await getQuestion(req.params.qid)
   var user = await getUser(req.user.sub)

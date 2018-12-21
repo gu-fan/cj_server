@@ -98,18 +98,16 @@ router.get('/q/:qid/answers', jwt.auth(),
 
   var question = await Question.query()
                         .findById(req.params.qid)
-  // var question = await Question.query()
-  //                       .findById(req.params.qid)
-  //                       .eagerAlgorithm(Question.NaiveEagerAlgorithm)
-  //                       .eager('[author, answers(page).author]',{
-  //                         page:builder => builder.page(0, 5) 
-  //                       })
   
+  console.log(req.params.qid)
+
   if (question == undefined) throw ERR.NO_SUCH_TARGET
   var answers = await question.$relatedQuery('answers')
                         .eager('[author, question]')
                         .page(0, 5)
                         .orderBy('created_at', 'desc')
+    console.log(question)
+    console.log(answers)
 
   res.json({
       msg:"got question with answers",
@@ -118,6 +116,97 @@ router.get('/q/:qid/answers', jwt.auth(),
   })
 
 }))
+
+router.post('/q', jwt.auth(), hasPermission('censor'),
+  wrap(async function(req, res, next) {
+
+  var question = await Question.query().insertGraph([{
+    title: req.body.title,
+    content: req.body.content, 
+    censor_status: 'pass',
+    author: {
+      id: req.body.author_id,
+    },
+    // author_id: req.user.sub,
+  }], {
+    relate: true
+  })
+  .eager('author');
+
+  question = question[0]
+
+  res.json({
+      msg:"question created",
+      question,
+      code:0,
+  })
+
+
+
+}))
+
+router.post('/a', jwt.auth(), hasPermission('censor'),
+  wrap(async function(req, res, next) {
+
+  console.log(req.body)
+
+  var answer = await Answer.query().insertAndFetch({
+    content: req.body.content, 
+    censor_status: 'pass',
+    author_id: req.body.author_id,
+    question_id: req.body.question_id
+  })
+  .eager('author');
+
+
+  res.json({
+      msg:"answer created",
+      answer,
+      code:0,
+  })
+
+
+
+}))
+
+
+router.patch('/q', jwt.auth(), hasPermission('censor'),
+  wrap(async function(req, res, next) {
+
+  var question = await Question.query().patchAndFetchById(req.body.id,  {
+    title: req.body.title,
+    content: req.body.content, 
+  })
+  .eager('author');
+
+  res.json({
+      msg:"question patched",
+      question,
+      code:0,
+  })
+
+
+}))
+
+router.patch('/a', jwt.auth(), hasPermission('censor'),
+  wrap(async function(req, res, next) {
+
+  var answer = await Answer.query().patchAndFetchById(req.body.id,  {
+    content: req.body.content, 
+  })
+  .eager('author');
+
+  res.json({
+      msg:"answer patched",
+      answer,
+      code:0,
+  })
+
+
+
+}))
+
+
 
 // XXX
 // this should put ahead /:qid
@@ -368,6 +457,8 @@ router.patch('/user/:uid', jwt.auth(),
   })
 
 }))
+
+
 
 module.exports = router
 
