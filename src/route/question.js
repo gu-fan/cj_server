@@ -13,7 +13,7 @@ const {TrackQ, Question, User, Answer}  = require('../models')
 const {normalizeUser} =require('../services/user')
 
 const {getUser} = require('../services/user')
-const {normAnswers} = require('../services/answer')
+const {normContent} = require('../services/answer')
 const {getQuestion} = require('../services/question')
 
 router.get('/', jwt.auth(), wrap(async function(req, res, next) {
@@ -32,10 +32,10 @@ router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 
 router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
-  if (req.body.title == '' || req.body.content == '') throw ERR.NEED_CONTENT
+  if (req.body.title == '' ) throw ERR.NEED_TITLE
   var question = await Question.query().insertGraph([{
     title: req.body.title,
-    content: req.body.content, 
+    content: req.body.content || '', 
     author: {
       id: req.user.sub,
     },
@@ -107,7 +107,7 @@ router.get('/:qid', jwt.auth(),
                           .where('censor_status', 'pass')
                           .page(req.query.page||0,5)
     
-    answers = normAnswers(answers)
+    answers = normContent(answers)
 
     res.json({
         msg:"question got",

@@ -15,7 +15,7 @@ exports.up = function(knex, Promise) {
       table.integer('total_answer_zhichi').unsigned().defaultTo(0)
       table.integer('total_answer_thanks').unsigned().defaultTo(0)
 
-      table.integer('total_points').unsigned().defaultTo(20)
+      table.integer('total_points').unsigned().defaultTo(100)
       table.timestamp('checkpoint_at')
 
       table.unique('wx_id')

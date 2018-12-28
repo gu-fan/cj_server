@@ -9,7 +9,8 @@ const {uid, slug}= require('../models/mixin/_uid')
 
 const {Question, User, Answer}  = require('../models')
 
-const {getHotAnswers, getNewAnswers, getGoldAnswers} = require('../services/answer')
+const {getHotAnswers, getNewAnswers, getGoldAnswers,
+       getMixedHot, getMixedNew} = require('../services/answer')
 
 router.get('/answers', wrap(async function(req, res, next) {
   var page = req.query.page || 0
@@ -17,6 +18,9 @@ router.get('/answers', wrap(async function(req, res, next) {
   var new_answers = await getNewAnswers(page)
   var hot_answers = await getHotAnswers(page)
   var gold_answers = await getGoldAnswers(page)
+
+  var newest = await getMixedNew(page)
+  var hottest = await getMixedHot(page)
   
   res.json({
       msg:"answerlist",
@@ -24,6 +28,8 @@ router.get('/answers', wrap(async function(req, res, next) {
       new_answers,
       hot_answers,
       gold_answers,
+      newest,
+      hottest,
       page,
   })
 
@@ -44,11 +50,13 @@ router.get('/new_answers', wrap(async function(req, res, next) {
   var page = req.query.page || 0
 
   var new_answers = await getNewAnswers(page);
+  var newest = await getMixedNew(page)
   
   res.json({
       msg:"answerlist new",
       code:0,
       new_answers,
+      newest,
       page,
   })
 
@@ -58,11 +66,13 @@ router.get('/hot_answers', wrap(async function(req, res, next) {
   var page = req.query.page || 0
 
   var hot_answers = await getHotAnswers(page);
+  var hottest = await getMixedHot(page)
   
   res.json({
       msg:"answerlist hot",
       code:0,
       hot_answers,
+      hottest,
       page,
   })
 

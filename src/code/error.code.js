@@ -25,7 +25,7 @@ const RAW_CODE = {
   NO_SUCH_GROUP: {text:"没有找到群组", http: 400},
   NO_GROUP_ID: {text:"没有群组ID", http:400},
   ALREADY_IN_GROUP: {text:"已经加入该群组", http: 400},
-  ALREADY_CHECKED: {text:"今天已经签过到了", http: 400},
+  ALREADY_CHECKED: {text:"今天已经完成签到了", http: 400},
 }
 
 const ERR = Object.keys(RAW_CODE).map((name)=>{
