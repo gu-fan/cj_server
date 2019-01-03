@@ -274,7 +274,7 @@ router.post('/q/:qid', jwt.auth(), hasPermission('censor'),
            question_id:req.params.qid,
            content: req.body.action,
            reason: req.body.reason, 
-           setter_id:req.user.sub
+           setter_id: null,
        })
 
   question = await Question.query()

@@ -10,6 +10,7 @@
     "seed": "NODE_ENV=staging ./node_modules/knex/bin/cli.js seed:run",
     "test": "jest --runInBand --watch",
     "cover": "jest --coverage",
+    "deploy": "sh ./deploy/dev.sh",
     "dev": "nodemon bin/www"
   },
   "dependencies": {
