@@ -3,8 +3,6 @@
 1. 小程序：主要目的是为了聚拢人气
    提供一个用户生产内容，消费内容的社区
 
-   初步10W左右数量
-
 2. 认证
 
    优质内容创造者
@@ -17,3 +15,42 @@
    赞赏(?)
 
 4. 审核
+
+RETHINK
+=======
+
+
+数据库问题
+
+
+1. user_detail ?
+2. user message box
+3. locked & jinhua
+4. content_json: {
+      content: [
+            {
+               type:'img',
+               url: 'xxxx',
+            },
+            {
+               type:'text',
+               text: 'xxxx',
+            },
+            {
+               type:'img',
+               url: 'xxxx',
+            },
+            {
+               type:'title',
+               text: 'xxxx',
+            },
+            {
+               type:'quote',
+               text: 'xxxx',
+            },
+            {
+               type:'img',
+               url: 'xxxx',
+            },
+         ]
+   }
