@@ -5,16 +5,19 @@ class Session {
   constructor(config) {
     const knex = Knex(config);
     this.knex = knex;
-
   }
 
   async createTables() {
     const { knex } = this;
 
+    await knex.migrate.latest()
+  }
+
+  async clearTables(){
+    const { knex } = this;
     await knex.schema
             .dropTableIfExists('knex_migrations')
             .dropTableIfExists('knex_migrations_lock')
-
             .dropTableIfExists('user')
             .dropTableIfExists('question')
             .dropTableIfExists('answer')
@@ -24,9 +27,6 @@ class Session {
             .dropTableIfExists('track_q')
             .dropTableIfExists('track_a')
             .dropTableIfExists('staff')
-
-    await knex.migrate.latest()
-
   }
 }
 

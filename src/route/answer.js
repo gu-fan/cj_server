@@ -4,14 +4,14 @@ const {promisify, wrap, delay} = require('../common/promise')
 const jwt = require('../common/jwt-auth')
 const {ERR, MSG} = require('../code')
 
-const {uid, slug}= require('../models/mixin/_uid')
-
 const {Question, User, Answer}  = require('../models')
 
-const commentRoute = require('./comment')
+// const commentRoute = require('./comment')
 
 const {getUser} = require('../services/user')
 const {getAnswer} = require('../services/answer')
+
+const { checkSpam } = require('../common/spam')
 
 router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 
@@ -30,7 +30,8 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
   if (req.body.qid == null )  throw ERR.NEED_ARGUMENT
   if (req.body.content == '')  throw ERR.NEED_CONTENT
-
+  if (checkSpam(req.body.content)) throw ERR.IS_SPAM
+  
   var question = await Question.query().findById(req.body.qid)
 
   if (question == undefined) throw ERR.NO_SUCH_TARGET
@@ -99,8 +100,8 @@ router.get('/:aid', jwt.auth(), wrap(async function(req, res, next) {
                         .eager('[author, question]')
 
 
-  if (answer == undefined) throw ERR.NO_SUCH_TARGET
-  var comments = await answer.$relatedQuery('comments')
+    if (answer == undefined) throw ERR.NO_SUCH_TARGET
+    var comments = await answer.$relatedQuery('comments')
                         .eager('[author, answer.question, reply_to.author, liked_users(byMe)]',         {
                           byMe: (builder)=>{
                               builder.where('uid', req.user.sub)
@@ -109,52 +110,50 @@ router.get('/:aid', jwt.auth(), wrap(async function(req, res, next) {
                         .orderBy('created_at', 'desc')
                         .page(req.query.page||0,5)
 
-  // remap is_like by me
-  comments.results.map((comment)=>{
-    if (comment.liked_users.length>0) {
-      comment.is_like = true
+    // remap is_like by me
+    comments.results.map((comment)=>{
+      if (comment.liked_users.length>0) {
+        comment.is_like = true
+      } else {
+        comment.is_like = false
+      }
+      delete comment.liked_users
+    })
+
+    // check zhichi and fandui by me
+    var u = await answer.$relatedQuery('liked_users')
+                    .findById(req.user.sub)
+
+    answer.is_zhichi=false
+    answer.is_fandui=false
+
+    if (u==null || u==undefined) {
     } else {
-      comment.is_like = false
+      if (u.num== 1){
+        answer.is_zhichi = true
+      } else if (u.num== -1) {
+        answer.is_fandui = true
+      }
     }
-    delete comment.liked_users
-  })
-
-  // check zhichi and fandui by me
-  var u = await answer.$relatedQuery('liked_users')
-                  .findById(req.user.sub)
-
-  answer.is_zhichi=false
-  answer.is_fandui=false
-
-  if (u==null || u==undefined) {
-  } else {
-    if (u.num== 1){
-      answer.is_zhichi = true
-    } else if (u.num== -1) {
-      answer.is_fandui = true
-    }
-  }
   
-  res.json({
-      msg:"answer got",
-      answer,
-      comments,
-      code:0,
-  })
+    res.json({
+        msg:"answer got",
+        answer,
+        comments,
+        code:0,
+    })
   }
 
 }))
 
 router.put('/:aid', jwt.auth(), wrap(async function(req, res, next) {
 
-  console.log(1)
   var answer = await Answer.query()
                         .findById(req.params.aid)
-  console.log(2)
   if (answer == undefined) throw ERR.NO_SUCH_TARGET
   if (req.user.sub != answer.author_id) throw ERR.NOT_AUTHOR
+  if (checkSpam(req.body.content)) throw ERR.IS_SPAM
   
-  console.log(3)
   var status 
   if (answer.censor_status == 'reject') {
       status = 'reject_review'
@@ -164,7 +163,6 @@ router.put('/:aid', jwt.auth(), wrap(async function(req, res, next) {
 
   await answer.$relatedQuery('tracks')
        .insertAndFetch({content:'edit', setter_id:req.user.sub})
-  console.log(4)
 
   answer = await Answer
     .query()

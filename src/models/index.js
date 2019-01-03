@@ -17,8 +17,10 @@ module.exports = {
   TrackQ,
   TrackA,
   Comment,
-  init: function(config){
-    const knex = Knex(config)
-    Model.knex(knex)
+  model :{
+    init: function(config){
+      const knex = Knex(config)
+      Model.knex(knex)
+    },
   }
 }

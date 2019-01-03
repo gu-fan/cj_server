@@ -2,7 +2,6 @@ const {ERR, ERR_CODE } = require('./error.code')
 const {MSG, MSG_CODE } = require('./msg.code')
 const APIError = require('./api.error')
 
-
 module.exports = {
   NotFound: function(req, res, next){
     next(ERR.NOT_FOUND);

@@ -1,75 +1,39 @@
 const assert = require('assert')
-const axios = require('axios')
-const app = require('../src/app')
-const {ERR_CODE}  = require('../src/code')
-
-const Session= require('./setup/session')
-const config = require('config')
-const Knex = require('knex')
-const {raw, Model } = require('objection')
-const {User} = require('../src/models')
-
-
-const jwt = require('../src/common/jwt-auth')
-const port = 3014
-const http = axios.create({
-  baseURL : 'http://localhost:'+port,
-})
-
-const { signup, signupAndLogin,  getRes } = require('./common')(http)
-
 const sinon = require('sinon')
 
-async function SignupAndLogin(idx){
-  var wx_id= 'wx_20000' + idx
-  var res = await http.post('/auth/wx_code_fake', {wx_id})
-  http.defaults.headers.common['Authorization'] ='Bearer '+ res.data.t
-}
+const ERR = require('../src/code').ERR_CODE
 
-async function BindUser(idx){
-  var nickName = 'wx' + idx
-  var res = await http.post('/wx/bind', {userInfo:{avatarUrl:'http://xxxxxx',nickName}})
-}
+const _TEST_ = require('path').basename(__filename);
+const { http, setupServer, closeServer } = require('./setup/server')(_TEST_)
 
-
+const { signupAndLoginWX, bindUserWX } = require('./common')(http)
 
 describe('user tests', () => {
-  let session
   let clock
+  let res
 
   beforeAll(async ()=>{
-    session = new Session(config.db)
-    Model.knex(session.knex)
-    await session.createTables()
-
-    this.server = app.listen(port)
-    await this.server.once('listening', () =>{} )
-
-    clock = sinon.useFakeTimers(new Date(2000,1,1,8));
-
+    await setupServer()
   })
 
-  afterAll(()=>{
-    this.server.close()
-    clock.restore()
-    http = null 
-    
+  afterAll(async ()=>{
+    await closeServer()
   })
+
   var qid, aid, cid, uid
   test('permission test all', async () => {
     try {
       
-      await SignupAndLogin(1)
-      await BindUser(1)
+      await signupAndLoginWX(1)
+      await bindUserWX(1)
 
       res = await http.get('/u/.ping')
-      console.log(res.data)
 
-      await SignupAndLogin(2)
-      await BindUser(2)
+      await signupAndLoginWX(2)
+      await bindUserWX(2)
 
       res = await http.get('/u/.ping')
-      console.log(res.data)
+      // console.log(res.data)
       uid = res.data.user.id
 
       var question = {
@@ -93,31 +57,30 @@ describe('user tests', () => {
       }
 
       res = await http.get('/pub/grant', {params:{uid, code:'FZBB'}})
-      console.log(res.data)
+      // console.log(res.data)
 
       res = await http.post('/censor/q/'+qid, {
         action:'reject',
         reason:'MISLEADING'
       })
-      console.log(res.data)
+      // console.log(res.data)
 
       res = await http.put('/q/'+qid, {title:'hello', content:'LLLLLOLLLL'})
-      console.log(res.data)
+      // console.log(res.data)
 
-      try {
+      // try {
       
         res = await http.post('/a', {qid, content:'ANS'})
-        console.log(res.data)
         // expect(res.data.code).toBe('TARGET_LOCKED')
-      } catch (e) {
-        expect(e.response.data.code).toBe('CENSOR_NOT_PASS')
+      // } catch (e) {
+      //   expect(e.response.data.code).toBe('CENSOR_NOT_PASS')
       
-      }
+      // }
 
       res = await http.post('/censor/q/'+qid,{
         action:'pass'
       })
-      console.log(res.data)
+      // console.log(res.data)
 
       res = await http.get('/pub/questions')
       expect(res.data.questions.results.length).toBe(1)
@@ -125,12 +88,11 @@ describe('user tests', () => {
       res = await http.get('/censor/questions')
       expect(res.data.questions.results.length).toBe(1)
 
-      console.log("SHOULD PASS")
       res = await http.post('/a', {qid, content:'ANS'})
-      console.log(res.data)
+      // console.log(res.data)
 
       res = await http.get('/q/'+qid+'/tracks')
-      console.log(res.data)
+      // console.log(res.data)
 
       // try {
       
@@ -176,8 +138,6 @@ describe('user tests', () => {
     try {
       
       res = await http.post('/a', {qid, content:'ANS'})
-      console.log(res.data)
-
       aid = res.data.answer.id
 
       try {
@@ -186,7 +146,6 @@ describe('user tests', () => {
         expect(e.response.data.code).toBe('CENSOR_NOT_PASS')
       }
 
-    
       res = await http.post('/censor/a/'+aid, {
         action:'reject',
         reason:'MISLEADING'
@@ -209,14 +168,15 @@ describe('user tests', () => {
     }
 
   })
+
   test('permission grant and give', async () => {
     try {
       
-      await SignupAndLogin(3)
+      await signupAndLoginWX(3)
       res = await http.get('/u/.ping')
       expect(res.data.user.is_staff).toBe(false)
       var uid3 = res.data.user.id
-      await SignupAndLogin(5)
+      await signupAndLoginWX(5)
       res = await http.get('/u/.ping')
       var uid5 = res.data.user.id
       expect(res.data.user.is_admin).toBe(false)
@@ -240,7 +200,7 @@ describe('user tests', () => {
       }
 
       res = await http.post('/u/.grant', {uid:uid3})
-      await SignupAndLogin(3)
+      await signupAndLoginWX(3)
 
       res = await http.get('/u/.ping')
       expect(res.data.user.is_staff).toBe(true)

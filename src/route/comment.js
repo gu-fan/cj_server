@@ -9,6 +9,8 @@ const {uid, slug} = require('../models/mixin/_uid')
 const {Question, User, Answer, Comment} = require('../models')
 const {getUser} = require('../services/user')
 
+const { checkSpam } = require('../common/spam')
+
 router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 
   var count = await Comment.query()
@@ -24,13 +26,19 @@ router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 }))
 
 router.post('/', jwt.auth(), wrap(async function(req, res, next) {
+
+
+  if (req.body.aid == null || req.body.aid == '') throw ERR.NEED_ARGUMENT
   var answer = await Answer.query().findById(req.body.aid)
+
   
   if (answer.lock_status == 'lock' ) {
      throw ERR.TARGET_LOCKED
   // } else if (answer.censor_status == 'reject' || answer.censor_status == undefined) {
   //    throw ERR.CENSOR_NOT_PASS
   }
+
+  if (checkSpam(req.body.content)) throw ERR.IS_SPAM
 
   var comments = await Comment.query().insertGraph([{
       content: req.body.content, 
@@ -78,6 +86,8 @@ router.put('/:cid', jwt.auth(), wrap(async function(req, res, next) {
                         .findById(req.params.cid)
                         .eager('author')
   if (comment == undefined) throw ERR.NO_SUCH_TARGET
+  if (checkSpam(req.body.content)) throw ERR.IS_SPAM
+
   const updatedComment = await Comment
     .query()
     .patchAndFetchById(req.params.cid, {content:req.body.content});

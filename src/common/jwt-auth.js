@@ -13,6 +13,6 @@ module.exports = {
           credentialsRequired: false
         }),     // sync middleware
   sign: (pay,opt)=>sign(pay, key, opt),  // async 
-  signId: (id, opt) => sign({sub:id},key,{expiresIn:"3d"}),
+  signId: (id, opt) => sign({sub:id},key,{expiresIn:"15d"}),
   verify: token=>verify(token, key),     // async
 }

@@ -25,9 +25,6 @@ const isEmpty = require('lodash').isEmpty
  */
 router.get('/.ping', jwt.auth(), wrap(async function(req, res, next) {
 
-  console.log("PING")
-  console.log(req.user.sub)
-
   try {
     var u = await Staff.query().findOne({id:req.user.sub})
   } catch (e) {
@@ -36,7 +33,7 @@ router.get('/.ping', jwt.auth(), wrap(async function(req, res, next) {
 
   if (u == null) throw ERR.NO_SUCH_USER
 
-  res.json({code:0, u, msg:MSG.STAFF_VALID})
+  res.json({u, ...MSG.STAFF_VALID})
 }))
 
 

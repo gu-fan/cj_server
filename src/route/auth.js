@@ -13,6 +13,8 @@ const {wrap, delay} = require('../common/promise')
 const isEmpty = require('lodash').isEmpty
 const {normalizeUser} =require('../services/user')
 
+// const { logTime } = require('../../test/common/util')
+
 /** Signup
  * @post /auth/signup
  *
@@ -33,12 +35,16 @@ router.post('/signup', wrap(async function(req, res, next) {
     const k = await User
       .query()
       .insert({
-       phone: req.body.phone,
-       password: req.body.password,
+         phone: req.body.phone,
+         password: req.body.password,
       })
+    // 300 ms, on generate hash, which should be slow
+    // logTime('insert')
     
     var token = await jwt.signId(k.id)
-    res.json({msg:MSG.REGISTER_SUCCESS, code:0, t:token})
+    // logTime('sign')
+   
+    res.json({...MSG.REGISTER_SUCCESS, t:token})
 
   } catch (e) {
     if (e.name === 'Error' && e.code === 'SQLITE_CONSTRAINT') {
@@ -77,7 +83,7 @@ router.post('/login', wrap(async function(req, res, next) {
   if (isMatch) {
     var token = await jwt.signId(u.id)
     // Object.assign({}, MSG.LOGIN_SUCCESS,t:token)
-    res.json({msg:MSG.LOGIN_SUCCESS, code:0, t:token})
+    res.json({...MSG.LOGIN_SUCCESS, t:token})
   } else {
     throw ERR.PASSWORD_MISMATCH
   }
@@ -97,7 +103,7 @@ router.get('/check', jwt.auth(), wrap(async function(req, res, next) {
   var u = await User.query().findOne({id:req.user.sub})
   if (u == null) throw ERR.NO_SUCH_USER
 
-  res.json({code:0, msg:MSG.USER_VALID})
+  res.json({...MSG.USER_VALID})
 }))
 
 

@@ -659,6 +659,10 @@ fast-json-stable-stringify@^2.0.0:
   version "2.0.0"
   resolved "http://registry.npm.taobao.org/fast-json-stable-stringify/download/fast-json-stable-stringify-2.0.0.tgz#d5142c0caee6b1189f87d3a76111064f86c8bbf2"
 
+fastscan@^1.0.6:
+  version "1.0.6"
+  resolved "http://registry.npm.taobao.org/fastscan/download/fastscan-1.0.6.tgz#4efea05f60394f2d3e3634f5ee2291be0e67d356"
+
 feature-policy@0.1.0:
   version "0.1.0"
   resolved "http://registry.npm.taobao.org/feature-policy/download/feature-policy-0.1.0.tgz#782d4865b1f261aa6ff6d0bba0c4eaeb2fd92862"

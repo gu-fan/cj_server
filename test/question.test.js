@@ -1,78 +1,51 @@
 const assert = require('assert')
-const axios = require('axios')
-const app = require('../src/app')
-const {ERR_CODE}  = require('../src/code')
-
-const Session= require('./setup/session')
-const config = require('config')
-const Knex = require('knex')
-const {raw, Model } = require('objection')
-const {User} = require('../src/models')
-
-
-const jwt = require('../src/common/jwt-auth')
-const port = 3013
-const http = axios.create({
-  baseURL : 'http://localhost:'+port,
-})
-
-const { signup, signupAndLogin,  getRes } = require('./common')(http)
-
 const sinon = require('sinon')
 
+const ERR = require('../src/code').ERR_CODE
+const MSG = require('../src/code').MSG_CODE
+
+const _TEST_ = require('path').basename(__filename);
+const { http, setupServer, closeServer } = require('./setup/server')(_TEST_)
+const { signup, signupAndLogin } = require('./common')(http)
 
 describe('user tests', () => {
-  let session
   let clock
+  let res
 
   beforeAll(async ()=>{
-    session = new Session(config.db)
-    Model.knex(session.knex)
-    await session.createTables()
-
-    this.server = app.listen(port)
-    await this.server.once('listening', () =>{} )
-
+    await setupServer()
   })
 
-  afterAll(()=>{
-    this.server.close()
-    http = null 
-    
+  afterAll(async ()=>{
+    await closeServer()
   })
 
   var qid,uid,qid2
   test('create question', async () => {
 
-    var phone = 'hello'
-    res = await http.post('/auth/signup', {phone: phone , password: 'test'})
+    await signupAndLogin('test')
 
-    var token = res.data.t
-    var payload = await jwt.verify(token)
-    http.defaults.headers.common['Authorization'] ='Bearer '+token
-
-    var res
     var question = {
       title: "hello",
       content: "HELLO WORLD"
     }
 
-    try {
-      res = await http.post('/q', question)
-    } catch (e) {
-      res = e.response
-    }
+    res = await http.post('/q', question)
+    expect(res.data.msg).toBe(MSG.QUESTION_SUCCESS)
+    expect(res.data.question.content).toBe('HELLO WORLD')
+
     qid2 = res.data.question.id
     var question2 = {
       title: "hello222",
       content: "HELLO WORLD222"
     }
 
-    try {
+    // NOTE: IT"S ALREADY PASSED
+    // try {
       res = await http.post('/q/', question2)
-    } catch (e) {
-      res = e.response
-    }
+    // } catch (e) {
+    //   res = e.response
+    // }
     qid = res.data.question.id
     uid = res.data.question.author_id
     expect(res.data.code).toBe(0)
@@ -87,7 +60,6 @@ describe('user tests', () => {
 
 
     res = await http.get('/q')
-    console.log(res.data)
     
   })
 
@@ -98,8 +70,6 @@ describe('user tests', () => {
       
     } catch (e) {
       console.log(e.response)
-
-      
     }
 
   })
@@ -116,11 +86,9 @@ describe('user tests', () => {
   })
   test('update pos', async () => {
     try {
-      res = await http.put('/q/'+qid, {title:'aaa'})
-      console.log(res.data)
+      res = await http.put('/q/'+qid, {title:'cccc'})
     } catch (e) {
       console.log(e.response)
-
       
     }
 
@@ -129,7 +97,6 @@ describe('user tests', () => {
   test('delete pos', async () => {
     try {
       res = await http.delete('/q/'+qid)
-      console.log(res.data)
     } catch (e) {
       console.log(e.response)
 
@@ -140,8 +107,7 @@ describe('user tests', () => {
   test('get users question', async () => {
     try {
       res = await http.get('/u/'+uid)
-      console.log(res.data.user.total_questions)
-      expect(res.data.user.total_questions).toBe(1)
+      expect(res.data.user.total_questions).toBe(2)
     } catch (e) {
       console.log(e)
     }
@@ -150,7 +116,6 @@ describe('user tests', () => {
   test('get total ans', async () => {
     try {
       res = await http.get('/a')
-      console.log(res.data.count)
       expect(res.data.count).toBe(0)
     } catch (e) {
       console.log(e.response)
@@ -171,7 +136,6 @@ describe('user tests', () => {
         action:'pass'
       })
       
-      console.log(res.data)
       expect(res.data.answer.content).toBe('ANS2')
     } catch (e) {
       console.log(e.response)
@@ -181,7 +145,6 @@ describe('user tests', () => {
   test('get qs', async () => {
     try {
       res = await http.get('/q/'+qid2)
-      console.log(res.data.answers)
       expect(res.data.answers.results.length).toBe(2)
       aid = res.data.answers.results[0].id
       aid2 = res.data.answers.results[1].id
@@ -194,7 +157,6 @@ describe('user tests', () => {
   test('patch ans', async () => {
     try {
       res = await http.put('/a/' + aid, {content:'ANS PATCH'})
-      console.log(res.data.answer)
     } catch (e) {
       console.log(e)
     }
@@ -221,14 +183,12 @@ describe('user tests', () => {
       })
     
       res = await http.post('/c', {aid:aid, content:'hello comment'})
-      console.log(res.data.comment)
       cid = res.data.comment.id
 
   })
   test('get cmt', async () => {
     try {
       res = await http.get('/c')
-      console.log(res.data)
       expect(res.data.count).toBe(1)
     } catch (e) {
       console.log(e.response)
@@ -238,7 +198,6 @@ describe('user tests', () => {
   test('patch cmt', async () => {
     try {
       res = await http.put('/c/'+cid, {content:'CMT PATCH'})
-      console.log(res.data.updatedComment)
     } catch (e) {
       console.log(e.response)
     }
@@ -247,7 +206,6 @@ describe('user tests', () => {
   test('delete cmt', async () => {
     try {
       res = await http.delete('/c/'+cid)
-      console.log(res.data)
     } catch (e) {
       console.log(e.response)
     }
@@ -255,7 +213,6 @@ describe('user tests', () => {
   test('get cmt', async () => {
     try {
       res = await http.get('/c')
-      console.log(res.data)
       expect(res.data.count).toBe(1)
     } catch (e) {
       console.log(e)

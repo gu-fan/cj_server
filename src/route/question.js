@@ -6,6 +6,8 @@ const {promisify, wrap, delay} = require('../common/promise')
 const jwt = require('../common/jwt-auth')
 const {ERR, MSG} = require('../code')
 
+const { checkSpam } = require('../common/spam')
+
 const {uid, slug}= require('../models/mixin/_uid')
 
 const {TrackQ, Question, User, Answer}  = require('../models')
@@ -29,13 +31,18 @@ router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 
 }))
 
-
 router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
-  if (req.body.title == '' ) throw ERR.NEED_TITLE
+  if (req.body.title == '' || req.body.title == null) throw ERR.NEED_TITLE
+  var content = req.body.content || ''
+  
+  if (checkSpam(req.body.title) || checkSpam(content)) {
+    throw ERR.IS_SPAM
+  }
+
   var question = await Question.query().insertGraph([{
     title: req.body.title,
-    content: req.body.content || '', 
+    content, 
     author: {
       id: req.user.sub,
     },
@@ -49,9 +56,8 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
   question = question[0]
 
   res.json({
-      msg:"question created",
       question,
-      code:0,
+      ...MSG.QUESTION_SUCCESS
   })
 
 }))
@@ -131,6 +137,11 @@ router.put('/:qid', jwt.auth(),
   if (question == undefined) throw ERR.NO_SUCH_TARGET
   if (req.user.sub != question.author_id) throw ERR.NOT_AUTHOR
 
+  var content = req.body.content || ''
+  if (checkSpam(req.body.title) || checkSpam(content)) {
+    throw ERR.IS_SPAM
+  }
+
   var status 
   if (question.censor_status == 'reject') {
         status = 'reject_review'
@@ -144,7 +155,7 @@ router.put('/:qid', jwt.auth(),
   question = await Question
     .query()
     .patchAndFetchById(req.params.qid, 
-            {title:req.body.title, content:req.body.content, censor_status:status})
+            {title:req.body.title, content, censor_status:status})
       .eager('author')
   
   res.json({

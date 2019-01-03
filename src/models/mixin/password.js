@@ -4,6 +4,8 @@ const RECOMMENDED_ROUNDS = 12;
 
 const REGEXP = /^\$2[ayb]\$[0-9]{2}\$[A-Za-z0-9./]{53}$/;
 
+// const { logTime } = require('../../../test/common/util')
+
 module.exports = (options) => {
 
     // Provide good defaults for the options if possible.
@@ -20,6 +22,7 @@ module.exports = (options) => {
         return class extends Model {
 
             $beforeInsert(context) {
+              // logTime('insert before')
 
                 const maybePromise = super.$beforeInsert(context);
 
@@ -69,7 +72,9 @@ module.exports = (options) => {
                         return Promise.resolve()
                     }
 
+                    // logTime('generate hash start')
                     return Bcrypt.hash(password, options.rounds).then((hash) => {
+                        // logTime('hash generated')
                         this[options.passwordField] = hash;
                     });
                 }

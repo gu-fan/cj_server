@@ -1,58 +1,77 @@
+function setupToken(http, t) {
+  http.defaults.headers.common['Authorization'] = 'Bearer ' + t
+}
+
 module.exports = function(http){
 
-  async function getRes(cb){
-    try {
-      res = await cb
-    } catch (e) {
-      res = e.response
-    }
-    return res
-  }
-
-  async function staffSignup (id) {
-      var p ='a10000'+id 
-      var res = await http.post('/sa/signup', {username: p, password: 'pass'})
-      var token = res.data.t
-      http.defaults.headers.common['Authorization'] ='Bearer '+ token
+  async function staffSignup(id) {
+      var res = await http.post('/sa/signup',
+        {
+          username: 'STAFF_'+id,
+          password: 'password'
+        })
+      setupToken(http, res.data.t)
       return res
   }
 
   async function staffLogin(id){
-    var p = 'a10000' + id
-    var res = await http.post('/sa/login', {username: p, password: 'pass'})
-    var token = res.data.t
-    http.defaults.headers.common['Authorization'] ='Bearer '+ token
+    var res = await http.post('/sa/login',
+      {
+        username: 'STAFF_'+id,
+        password: 'password'
+      }
+    )
+    setupToken(http, res.data.t)
     return res
   }
 
   async function signup (id) {
-      var p ='s10000'+id 
-      var res = await http.post('/auth/signup', {phone: p, password: 'password'})
-      return res
-  }
-
-
-  async function signupAndLogin(idx){
-    var phone = 'sl20000' + idx
-    var res = await http.post('/auth/signup', {phone: phone , password: 'test123'})
-    var token = res.data.t
-    http.defaults.headers.common['Authorization'] ='Bearer '+ token
+    var res = await http.post('/auth/signup', {
+      phone: 'p20000_'+id,
+      password: 'password'
+    })
     return res
   }
-  async function login(idx){
-    var phone = 'sl20000' + idx
-    var res = await http.post('/auth/login', {phone: phone , password: 'test123'})
-    var token = res.data.t
-    http.defaults.headers.common['Authorization'] ='Bearer '+ token
+
+  async function login(id) {
+    var res = await http.post('/auth/login', {
+      phone: 'p20000_'+id,
+      password: 'password'
+    })
+    setupToken(http, res.data.t)
+    return res
+  }
+
+  async function signupAndLogin(idx){
+    var res = await http.post('/auth/signup',
+      {
+        phone: 'p20000_'+idx,
+        password: 'password'
+      })
+    setupToken(http, res.data.t)
+    return res
+  }
+
+  async function signupAndLoginWX(idx){
+    var wx_id= 'wx_20000' + idx
+    var res = await http.post('/auth/wx_code_fake', {wx_id})
+    setupToken(http, res.data.t)
+    return res
+  }
+
+  async function bindUserWX(idx){
+    var nickName = 'wx' + idx
+    var res = await http.post('/wx/bind', {userInfo:{avatarUrl:'http://xxxxxx',nickName}})
     return res
   }
 
   return {
-    getRes,
     signup,
     login,
     signupAndLogin,
+    signupAndLoginWX,
     staffSignup,
     staffLogin,
+    bindUserWX,
   }
 }

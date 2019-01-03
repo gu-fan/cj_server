@@ -1,6 +1,6 @@
 const router = require('express').Router()
-var jwt = require('express-jwt');
 const config = require('config')
+const jwt = require('express-jwt');
 
 const wx_sign = require('./wx_sign')
 const auth = require('./auth')
@@ -29,9 +29,10 @@ module.exports = app => {
   app.use(jwt({secret: config.key}))
 
   app.use('/sas', staff_stat)
+
   app.use('/wx', wx_sign)
 
-  app.use('/kpass', kpass)
+  app.use('/kpass', kpass)      // qcloud cos
 
   app.use('/u', user)
   app.use('/q', question)
@@ -40,4 +41,3 @@ module.exports = app => {
   app.use('/censor', censor)
 
 }
-

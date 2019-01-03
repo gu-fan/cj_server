@@ -1,43 +1,24 @@
-const assert = require('assert')
-const axios = require('axios')
-const app = require('../src/app')
-const {MSG,ERR_CODE}  = require('../src/code')
-
-const Session= require('./setup/session')
-const config = require('config')
-const Knex = require('knex')
-const {raw, Model } = require('objection')
-const {Staff} = require('../src/models')
-
-const jwt = require('../src/common/jwt-auth')
-const port = 3013
-const http = axios.create({
-  baseURL : 'http://localhost:'+port,
-})
-
-const { staffSignup, staffLogin } = require('./common')(http)
-
 const sinon = require('sinon')
 
-describe('user tests', () => {
-  let session
-  let clock
+const ERR = require('../src/code').ERR_CODE
+const MSG = require('../src/code').MSG_CODE
 
+const _TEST_ = require('path').basename(__filename);
+const { http, setupServer, closeServer } = require('./setup/server')(_TEST_)
+
+const { signup, signupAndLogin, staffLogin, staffSignup } = require('./common')(http)
+
+describe('staff tests', () => {
   beforeAll(async ()=>{
-    session = new Session(config.db)
-    Model.knex(session.knex)
-    await session.createTables()
-
-    this.server = app.listen(port)
-    await this.server.once('listening', () =>{} )
-
+    await setupServer()
   })
 
-  afterAll(()=>{
-    this.server.close()
-    http = null 
-    
+  afterAll(async ()=>{
+    await closeServer()
   })
+
+  let clock
+  let res
 
   test('signup only once', async () => {
 
@@ -46,8 +27,7 @@ describe('user tests', () => {
       expect(res.status).toBe(200)
       var res = await staffSignup('A1')
     } catch (e) {
-
-      expect(e.response.data.code).toBe(ERR_CODE.NAME_REGISTERED)
+      expect(e.response.data.code).toBe(ERR.NAME_REGISTERED)
     }
 
   })

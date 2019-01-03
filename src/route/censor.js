@@ -10,6 +10,8 @@ const {hasPermission} = require('../common/permission')
 
 const {TrackA, TrackQ, User, Answer, Comment, Question, Staff}  = require('../models')
 
+const { checkSpam } = require('../common/spam')
+
 router.get('/.ping', jwt.auth(), wrap(async function(req, res, next) {
 
   res.json({
@@ -117,8 +119,16 @@ router.get('/q/:qid/answers', jwt.auth(),
 
 }))
 
+
+// CREATE QUESTION
 router.post('/q', jwt.auth(), hasPermission('censor'),
   wrap(async function(req, res, next) {
+
+  var content = req.body.content || ''
+
+  if (checkSpam(req.body.title) || checkSpam(content)) {
+    throw ERR.IS_SPAM
+  }
 
   var question = await Question.query().insertGraph([{
     title: req.body.title,
@@ -145,10 +155,15 @@ router.post('/q', jwt.auth(), hasPermission('censor'),
 
 }))
 
+// CREATE ANSWER
 router.post('/a', jwt.auth(), hasPermission('censor'),
   wrap(async function(req, res, next) {
 
-  console.log(req.body)
+  if (req.body.question_id == null )  throw ERR.NEED_ARGUMENT
+  if (req.body.author_id == null )  throw ERR.NEED_ARGUMENT
+  if (req.body.content == null || req.body.content == '')  throw ERR.NEED_CONTENT
+
+  if (checkSpam(req.body.content))  throw ERR.IS_SPAM
 
   var answer = await Answer.query().insertAndFetch({
     content: req.body.content, 
@@ -173,9 +188,15 @@ router.post('/a', jwt.auth(), hasPermission('censor'),
 router.patch('/q', jwt.auth(), hasPermission('censor'),
   wrap(async function(req, res, next) {
 
+  var content = req.body.content || ''
+
+  if (checkSpam(req.body.title) || checkSpam(content)) {
+    throw ERR.IS_SPAM
+  }
+
   var question = await Question.query().patchAndFetchById(req.body.id,  {
     title: req.body.title,
-    content: req.body.content, 
+    content: content, 
   })
   .eager('author');
 
@@ -190,6 +211,8 @@ router.patch('/q', jwt.auth(), hasPermission('censor'),
 
 router.patch('/a', jwt.auth(), hasPermission('censor'),
   wrap(async function(req, res, next) {
+
+  if (checkSpam(req.body.content))  throw ERR.IS_SPAM
 
   var answer = await Answer.query().patchAndFetchById(req.body.id,  {
     content: req.body.content, 
@@ -208,8 +231,9 @@ router.patch('/a', jwt.auth(), hasPermission('censor'),
 
 
 
-// XXX
+// FIXED
 // this should put ahead /:qid
+//
 router.get('/q/:qid/', jwt.auth(), hasPermission('censor'),
     wrap(async function(req, res, next) {
 
@@ -233,6 +257,8 @@ router.get('/q/:qid/', jwt.auth(), hasPermission('censor'),
 
 }))
 
+
+// CENSOR QUESTION
 router.post('/q/:qid', jwt.auth(), hasPermission('censor'), 
   wrap(async function(req, res, next) {
 
@@ -241,7 +267,6 @@ router.post('/q/:qid', jwt.auth(), hasPermission('censor'),
   var question = await Question.query()
                         .findById(req.params.qid)
 
-  console.log(question)
   if (question == undefined) throw ERR.NO_SUCH_TARGET
 
   await TrackQ.query()
@@ -272,6 +297,8 @@ router.post('/q/:qid', jwt.auth(), hasPermission('censor'),
 
 }))
 
+
+// CENSOR ANSWER
 router.post('/a/:aid', jwt.auth(), hasPermission('censor'),
   wrap(async function(req, res, next) {
     
@@ -308,7 +335,8 @@ router.post('/a/:aid', jwt.auth(), hasPermission('censor'),
   })
 
 }))
-router.get('/a/:aid',  wrap(async function(req, res, next) {
+
+router.get('/a/:aid', hasPermission('censor'), wrap(async function(req, res, next) {
 
   var answer = await Answer.query()
                   .patchAndFetchById(req.params.aid, {
@@ -415,6 +443,8 @@ router.get('/users', jwt.auth(),
 
 }))
 
+
+// CREATE USER
 router.post('/user', jwt.auth(),
   hasPermission('censor'),
   wrap(async function(req, res, next) {
@@ -439,7 +469,6 @@ router.post('/user', jwt.auth(),
 router.patch('/user/:uid', jwt.auth(),
   hasPermission('censor'),
   wrap(async function(req, res, next) {
-  console.log(req.body)
 
   var user = await User.query()
           .patchAndFetchById(req.params.uid, {

@@ -1,64 +1,51 @@
 const assert = require('assert')
-const axios = require('axios')
-const app = require('../src/app')
-const {ERR_CODE}  = require('../src/code')
-
-const Session= require('./setup/session')
-const config = require('config')
-const Knex = require('knex')
-const {raw, Model } = require('objection')
-const {User} = require('../src/models')
-
-const jwt = require('../src/common/jwt-auth')
-const port = 3018
-
-const http = axios.create({
-  baseURL : 'http://localhost:'+port,
-})
-
-const { login, signup, signupAndLogin,  getRes } = require('./common')(http)
-const { logError } = require('./common/error')
-
 const sinon = require('sinon')
 
-describe('user tests', () => {
-  let session
+const ERR = require('../src/code').ERR_CODE
+
+const _TEST_ = require('path').basename(__filename);
+const { http, setupServer, closeServer } = require('./setup/server')(_TEST_)
+
+const { signup, signupAndLogin, login } = require('./common')(http)
+
+describe(_TEST_, () => {
   let clock
   let res
 
   beforeAll(async ()=>{
-    session = new Session(config.db)
-    Model.knex(session.knex)
-    await session.createTables()
-
-    this.server = app.listen(port)
-    await this.server.once('listening', () =>{} )
-
+    await setupServer()
   })
 
-  afterAll(()=>{
-    this.server.close()
-    http = null 
-    
+  afterAll(async ()=>{
+    await closeServer()
   })
 
   var uid, aid, qid
   test('signup', async () => {
+      // logTime()
+
       await signupAndLogin(2)
+      // logTime('signup 2')
       await signupAndLogin(1)
+      // logTime('signup 1')
       res = await http.get('/u/.ping')
       uid = res.data.user.id
       res = await http.get('/pub/grant',
                       {params: {uid, code:'FZBB'} })
+      // logTime('grant')
       res = await http.get('/u/.ping')
       expect(res.data.user.is_staff).toBe(true)
+      // logTime()
   })
 
   test('create post', async () => {
+    try {
+      
     var question = {
       title: "H1",
       content: "HELLO WORLD"
     }
+
     res = await http.post('/q', question)
     qid = res.data.question.id
     expect(res.data.question.title).toBe('H1')
@@ -66,10 +53,16 @@ describe('user tests', () => {
     res = await http.post('/a', {qid, content:'A1'})
     aid = res.data.answer.id
     expect(res.data.answer.content).toBe('A1')
+      
+    } catch (e) {
+      console.log(e)
+    }
   })
 
   var aid2,qid2
   test('select post', async () => {
+    try {
+      
 
     await login(2)
     try {
@@ -82,6 +75,10 @@ describe('user tests', () => {
     expect(res.data.answer.is_selected) .toBe(1)
     res = await http.get('/a/'+ aid + '/unselect')
     expect(res.data.answer.is_selected) .toBe(0)
+    } catch (e) {
+      console.log(e)
+      
+    }
 
   })
 

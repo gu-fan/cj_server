@@ -1,6 +1,6 @@
 const APIError = require('./api.error')
 const RAW_CODE = {
-  NOT_FOUND: {text:"没有找到页面", http: 404},
+  NOT_FOUND: {text:"没有找到内容", http: 404},
   ALREADY_GOT_PERM: {text:"已拥有权限", http: 403},
   ALREADY_DELETED: {text:"已被删除", http: 400},
   CENSOR_NOT_PASS: {text:"目标未审核", http: 403},
@@ -20,12 +20,13 @@ const RAW_CODE = {
   NEED_PHONE: {text:"请输入手机号", http: 400},
   NEED_USERNAME: {text:"请输入用户名", http: 400},
   NEED_PASSWORD: {text:"请输入密码", http: 400},
-  NOT_AUTHOR: {text:"不是作者", http: 400},
+  NOT_AUTHOR: {text:"当前登录不是作者", http: 400},
   DUPLICATED_CONTENT: {text:"内容重复", http: 400},
   NO_SUCH_GROUP: {text:"没有找到群组", http: 400},
   NO_GROUP_ID: {text:"没有群组ID", http:400},
   ALREADY_IN_GROUP: {text:"已经加入该群组", http: 400},
   ALREADY_CHECKED: {text:"今天已经完成签到了", http: 400},
+  IS_SPAM: {text:"请不要包含色情或敏感内容", http: 400},
 }
 
 const ERR = Object.keys(RAW_CODE).map((name)=>{
