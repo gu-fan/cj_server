@@ -246,7 +246,7 @@ router.get('/q/:qid/', jwt.auth(), hasPermission('censor'),
   if (question == undefined) throw ERR.NO_SUCH_TARGET
 
   var tracks = await question.$relatedQuery('tracks')
-     .insertAndFetch({content:'pass', setter_id:req.user.sub})
+     .insertAndFetch({content:'pass', setter_id:null})
 
   res.json({
       msg:"got question censor track",
@@ -309,7 +309,7 @@ router.post('/a/:aid', jwt.auth(), hasPermission('censor'),
            answer_id:req.params.aid,
            content: req.body.action, 
            reason: req.body.reason, 
-           setter_id:req.user.sub
+           setter_id: null
        })
 
   await Answer.query()
@@ -347,7 +347,7 @@ router.get('/a/:aid', hasPermission('censor'), wrap(async function(req, res, nex
   if (answer == undefined) throw ERR.NO_SUCH_TARGET
 
   var tracks = await answer.$relatedQuery('tracks')
-     .insertAndFetch({content:'pass', setter_id:req.user.sub})
+     .insertAndFetch({content:'pass', setter_id:null})
 
   
   res.json({
