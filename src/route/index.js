@@ -13,6 +13,7 @@ const answer  = require('./answer')
 const comment  = require('./comment')
 const censor  = require('./censor')
 const kpass  = require('./kpass')
+const dashboard  = require('./dashboard')
 
 module.exports = app => {
 
@@ -29,6 +30,7 @@ module.exports = app => {
   app.use(jwt({secret: config.key}))
 
   app.use('/sas', staff_stat)
+  app.use('/dashboard', dashboard)
 
   app.use('/wx', wx_sign)
 

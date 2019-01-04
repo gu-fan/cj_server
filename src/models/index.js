@@ -21,6 +21,10 @@ module.exports = {
     init: function(config){
       const knex = Knex(config)
       Model.knex(knex)
+      return (req, res, next)=>{
+        req.knex = knex
+        next()
+      }
     },
   }
 }

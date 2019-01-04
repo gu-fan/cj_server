@@ -25,7 +25,8 @@ const { model } = require('./models')
 const route = require('./route')
 const code = require('./code')
 
-model.init(config.db)
+
+app.use(model.init(config.db))
 
 route(app)
 
