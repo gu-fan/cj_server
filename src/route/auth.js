@@ -115,6 +115,7 @@ router.use('/wx_code', wrap(async function(req, res, next) {
     .then(async response=>{
       var data = JSON.parse(response.data)
       console.log(data)
+      return res.json(data)
       if (data.openid) {
 
         // get user from database
