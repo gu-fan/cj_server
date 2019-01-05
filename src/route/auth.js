@@ -115,7 +115,6 @@ router.use('/wx_code', wrap(async function(req, res, next) {
     .then(async response=>{
       var data = JSON.parse(response.data)
       console.log(data)
-      return res.json(data)
       if (data.openid) {
 
         // get user from database
@@ -131,6 +130,7 @@ router.use('/wx_code', wrap(async function(req, res, next) {
                     }
                   })
         
+        console.log(0)
 
         if (u == null) {
           u = await User
@@ -138,6 +138,7 @@ router.use('/wx_code', wrap(async function(req, res, next) {
             .insert({
               wx_id: data.openid
             })
+          console.log(1)
 
           var t = await jwt.signId(u.id)
           res.json({
@@ -151,6 +152,7 @@ router.use('/wx_code', wrap(async function(req, res, next) {
           var user = normalizeUser(u)
           
           var t = await jwt.signId(u.id)
+          console.log(2)
           if (isEmpty(u.avatar)) {  
             // no user info as no avatar
             res.json({
@@ -172,6 +174,7 @@ router.use('/wx_code', wrap(async function(req, res, next) {
         }
 
       } else {
+        console.log(3)
         res.json({
           msg: data.errMsg,
           code:data.errcode
