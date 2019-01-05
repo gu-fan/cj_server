@@ -112,7 +112,7 @@ const SECRECT='c68cb819032df23248de5278015a4c77'
 router.use('/wx_code', wrap(async function(req, res, next) {
   fly.get(`https://api.weixin.qq.com/sns/jscode2session?appid=${APPID}&secret=${SECRECT}&js_code=${req.query.code}&grant_type=authorization_code`
   )
-    .then(respnse=>{
+    .then(async respnse=>{
       var data = JSON.parse(response.data)
       console.log(data)
       if (data.openid) {
