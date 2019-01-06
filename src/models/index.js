@@ -18,6 +18,11 @@ module.exports = {
   TrackA,
   Comment,
   model :{
+    bareInit: function(config){
+      const knex = Knex(config)
+      Model.knex(knex)
+      return knex
+    },
     init: function(config){
       const knex = Knex(config)
       Model.knex(knex)

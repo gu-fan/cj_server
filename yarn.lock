@@ -192,12 +192,12 @@ bcrypt-pbkdf@^1.0.0:
   dependencies:
     tweetnacl "^0.14.3"
 
-bcrypt@^3.0.1:
-  version "3.0.1"
-  resolved "http://registry.npm.taobao.org/bcrypt/download/bcrypt-3.0.1.tgz#2ea12883330bf5f81926f70475cf21bdd0c2f8ff"
+bcrypt@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/bcrypt/-/bcrypt-3.0.3.tgz#7d1e9e5d533c5ea060e6ac8834942c004dbffe9c"
   dependencies:
-    nan "2.11.0"
-    node-pre-gyp "0.11.0"
+    nan "2.12.1"
+    node-pre-gyp "0.12.0"
 
 bignumber.js@4.1.0:
   version "4.1.0"
@@ -418,6 +418,10 @@ dashdash@^1.12.0:
 dasherize@2.0.0:
   version "2.0.0"
   resolved "http://registry.npm.taobao.org/dasherize/download/dasherize-2.0.0.tgz#6d809c9cd0cf7bb8952d80fc84fa13d47ddb1308"
+
+dayjs@^1.7.8:
+  version "1.7.8"
+  resolved "http://registry.npm.taobao.org/dayjs/download/dayjs-1.7.8.tgz#05d288f8d4b2140110cc1519cfe317d6f1f11a3c"
 
 debug@2.6.9, debug@^2.1.2, debug@^2.2.0, debug@^2.3.3:
   version "2.6.9"
@@ -1430,9 +1434,9 @@ mysql@^2.16.0:
     safe-buffer "5.1.2"
     sqlstring "2.3.1"
 
-nan@2.11.0:
-  version "2.11.0"
-  resolved "http://registry.npm.taobao.org/nan/download/nan-2.11.0.tgz#574e360e4d954ab16966ec102c0c049fd961a099"
+nan@2.12.1:
+  version "2.12.1"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.12.1.tgz#7b1aa193e9aa86057e3c7bbd0ac448e770925552"
 
 nan@~2.10.0:
   version "2.10.0"
@@ -1480,9 +1484,9 @@ nocache@2.0.0:
   version "2.0.0"
   resolved "http://registry.npm.taobao.org/nocache/download/nocache-2.0.0.tgz#202b48021a0c4cbde2df80de15a17443c8b43980"
 
-node-pre-gyp@0.11.0:
-  version "0.11.0"
-  resolved "http://registry.npm.taobao.org/node-pre-gyp/download/node-pre-gyp-0.11.0.tgz#db1f33215272f692cd38f03238e3e9b47c5dd054"
+node-pre-gyp@0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/node-pre-gyp/-/node-pre-gyp-0.12.0.tgz#39ba4bb1439da030295f899e3b520b7785766149"
   dependencies:
     detect-libc "^1.0.2"
     mkdirp "^0.5.1"
@@ -2071,9 +2075,9 @@ sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "http://registry.npm.taobao.org/sprintf-js/download/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
 
-sqlite3@^4.0.2:
-  version "4.0.2"
-  resolved "http://registry.npm.taobao.org/sqlite3/download/sqlite3-4.0.2.tgz#1bbeb68b03ead5d499e42a3a1b140064791c5a64"
+sqlite3@^4.0.4:
+  version "4.0.4"
+  resolved "http://registry.npm.taobao.org/sqlite3/download/sqlite3-4.0.4.tgz#1f75e3ededad6e26f7dd819929460ce44a49dfcd"
   dependencies:
     nan "~2.10.0"
     node-pre-gyp "^0.10.3"

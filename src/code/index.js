@@ -16,6 +16,9 @@ module.exports = {
 
     if (err.code == "SQLITE_CONSTRAINT") {
       message = "已存在相同内容"
+    } else if (err.message == "jwt malformed") {
+      message = "登录不成功"
+      errcode = 'token_invalid'
     } else if (err.message == "jwt expired") {
       message = "登录已过期"
       errcode = 'token_expired'

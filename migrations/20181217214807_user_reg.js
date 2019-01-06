@@ -15,7 +15,6 @@ exports.up = function(knex, Promise) {
 exports.down = function(knex, Promise) {
 
   return Promise.all([
-
     knex.schema
     .table('user', function (table) {
       table.dropColumn('r_type');

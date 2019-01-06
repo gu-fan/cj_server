@@ -21,6 +21,11 @@ exports.up = function(knex, Promise) {
       table.unique('wx_id')
       table.unique('phone')
       table.timestamps()
+
+      // table.foreign('id')
+      //      .references('question.author_id')
+      //      .onDelete('NO ACTION');
+
     })
     // POST
     .createTable('question', table=>{
@@ -36,7 +41,8 @@ exports.up = function(knex, Promise) {
       table
         .string('author_id', 50)
         .references('id')
-        .inTable('user');
+        .inTable('user')
+        .onDelete('NO ACTION')
 
       table.timestamps()
     })
@@ -55,12 +61,14 @@ exports.up = function(knex, Promise) {
       table
         .string('question_id', 50)
         .references('id')
-        .inTable('question');
+        .inTable('question')
+        .onDelete('NO ACTION')
 
       table
         .string('author_id', 50)
         .references('id')
-        .inTable('user');
+        .inTable('user')
+        .onDelete('NO ACTION')
 
       table.timestamps()
 
@@ -74,12 +82,12 @@ exports.up = function(knex, Promise) {
         .string('uid', 50)
         .references('id')
         .inTable('user')
-        .onDelete('CASCADE');
+        .onDelete('CASCADE')
       table
         .string('aid', 50)
         .references('id')
         .inTable('answer')
-        .onDelete('CASCADE');
+        .onDelete('CASCADE')
     })
 
     .createTable('comment', table=>{
@@ -92,17 +100,20 @@ exports.up = function(knex, Promise) {
       table
         .string('answer_id', 50)
         .references('id')
-        .inTable('answer');
+        .inTable('answer')
+        .onDelete('NO ACTION')
 
       table
         .string('reply_id', 50)
         .references('id')
-        .inTable('comment');
+        .inTable('comment')
+        .onDelete('NO ACTION')
 
       table
         .string('author_id', 50)
         .references('id')
-        .inTable('user');
+        .inTable('user')
+        .onDelete('NO ACTION')
 
       table.timestamps()
     })

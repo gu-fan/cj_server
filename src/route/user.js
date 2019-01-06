@@ -47,15 +47,16 @@ router.post('/.grant', jwt.auth(), wrap(async function(req, res, next) {
           .patchAndFetch({'permission': permission})
   }
 
-
   res.json({
     msg:'user granted',
     user,
     code:0
   })
+
 }))
 
 router.get('/checkpoint', jwt.auth(), wrap(async function(req, res, next) {
+
   var user = await User.query()
                 .findById(req.user.sub)
 
@@ -64,6 +65,7 @@ router.get('/checkpoint', jwt.auth(), wrap(async function(req, res, next) {
   var last = moment(user.checkpoint_at)
   var today = moment().set({'hour':7, 'minute':0})
   var hr = today.diff(last, 'hours') 
+
   if (user.checkpoint_at == null || (last.isBefore(today) && hr > 7) ) {
     user = await user.$query()
                 .patchAndFetch({

@@ -5,7 +5,6 @@ const knex = require('knex')
 const moment = require('moment')
 const _ = require('lodash')
 
-
 function normContent(item){
   item.results = item.results.map((it)=>{
     it.content = it.content.substring(0, 500)

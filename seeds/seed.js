@@ -1,93 +1,144 @@
-const yaml = require('js-yaml');
-const fs   = require('fs');
-const path = require("path");
-const file = fs.readFileSync(path.resolve(__dirname, "./q.yml"));
 const _ = require('lodash')
-const mmt = require('moment')
- 
-var doc
-try {
-  doc = yaml.safeLoad(file);
-  console.log(doc);
-} catch (e) {
-  doc = []
-  console.log(e);
+const mt = require('moment')
+
+const { doc } = require('./loader')
+const { uid, slug } = require('../src/models/mixin/_uid')
+const { Staff, model } = require('../src/models')
+
+const knex = model.bareInit(require('config').db)
+
+
+// create 100 user
+// create 200 question
+// create 400 answer
+
+var time = mt("2018-12-10")
+var tmp = time.clone()
+
+// +2~15h to tmp
+function addMoreTime(){
+  tmp = tmp.clone()
+            .add(_.random(18, 35), 'h')
+            .add(_.random(500), 's')
+  return tmp
 }
 
-var time = mmt("2018-11-27T00:00:00+08:00")
+var times = _.range(50).map(addMoreTime)
 
-var tmp = mmt(time)
-var times = _.range(30).map(function(idx){
-  tmp = mmt(tmp).add(_.random(1,15), 'h').add(_.random(1000), 's')
-  return tmp
-})
-var times2 = [], times3 = []
+
+var times_q = [], times3 = []
 var TOTAL_COUNT = doc.length
 
-exports.seed = function(knex, Promise) {
-  return Promise.all([
-    knex('user').del()
-    .then(function () {
-      return knex('user').insert([
-        {id:0, wx_id:'wx_fiaoweh081zk', name:'彬彬有法',created_at:times[0].format(), avatar:'/static/wx_avatar/admin.jpg', total_answer_zhichi: 8, total_answer_thanks: 3, r_type:1 },
-        {id:1, wx_id:'wx_a0d9aejlmvlz1', name:'青葱岁月',created_at:times[1].format(), avatar:'/static/wx_avatar/1.jpg', r_type:1},
-        {id:2, wx_id:'wx_g0zaj2zlfawe0', name:'笑说再见',created_at:times[2].format(), avatar:'/static/wx_avatar/2.jpg', total_answer_zhichi: 2, r_type:1},
-        {id:3, wx_id:'wx_gha9uwfy982hz', name:'alf01j8',created_at: times[3].format(), r_type:1},
-        {id:4, wx_id:'wx_a0f9k234f0kjf', name:'君子好逑～',created_at:times[4].format(), avatar:'/static/wx_avatar/4.jpg', total_answer_zhichi: 1,r_type:1},
-        {id:5, wx_id:'wx_zvm8342rjojzo', name:'lmf10z1',created_at:times[5].format(),r_type:1},
-        {id:6, wx_id:'wx_z90fe01091304', name:'明明很困',created_at:times[6].format(), avatar:'/static/wx_avatar/6.jpg', total_answer_zhichi: 3,r_type:1},
-        {id:7, wx_id:'wx_kgjrgif0e9fua', name:'Angel、浮熙', created_at:times[7].format(),avatar:'/static/wx_avatar/7.jpg', r_type:1},
-        {id:8, wx_id:'wx_0fwaflemalej1', name:'知道长啥样', created_at:times[8].format(),avatar:'/static/wx_avatar/8.jpg',r_type:1},
-        {id:9, wx_id:'wx_09aewlfmzaalk1', name:'Rencontre',created_at:times[9].format(), avatar:'/static/wx_avatar/9.jpg', total_answer_zhichi: 4,r_type:1},
-        {id:10, wx_id:'wx_09aewlfmzalk1', name:'单独等待',created_at:times[10].format(), avatar:'/static/wx_avatar/10.jpg',r_type:1},
-        {id:11, wx_id:'wx_1fa8fajzlkjql', name:'张林远', created_at:times[11].format(), avatar:'/static/wx_avatar/11.jpg', total_answer_thanks: 2,r_type:1 }
-      ]);
-    })
-    ,
-    knex('question').del()
-    .then(function () {
-      var time = mmt("2018-11-28T23:10:10+08:00")
-      var questions = _.range(TOTAL_COUNT).map(function(idx){
-        var c_at  = times[idx].add(_.random(100,2500),'m')
-        times2.push(c_at)
-        var content = doc[idx].content||doc[idx].title
-        return {
-          id: idx,
-          title: doc[idx].title,
-          content: content.replace(/\n/g,'\n\n'),
-          author_id: doc[idx].by_admin ? 0 : (idx > 11 ? _.random(1,10) :   _.random(1, idx+1) ) ,
-          created_at: c_at.format(),
-          censor_status:'pass',
-          total_answers: 1,
-        }
-      })
-      return knex('question').insert(questions);
-    })
-    ,
-    knex('answer').del()
-    .then(function () {
-      var time = mmt("2018-11-29T10:10:10+08:00")
-      var answers = _.range(TOTAL_COUNT).map(function(idx){
-        var c_at  = times2[idx].add(_.random(100,2500),'m')
-        var content = doc[idx].answer
-        times3.push(c_at)
-        return {
-          id: idx, 
-          content: content.replace(/\n/g,'\n\n'),
-          author_id: 
-          doc[idx].by_admin ? 0 : (
-              _.random(0,4) > 2 ? 0 : _.random(2,10)
-          ), 
-          question_id: idx,
-          created_at:c_at.format(),
-          censor_status: 'pass',
-          total_zhichi: _.random(0,12), 
-          total_thanks: _.random(0,2), 
-          is_selected: _.random(0,5) > 3
-        }
-      })
+var users=[], questions=[], answers=[]
+function createUser(idx){
+  var id = uid()
+  users.push(id)
+  return {
+    id: id,
+    wx_id: 'wx_' + uid(),
+    name: slug(),
+    created_at: times[idx] ? times[idx].format() : addMoreTime().format(),
+    total_answer_zhichi: _.random(1, 10),
+    total_answer_thanks: _.random(0, 5),
+    r_type: 1 
+  }
+}
 
-      return knex('answer').insert(answers);
+function createQuestion(idx){
+    var c_at  = times[idx].add(_.random(100,2500),'m')
+    var qid = uid()
+    times_q.push(c_at)       // track for answer
+    questions.push(qid)
+    console.log(doc[idx].title)
+
+    var content = doc[idx].content||doc[idx].title
+    return {
+      id: qid,
+      author_id: doc[idx].by_admin ? users[0] : (idx > 11 ? users[_.random(1,10)] :   users[_.random(1, idx+1)] ) ,
+      content: content.replace(/\n/g,'\n\n'),
+      // content: 'question',
+      title: doc[idx].title,
+      created_at: c_at.format(),
+      censor_status:'pass',
+      total_answers: 1,
+    }
+}
+
+function createAnswer(idx) {
+
+    var c_at  = times_q[idx].add(_.random(100, 2500),'m')
+    var content = doc[idx].answer
+
+    return {
+      id: uid(), 
+      content: content.replace(/\n/g,'\n\n'),
+      // content: 'answer',
+      author_id: doc[idx].by_admin ? users[0] : (
+          _.random(0,4) > 2 ? users[0] : users[_.random(2,10)]
+      ), 
+      question_id: questions[idx],
+      created_at:c_at.format(),
+      censor_status: 'pass',
+      total_zhichi: _.random(0,6), 
+      total_thanks: _.random(0,2), 
+      is_selected: _.random(0, 5) > 3
+    }
+}
+
+function createRndAnswer() {
+
+    var idx = _.random(0, TOTAL_COUNT-1)
+    var c_at  = times_q[idx].add(_.random(100, 2500),'m')
+
+    return {
+      id: uid(), 
+      content: slug(),
+      author_id: users[_.random(1, 99)], 
+      question_id: questions[idx],
+      created_at: c_at.format(),
+      censor_status: 'pass',
+      total_zhichi: _.random(0,1), 
+      total_thanks: _.random(0,1), 
+      is_selected: 0,
+    }
+
+}
+
+function createStaff() {
+
+    return {
+      id: uid(), 
+      username :'fzbb',
+      password:'fzbb',
+      permission: 'superadmin',
+    }
+  
+}
+
+exports.seed = function(knex, Promise) {
+  console.log("SEEDING...")
+  return Promise.all([
+    knex('answer').del(),
+    knex('question').del(),
+    knex('user').del(),
+    knex('staff').del()
+    .then(function () {
+      // return knex('staff').insert(createStaff())
+      return Staff.query().insert(createStaff())
+    }),
+    knex('user')
+    .then(function () {
+      return knex('user').insert(_.range(100).map(createUser))
+    }),
+    knex('question')
+    .then(function () {
+      return knex('question').insert(_.range(TOTAL_COUNT).map(createQuestion))
+    })
+    .then(()=>{
+      Promise.all([
+        knex('answer').insert(_.range(TOTAL_COUNT).map(createAnswer)),
+        knex('answer').insert(_.range(100).map(createRndAnswer))
+      ])
     })
   ])
 

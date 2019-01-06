@@ -15,10 +15,11 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "bcrypt": "^3.0.1",
+    "bcrypt": "^3.0.3",
     "compression": "^1.7.3",
     "config": "^2.0.1",
     "cors": "^2.8.4",
+    "dayjs": "^1.7.8",
     "express": "^4.16.4",
     "express-jwt": "^5.3.1",
     "express-unless": "^0.5.0",
@@ -37,7 +38,7 @@
     "redis": "^2.8.0",
     "restc": "^0.3.2",
     "sinon": "^7.0.0",
-    "sqlite3": "^4.0.2"
+    "sqlite3": "^4.0.4"
   },
   "jest": {
     "testPathIgnorePatterns": [
