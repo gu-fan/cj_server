@@ -9,6 +9,7 @@ var ports = {
   'spam.test.js':3024,
   'staff.test.js':3025,
   'user.test.js':3026,
+  'picture.test.js':3027,
 }
 var p = 3030
 module.exports = {

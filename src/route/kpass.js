@@ -16,6 +16,7 @@ var config = {
     // 简单上传和分片，需要以下的权限，其他权限列表请看 https://cloud.tencent.com/document/product/436/14048
     allowActions: [
         'name/cos:PutObject',
+        'name/cos:PostObject',
         'name/cos:InitiateMultipartUpload',
         'name/cos:ListMultipartUploads',
         'name/cos:ListParts',
@@ -53,7 +54,7 @@ router.get('/cos', jwt.auth(), function(req, res, next) {
         if (err) {
           res.json(err)
         } else {
-          var result = tempKeys
+          var result = tempKeys || {}
           result.code = 0
           res.json(result);
         }

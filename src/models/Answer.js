@@ -33,7 +33,6 @@ class Answer extends mixin(Model, [timestamp,uid()]) {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['content'],
 
       properties: {
         id: { type: 'string' },
@@ -41,6 +40,14 @@ class Answer extends mixin(Model, [timestamp,uid()]) {
         is_deleted: { type: 'boolean'},
         is_selected: { type: 'boolean'},
         content: { type: 'string'},
+        content_json: {
+          type: 'object',
+          properties: {
+            data: {type: 'array'},
+            v: {type: 'string'},
+          }
+        },
+
         total_zhichi: { type: 'integer'},
         total_thanks: { type: 'integer'},
         total_comments: { type: 'integer'},

@@ -29,7 +29,7 @@ router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
   if (req.body.qid == null )  throw ERR.NEED_ARGUMENT
-  if (req.body.content == '')  throw ERR.NEED_CONTENT
+  if (req.body.content == '' && req.body.content_json == null)  throw ERR.NEED_CONTENT
   if (checkSpam(req.body.content)) throw ERR.IS_SPAM
   
   var question = await Question.query().findById(req.body.qid)
@@ -43,6 +43,7 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
   var answers = await Answer.query().insertGraph([{
     content: req.body.content, 
+    content_json: req.body.content_json, 
     question:{
       id: req.body.qid,
     },
@@ -167,7 +168,7 @@ router.put('/:aid', jwt.auth(), wrap(async function(req, res, next) {
   answer = await Answer
     .query()
     .patchAndFetchById(req.params.aid, 
-            {content:req.body.content, censor_status:status})
+            {content:req.body.content,content_json:req.body.content_json, censor_status:status})
       .eager('author')
 
   res.json({
