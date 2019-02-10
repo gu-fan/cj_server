@@ -12,6 +12,14 @@ const {Question, User, Answer}  = require('../models')
 const {getHotAnswers, getNewAnswers, getGoldAnswers,
        getMixedHot, getMixedNew} = require('../services/answer')
 
+router.get('/.ping', wrap(async function(req, res, next) {
+  
+  res.json({
+      msg:"ping",
+      code:0,
+  })
+}))
+
 router.get('/answers', wrap(async function(req, res, next) {
   var page = req.query.page || 0
 

@@ -11,6 +11,7 @@
     "test": "jest --runInBand --watch",
     "cover": "jest --coverage",
     "deploy": "sh ./deploy/dev.sh",
+    "deploy_test": "sh ./deploy/test.sh",
     "dev": "nodemon bin/www"
   },
   "dependencies": {
