@@ -7,7 +7,19 @@ const _ = require('lodash')
 
 function normContent(item){
   item.results = item.results.map((it)=>{
-    it.content = it.content.substring(0, 500)
+    if (it.content != null) {
+      it.content = it.content.substring(0, 500)
+    } else {
+      var data = it.content_json.data.filter(item=>{
+        return item.t == 'text'
+      })
+      if (data.length > 0) {
+        it.content = data[0].text
+      } else {
+        it.content = ''
+      }
+
+    }
     return it
   })
   return item
