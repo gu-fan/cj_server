@@ -7,18 +7,14 @@ const _ = require('lodash')
 
 function normContent(item){
   item.results = item.results.map((it)=>{
-    if (it.content != null) {
-      it.content = it.content.substring(0, 500)
+    if (it.content_json == null) {
+      it.content = it.content.substring(0, 400)
     } else {
-      var data = it.content_json.data.filter(item=>{
+      var txt = it.content_json.data.filter(item=>{
         return item.t == 'text'
-      })
-      if (data.length > 0) {
-        it.content = data[0].text
-      } else {
-        it.content = ''
-      }
-
+      }).map(item=>{return item.text}).join('\n')
+      it.content = txt.substring(0, 400)
+      it.content_json = null
     }
     return it
   })
@@ -44,7 +40,7 @@ module.exports = {
   },
   getMixedNew(page){
     return new Promise((resolve, reject)=>{
-      var day_before = moment().subtract(30, 'day').format()
+      var day_before = moment().subtract(60, 'day').format()
       Answer.query()
           .eager('[author, question]')
           .where('censor_status', 'pass')
@@ -75,7 +71,6 @@ module.exports = {
                   return it
               })
 
-              console.log(n_a.results)
               if (n_a.results.length >6 && n_q.results.length ==2 ){
                 n_a.results.splice(1, 0, n_q.results[0])
                 n_a.results.splice(6, 0, n_q.results[1])
@@ -96,7 +91,7 @@ module.exports = {
   
   getMixedHot(page){
     return new Promise((resolve, reject)=>{
-      var day_before = moment().subtract(25, 'day').format()
+      var day_before = moment().subtract(60, 'day').format()
       Answer.query()
           .eager('[author, question]')
           .where('censor_status', 'pass')
@@ -128,7 +123,6 @@ module.exports = {
                   return it
               })
 
-              console.log(n_a.results)
               if (n_a.results.length >6 && n_q.results.length ==2 ){
                 n_a.results.splice(2, 0, n_q.results[0])
                 n_a.results.splice(6, 0, n_q.results[1])

@@ -161,12 +161,13 @@ router.post('/a', jwt.auth(), hasPermission('censor'),
 
   if (req.body.question_id == null )  throw ERR.NEED_ARGUMENT
   if (req.body.author_id == null )  throw ERR.NEED_ARGUMENT
-  if (req.body.content == null || req.body.content == '')  throw ERR.NEED_CONTENT
+  if (req.body.content == null && req.body.content_json == null )  throw ERR.NEED_CONTENT
 
   if (checkSpam(req.body.content))  throw ERR.IS_SPAM
 
   var answer = await Answer.query().insertAndFetch({
     content: req.body.content, 
+    content_json: req.body.content_json, 
     censor_status: 'pass',
     author_id: req.body.author_id,
     question_id: req.body.question_id

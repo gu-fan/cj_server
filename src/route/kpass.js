@@ -53,8 +53,10 @@ router.get('/cos', jwt.auth(), function(req, res, next) {
     }, function (err, tempKeys) {
         if (err) {
           res.json(err)
+        } else if (tempKeys == null ){
+          res.json({code:1, msg:"got empty key"});
         } else {
-          var result = tempKeys || {}
+          var result = tempKeys
           result.code = 0
           res.json(result);
         }
