@@ -28,7 +28,6 @@ describe('picture tests', () => {
       await bindUserWX(1)
 
       res = await http.get('/u/.ping')
-      console.log(res.data)
       var question = {
         title: "hello",
         content: "HELLO WORLD"
@@ -41,7 +40,6 @@ describe('picture tests', () => {
       res = await http.post('/a', {qid:qid, content_json:{v:'0',data:[{t:'text',text:"hhhh"},{t:'img',url:"https://www.vincit.fi/wp-content/uploads/2015/11/relational-documents-schema.png"}]}})
       aid = res.data.answer.id
       expect(res.data.answer.content_json.data[0].t).toBe('text')
-      console.log(res.data.answer.content_json)
     } catch (e) {
       console.log(e.response ? e.response.data : e.message)
     }
