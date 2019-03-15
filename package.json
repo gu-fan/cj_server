@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "pm2 start pm2.json",
+    "start": "pm2 start pm2.config.json",
     "debug": "DEBUG=route:* nodemon",
     "migrate": "NODE_ENV=staging ./node_modules/knex/bin/cli.js migrate:latest",
     "seed": "NODE_ENV=staging ./node_modules/knex/bin/cli.js seed:run",

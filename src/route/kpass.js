@@ -6,12 +6,12 @@ const {promisify, wrap, delay} = require('../common/promise')
 const jwt = require('../common/jwt-auth')
 
 var config = {
-    secretId: 'AKIDMTLxKSUwc7ML5C5h6LRs65g3FCg35BPO',
-    secretKey: 'tOehYDoBJCqFPJypSoxugCTVMyNZZKp5',
+    secretId: 'AKID57g4HI3AFlAPW6tnx1ayA8yfCaljtnxv',
+    secretKey: 'weJjukV7VrkPp34jFcnlUzRsBfyXu9B4',
     proxy: '',
     durationSeconds: 1800,
-    bucket: 'fzbb-1257828075',
-    region: 'ap-shanghai',
+    bucket: 'xyd-1258191884',
+    region: 'ap-guangzhou',
     allowPrefix: '*',
     // 简单上传和分片，需要以下的权限，其他权限列表请看 https://cloud.tencent.com/document/product/436/14048
     allowActions: [
