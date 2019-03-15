@@ -4,11 +4,11 @@ const { Model, mixin } = require('objection');
 const timestamp = require('./mixin/timestamp')
 const uid = require('./mixin/uid')
 
-// track the control history of answer
-class TrackA extends mixin(Model, [timestamp, uid()]) {
+// track the control history of question
+class Track extends mixin(Model, [timestamp, uid()]) {
 
   static get tableName(){
-     return 'track_a'
+     return 'track'
   } 
 
   static get jsonSchema() {
@@ -18,7 +18,7 @@ class TrackA extends mixin(Model, [timestamp, uid()]) {
       properties: {
         id: { type: 'string' },
         content: { type: 'string'},
-        reason: { type: 'string'},
+        topic: { type: 'string'},
       },
     }
   }
@@ -27,20 +27,11 @@ class TrackA extends mixin(Model, [timestamp, uid()]) {
 
     return {
 
-      answer: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: __dirname + '/Answer',
-        join: {
-          from: 'track_a.answer_id',
-          to: 'answer.id'
-        }
-      },
-
-      setter: {
+      operator: {
         relation: Model.BelongsToOneRelation,
         modelClass: __dirname + '/User',
         join: {
-          from: 'track_a.setter_id',
+          from: 'track.operator_id',
           to: 'user.id'
         }
       },
@@ -50,4 +41,4 @@ class TrackA extends mixin(Model, [timestamp, uid()]) {
 
 }
 
-module.exports = TrackA;
+module.exports = Track;

@@ -5,11 +5,10 @@ module.exports = {
   db:{
     client: 'mysql',
     connection: {
-      // host : '172.21.0.4',   // beijing
-      host : '172.17.0.14',     // shanghai
-      database: 'test',
+      host : '172.16.0.17',     // shanghai
+      database: 'api',
       user:     'root',
-      password: 'lk123456'
+      password: 'xyd12345'
     },
     pool: {
       min: 2,

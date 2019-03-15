@@ -1,10 +1,10 @@
 {
-  "name": "fzbb_server",
+  "name": "xyd_server",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon bin/www",
+    "start": "pm2 start pm2.js",
     "debug": "DEBUG=route:* nodemon",
     "migrate": "NODE_ENV=staging ./node_modules/knex/bin/cli.js migrate:latest",
     "seed": "NODE_ENV=staging ./node_modules/knex/bin/cli.js seed:run",

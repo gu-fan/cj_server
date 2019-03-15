@@ -4,11 +4,11 @@ const { Model, mixin } = require('objection');
 const timestamp = require('./mixin/timestamp')
 const uid = require('./mixin/uid')
 
-// track the control history of question
-class TrackQ extends mixin(Model, [timestamp, uid()]) {
+// track the control history of answer
+class Message extends mixin(Model, [timestamp, uid()]) {
 
   static get tableName(){
-     return 'track_q'
+     return 'message'
   } 
 
   static get jsonSchema() {
@@ -17,8 +17,13 @@ class TrackQ extends mixin(Model, [timestamp, uid()]) {
       required: ['content'],
       properties: {
         id: { type: 'string' },
+
         content: { type: 'string'},
-        reason: { type: 'string'},
+        type: { type: 'string'},
+
+        have_read: { type: 'boolean'},
+        is_deleted: { type: 'boolean'},
+        
       },
     }
   }
@@ -27,20 +32,19 @@ class TrackQ extends mixin(Model, [timestamp, uid()]) {
 
     return {
 
-      question: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: __dirname + '/Question',
-        join: {
-          from: 'track_q.question_id',
-          to: 'question.id'
-        }
-      },
-
-      setter: {
+      from: {
         relation: Model.BelongsToOneRelation,
         modelClass: __dirname + '/User',
         join: {
-          from: 'track_q.setter_id',
+          from: 'message.from_id',
+          to: 'user.id'
+        }
+      },
+      to: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: __dirname + '/User',
+        join: {
+          from: 'message.to_id',
           to: 'user.id'
         }
       },
@@ -50,4 +54,4 @@ class TrackQ extends mixin(Model, [timestamp, uid()]) {
 
 }
 
-module.exports = TrackQ;
+module.exports = Message;

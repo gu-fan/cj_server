@@ -22,18 +22,17 @@ class Staff extends mixin(Model, [
         id: { type: 'string' },
         username: { type: 'string'},
         password: { type: 'string'},
-        permission: { type:[ 'string', 'null']},
-        avatar: { type:[ 'string', 'null']},
         phone: { type:[ 'string', 'null']},
         email: { type:[ 'string', 'null']},
+
+        avatar: { type:[ 'string', 'null']},
+
+        permission: { type:[ 'string', 'null']},
+
       },
     };
   }
 
-  static get relationMappings() {
-    return {
-    };
-  }
 
 };
 

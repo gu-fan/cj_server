@@ -1,7 +1,7 @@
 module.exports = {
   apps : [
       {
-        name: "fzbb_ask",
+        name: "xyd_server",
         script: "./bin/www",
         watch: true,
         env: {

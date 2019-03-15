@@ -107,8 +107,8 @@ router.get('/check', jwt.auth(), wrap(async function(req, res, next) {
 }))
 
 
-const APPID='wx40ff346e15e8d454'
-const SECRECT='c68cb819032df23248de5278015a4c77'
+const APPID='wxa8b52e8c2ba72a84'
+const SECRECT='6fc9000524b18f8e68397f85bf7c4863'
 router.use('/wx_code', wrap(async function(req, res, next) {
   fly.get(`https://api.weixin.qq.com/sns/jscode2session?appid=${APPID}&secret=${SECRECT}&js_code=${req.query.code}&grant_type=authorization_code`
   )
@@ -122,12 +122,8 @@ router.use('/wx_code', wrap(async function(req, res, next) {
         //   id:data.openid,
         //   ss:data.session_key,
 
-        var u = await User.query().findOne({wx_id:data.openid})
-                  .eager('[questions(count), answers(count)]',{
-                    count:(builder)=>{
-                        builder.count()
-                    }
-                  })
+        var u = await User.query().findOne({wechat_id:data.openid})
+                  .eager('[posts(count)]')
         
         console.log(0)
 
@@ -135,7 +131,7 @@ router.use('/wx_code', wrap(async function(req, res, next) {
           u = await User
             .query()
             .insert({
-              wx_id: data.openid
+              wechat_id: data.openid
             })
           console.log(1)
 
@@ -188,17 +184,15 @@ router.use('/wx_code', wrap(async function(req, res, next) {
 
 
 router.use('/wx_code_fake', wrap(async function(req, res, next) {
-      var u = await User.query().findOne({wx_id:req.body.wx_id})
-                .eager('[questions(count), answers(count)]',{
-                  count:(builder)=>{
-                      builder.count()
-                  }
-                })
+      if (req.body.wechat_id == null) throw ERR.NEED_ARGUMENT
+
+      var u = await User.query().findOne({wechat_id:req.body.wechat_id})
+                .eager('[posts(count)]')
       if (u == null) {
         u = await User
           .query()
           .insert({
-            wx_id: req.body.wx_id
+            wechat_id: req.body.wechat_id
           })
 
         var t = await jwt.signId(u.id)

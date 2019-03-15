@@ -4,6 +4,8 @@ const timestamp = require('./mixin/timestamp')
 const uid = require('./mixin/uid')
 const password = require('./mixin/password')
 
+const UserDetail = require('./UserDetail')
+
 class User extends mixin(Model, [
     timestamp,
     password(),
@@ -15,6 +17,19 @@ class User extends mixin(Model, [
     return 'user';
   }
 
+  async $afterInsert(queryContext) {
+    await super.$afterInsert(queryContext);
+    await UserDetail
+            .query(queryContext.transaction)
+            .insert({user_id: this.id});
+  }
+
+  static get namedFilters() {
+    return {
+      safe: builder => builder.select('id','name','words','avatar','background','wechat_id')
+    }
+  }
+
   static get jsonSchema() {
     return {
       type: 'object',
@@ -22,22 +37,22 @@ class User extends mixin(Model, [
 
       properties: {
         id: { type: 'string' },
+
         name: { type: 'string'},
+        words: { type: 'string'},
+
         avatar: { type:[ 'string', 'null']},
+        background: { type:[ 'string', 'null']},
+
         phone: { type:[ 'string', 'null']},
-        password: { type: 'string'},
-        wx_id: { type:[ 'string', 'null']},
+        password: { type:[ 'string', 'null']},
+        wechat_id: { type:[ 'string', 'null']},
 
-        total_answer_fandui: { type: 'integer'},
-        total_answer_zhichi: { type: 'integer'},
-        total_answer_thanks: { type: 'integer'},
-        total_points: { type: 'integer'},
+        r_type: {type:'string'}, 
 
-        checkpoint_at: { type:[ 'string', 'null']},
+        is_deleted: { type: 'boolean'},
 
         permission: { type:[ 'string', 'null']},
-
-        r_type: {type:'integer'}, 
 
       },
     };
@@ -45,63 +60,36 @@ class User extends mixin(Model, [
 
   static get relationMappings() {
     return {
-      questions: {
+      // XXX: tags 
+      posts: {
         relation: Model.HasManyRelation,
-        modelClass: __dirname + '/Question',
+        modelClass: __dirname + '/Post',
         join: {
           from: 'user.id',
-          to: 'question.author_id'
+          to: 'post.author_id'
         }
       },
-      answers: {
-        relation: Model.HasManyRelation,
-        modelClass: __dirname + '/Answer',
+      tags: {
+        relation: Model.ManyToManyRelation,
+        modelClass: __dirname + '/Tag',
+        join: {
+          from: 'tag.id',
+          through: {
+            from: 'tag_of_user.tid',
+            to: 'tag_of_user.uid',
+            extra: ["count"],
+          },
+          to: 'user.id'
+        }
+      },
+      detail: {
+        relation: Model.HasOneRelation,
+        modelClass: __dirname + '/UserDetail',
         join: {
           from: 'user.id',
-          to: 'answer.author_id'
+          to: 'user_detail.user_id'
         }
       },
-      // following: {
-      //   relation: Model.ManyToManyRelation,
-      //   modelClass: __dirname + '/User',
-      //   join: {
-      //     from: 'user.id',
-      //     through: {
-      //       from: 'user_follow.from_id',
-      //       to: 'user_follow.to_id'
-      //     },
-      //     to: 'user.id'
-      //   }
-      // },
-      // follower: {
-      //   relation: Model.ManyToManyRelation,
-      //   modelClass: __dirname + '/User',
-      //   join: {
-      //     from: 'user.id',
-      //     through: {
-      //       from: 'user_follow.to_id',
-      //       to: 'user_follow.from_id'
-      //     },
-      //     to: 'user.id'
-      //   }
-      // },
-      // point_tracks are -from and +to
-      // point_tracks_from: {
-      //   relation: Model.HasManyRelation,
-      //   modelClass: __dirname + '/PointTrack',
-      //   join: {
-      //     from: 'user.id',
-      //     to: 'point_track.from_id'
-      //   }
-      // },
-      // point_tracks_to: {
-      //   relation: Model.HasManyRelation,
-      //   modelClass: __dirname + '/PointTrack',
-      //   join: {
-      //     from: 'user.id',
-      //     to: 'point_track.to_id'
-      //   }
-      // },
     };
   }
 

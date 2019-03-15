@@ -27,6 +27,9 @@ const RAW_CODE = {
   ALREADY_IN_GROUP: {text:"已经加入该群组", http: 400},
   ALREADY_CHECKED: {text:"今天已经完成签到了", http: 400},
   IS_SPAM: {text:"请不要包含色情或敏感内容", http: 400},
+  NOT_RELATED: {text:"并没有关联", http: 400},
+  TAG_EXCEED_LIMIT_15: {text:"标签不能大于15个字", http: 400},
+  CONTENT_MIN_4: {text:"内容不能少于4个字", http: 400},
 }
 
 const ERR = Object.keys(RAW_CODE).map((name)=>{

@@ -9,8 +9,8 @@ const jwt = require('../common/jwt-auth')
 
 // help functions
 const {wrap, delay} = require('../common/promise')
-const APPID='wx40ff346e15e8d454'
-const SECRECT='c68cb819032df23248de5278015a4c77'
+const APPID='wxa8b52e8c2ba72a84'
+const SECRECT='6fc9000524b18f8e68397f85bf7c4863'
 
 router.use('/bind', jwt.auth(), 
   wrap(async function(req, res, next) {

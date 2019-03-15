@@ -53,8 +53,8 @@ module.exports = function(http){
   }
 
   async function signupAndLoginWX(idx){
-    var wx_id= 'wx_20000' + idx
-    var res = await http.post('/auth/wx_code_fake', {wx_id})
+    var wechat_id= 'wx_20000' + idx
+    var res = await http.post('/auth/wx_code_fake', {wechat_id})
     setupToken(http, res.data.t)
     return res
   }

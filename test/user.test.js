@@ -4,7 +4,7 @@ const ERR = require('../src/code').ERR_CODE
 
 const _TEST_ = require('path').basename(__filename);
 const { http, setupServer, closeServer } = require('./setup/server')(_TEST_)
-const { signup, signupAndLogin } = require('./common')(http)
+const { signup, signupAndLogin, signupAndLoginWX } = require('./common')(http)
 
 describe('user tests', () => {
   let clock
@@ -28,6 +28,17 @@ describe('user tests', () => {
     }
   })
 
+  test('signup and login with wechat ', async () => {
+    try {
+      var res = await signupAndLoginWX('A1', http)
+      expect(res.status).toBe(200)
+      var res = await signupAndLoginWX('A1', http)
+    } catch (e) {
+      console.log(e.response.data)
+      expect(e.response.data.code).toBe(ERR.PHONE_REGISTERED)
+    }
+  })
+
   test('login with username and password', async()=>{
     clock = sinon.useFakeTimers(new Date(2019,1,1))
     res = await signupAndLogin('TIME', http)
@@ -36,7 +47,7 @@ describe('user tests', () => {
 
   test('token is valid after 100s', async()=>{
     clock = sinon.useFakeTimers(new Date(2019,1,1,0,0,5))
-    res = await http.get('/u/.ping')
+      res = await http.get('/u/.ping')
     expect(res.status).toBe(200)
     expect(res.data.msg).toBe('user ping valid')
   })

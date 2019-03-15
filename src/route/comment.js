@@ -6,7 +6,7 @@ const {ERR, MSG} = require('../code')
 
 const {uid, slug} = require('../models/mixin/_uid')
 
-const {Question, User, Answer, Comment} = require('../models')
+const {Post,  User, Comment} = require('../models')
 const {getUser} = require('../services/user')
 
 const { checkSpam } = require('../common/spam')
@@ -17,7 +17,7 @@ router.get('/', jwt.auth(), wrap(async function(req, res, next) {
                           .count()
 
   res.json({
-      msg:"answers count",
+      msg:"comments count",
       count:count[0]['count(*)'],
       code:0,
   })
@@ -28,33 +28,42 @@ router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
 
-  if (req.body.aid == null || req.body.aid == '') throw ERR.NEED_ARGUMENT
-  var answer = await Answer.query().findById(req.body.aid)
+  if (req.body.pid == null || req.body.pid == '') throw ERR.NEED_ARGUMENT
+  var post = await Post.query().findById(req.body.pid)
 
-  
-  if (answer.lock_status == 'lock' ) {
+  if (post.censor_status == 'lock' ) {
      throw ERR.TARGET_LOCKED
-  // } else if (answer.censor_status == 'reject' || answer.censor_status == undefined) {
-  //    throw ERR.CENSOR_NOT_PASS
   }
 
   if (checkSpam(req.body.content)) throw ERR.IS_SPAM
 
-  var comments = await Comment.query().insertGraph([{
-      content: req.body.content, 
-      reply_id: req.body.reply_id,
-      answer:{
-        id: req.body.aid,
-      },
-      author: {
-        id: req.user.sub,
-      },
-    }], {
-      relate: true
-    })
-    .eager('[author, answer, reply_to]');
+  var cmt_reply_to, root_id, is_root = true, reply_to_id
+  if (req.body.reply_to_id != null) {
+      cmt_reply_to = await Comment.query().findById(req.body.reply_to_id)
+      if (cmt_reply_to == null) throw ERR.NOT_FOUND
 
-  var comment = comments[0]
+      // the child reply to root have no reply_to_id
+      // for display convenience
+      if (cmt_reply_to.is_root) {
+        root_id = cmt_reply_to.id
+        reply_to_id = null
+      } else {
+        root_id = cmt_reply_to.root_id
+        reply_to_id = cmt_reply_to.id
+      }
+      is_root = false
+  }
+
+  var comment = await Comment.query().insertAndFetch({
+      content: req.body.content, 
+      root_id,
+      reply_to_id,
+      is_root, 
+      post_id : req.body.pid,
+      author_id: req.user.sub,
+      censor_status: 'pass',
+    })
+    .eager('[author, post]');
 
   res.json({
       msg:"comment create",
@@ -68,7 +77,7 @@ router.get('/:cid', jwt.auth(), wrap(async function(req, res, next) {
 
   var comment = await Comment.query()
                         .findById(req.params.cid)
-                        .eager('[author, reply_to, comments, answer.question]')
+                        .eager('[author, post]')
 
   if (comment == undefined) throw ERR.NO_SUCH_TARGET
   
@@ -84,18 +93,20 @@ router.put('/:cid', jwt.auth(), wrap(async function(req, res, next) {
 
   var comment = await Comment.query()
                         .findById(req.params.cid)
-                        .eager('author')
+
   if (comment == undefined) throw ERR.NO_SUCH_TARGET
+  if (req.user.sub != comment.author_id) throw ERR.NOT_AUTHOR
   if (checkSpam(req.body.content)) throw ERR.IS_SPAM
 
-  const updatedComment = await Comment
+  comment = await Comment
     .query()
-    .patchAndFetchById(req.params.cid, {content:req.body.content});
+    .patchAndFetchById(req.params.cid, {
+      content:req.body.content
+    });
     
-
   res.json({
       msg:"comment patch",
-      updatedComment,
+      comment,
       code:0,
   })
 
@@ -115,10 +126,10 @@ router.delete('/:cid', jwt.auth(), wrap(async function(req, res, next) {
     if (!user.is_staff) throw ERR.NO_PERMISSION
   }
 
-    // await Answer
-    //   .query()
-    //   .decrement('total_comments', 1)
-    //   .where('id', comment.answer_id)
+  // await Answer
+  //   .query()
+  //   .decrement('total_comments', 1)
+  //   .where('id', comment.answer_id)
 
   const deleted = await comment
           .$query()
@@ -142,23 +153,21 @@ router.get('/:cid/like', jwt.auth(), wrap(async function(req, res, next) {
                         .findById(req.params.cid)
   if (comment == undefined) throw ERR.NO_SUCH_TARGET
 
-  var u = await comment.$relatedQuery('liked_users')
+  var u = await comment.$relatedQuery('liked_by_users')
                   .findById(req.user.sub)
 
   // check if user is liked
-  var is_like = false
+  var is_like_by_me = false
   if (u==null) {
-    is_like = false
+    is_like_by_me = false
   } else {
-    is_like = true
+    is_like_by_me = true
   }
-  // var liked_users = await comment.$relatedQuery('liked_users')
-  
+
   res.json({
       msg:"answer like got",
       total_likes: comment.total_likes,
-      is_like,
-      // liked_users,
+      is_like_by_me,
       code:0,
   })
 
@@ -170,12 +179,12 @@ router.post('/:cid/like', jwt.auth(), wrap(async function(req, res, next) {
 
   if (comment == undefined) throw ERR.NO_SUCH_TARGET
 
-  var u = await comment.$relatedQuery('liked_users')
-                        .findById(req.user.sub)
-  var is_like = true
+  var u = await comment.$relatedQuery('liked_by_users')
+                            .findById(req.user.sub)
+  var is_like_by_me = true
   
   if (u==null) {
-    await comment.$relatedQuery('liked_users')
+    await comment.$relatedQuery('liked_by_users')
     .relate({
       id: req.user.sub,
     });
@@ -188,12 +197,10 @@ router.post('/:cid/like', jwt.auth(), wrap(async function(req, res, next) {
     // do nothing
   }
 
-  var liked_users = await comment.$relatedQuery('liked_users')
-
   res.json({
       msg:"comment like set",
       total_likes: comment.total_likes,
-      is_like,
+      is_like_by_me,
       code:0,
   })
 
@@ -206,27 +213,26 @@ router.post('/:cid/dislike', jwt.auth(), wrap(async function(req, res, next) {
 
   if (comment == undefined) throw ERR.NO_SUCH_TARGET
 
-  var u = await comment.$relatedQuery('liked_users')
+  var u = await comment.$relatedQuery('liked_by_users')
                         .findById(req.user.sub)
-  var is_like = false
+  var is_like_by_me = false
   if (u==null) {
     // do nothing
   } else {
-      await comment.$relatedQuery('liked_users')
+      await comment.$relatedQuery('liked_by_users')
                    .unrelate()
                    .where('uid', req.user.sub);
       await comment.$query()
             .decrement('total_likes', 1)
+
       comment = await Comment.query()
                           .findById(req.params.cid)
   }
 
-  var liked_users = await comment.$relatedQuery('liked_users')
-
   res.json({
       msg:"comment like set",
       total_likes: comment.total_likes,
-      is_like,
+      is_like_by_me,
       code:0,
   })
 

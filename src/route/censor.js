@@ -8,7 +8,7 @@ const {uid, slug}= require('../models/mixin/_uid')
 
 const {hasPermission} = require('../common/permission')
 
-const {TrackA, TrackQ, User, Answer, Comment, Question, Staff}  = require('../models')
+const { Post, Track, User, Answer, Comment, Question, Staff}  = require('../models')
 
 const { checkSpam } = require('../common/spam')
 
@@ -50,6 +50,107 @@ const withQueryStatus = function(queryBuilder, status) {
       .orWhere('censor_status', 'reject_review')
   }
 };
+router.get('/posts', wrap(async function(req, res, next) {
+
+  var posts = await Post.query()
+          .modify(withQueryStatus, req.query.censor_status)
+          .orderBy('created_at', 'desc')
+          .page(req.query.page||0, 10)
+          .eager('author(safe)')
+
+  res.json({
+      msg:"censor post list",
+      code:0,
+      posts,
+  })
+
+}))
+// FIXED
+// this should put ahead /:qid
+//
+router.get('/p/:pid/', jwt.auth(), hasPermission('censor'),
+    wrap(async function(req, res, next) {
+
+  var post = await Post.query()
+                        .patchAndFetchById(req.params.qid, {
+                          "censor_status": "pass"
+                        })
+                        .eager('author(safe)')
+
+  if (post == undefined) throw ERR.NO_SUCH_TARGET
+
+  res.json({
+      msg:"got post censor",
+      post,
+      code:0,
+  })
+
+}))
+// CENSOR QUESTION
+router.post('/p/:pid', jwt.auth(), hasPermission('censor'), 
+  wrap(async function(req, res, next) {
+
+
+  if (req.body.action == undefined ) throw ERR.NEED_ARGUMENT
+  var post = await Post.query()
+                        .findById(req.params.pid)
+
+  if (post == undefined) throw ERR.NO_SUCH_TARGET
+
+  await Track.query()
+     .insert({
+           content: req.body.action + ':post:' + req.param.pid+":" + req.body.reason,
+           topic: 'censor',
+           operator_id: req.user.sub,
+       })
+
+  post = await Post.query()
+                        .patchAndFetchById(req.params.pid, {
+                          "censor_status": req.body.action
+                        })
+                        .eager('[author(safe)]',{
+                          desc:(builder)=>{
+                            builder.orderBy('created_at', 'desc')
+                          }
+                        })
+
+  
+  res.json({
+      msg:"post censor finish",
+      censor: post.censor_status,
+      post,
+      code:0,
+  })
+
+}))
+
+router.get('/search', jwt.auth(), wrap(async function(req, res, next) {
+
+  var posts
+  if (req.query.q == undefined){
+    posts = await Question.query()
+             .eager('author')
+            .page(req.query.page||0, 10)
+  } else {
+    posts = await Post.query()
+            .where('content','like', '%'+req.query.q+'%')
+            .eager('author')
+            .page(req.query.page||0, 10)
+            
+  }
+
+  res.json({
+      msg:"search censor post",
+      code:0,
+      q:req.query.q,
+      posts,
+  })
+
+}))
+
+//////////////////////
+// CHECKED HERE
+//////////////////////
 
 router.get('/questions', jwt.auth(), wrap(async function(req, res, next) {
 
@@ -70,54 +171,7 @@ router.get('/questions', jwt.auth(), wrap(async function(req, res, next) {
 
 }))
 
-router.get('/search', jwt.auth(), wrap(async function(req, res, next) {
 
-  var questions
-  if (req.query.q == undefined){
-    questions = await Question.query()
-             .eager('author')
-            .page(req.query.page||0, 10)
-  } else {
-    questions = await Question.query()
-            .where('title','like', '%'+req.query.q+'%')
-             .eager('author')
-            .page(req.query.page||0, 10)
-            
-  }
-
-  res.json({
-      msg:"censor question list",
-      code:0,
-      q:req.query.q,
-      questions,
-  })
-
-}))
-
-router.get('/q/:qid/answers', jwt.auth(), 
-  hasPermission('censor'),
-  wrap(async function(req, res, next) {
-
-  var question = await Question.query()
-                        .findById(req.params.qid)
-  
-  console.log(req.params.qid)
-
-  if (question == undefined) throw ERR.NO_SUCH_TARGET
-  var answers = await question.$relatedQuery('answers')
-                        .eager('[author, question]')
-                        .page(0, 5)
-                        .orderBy('created_at', 'desc')
-    console.log(question)
-    console.log(answers)
-
-  res.json({
-      msg:"got question with answers",
-      answers,
-      code:0,
-  })
-
-}))
 
 
 // CREATE QUESTION
@@ -155,36 +209,6 @@ router.post('/q', jwt.auth(), hasPermission('censor'),
 
 }))
 
-// CREATE ANSWER
-router.post('/a', jwt.auth(), hasPermission('censor'),
-  wrap(async function(req, res, next) {
-
-  if (req.body.question_id == null )  throw ERR.NEED_ARGUMENT
-  if (req.body.author_id == null )  throw ERR.NEED_ARGUMENT
-  if (req.body.content == null && req.body.content_json == null )  throw ERR.NEED_CONTENT
-
-  if (checkSpam(req.body.content))  throw ERR.IS_SPAM
-
-  var answer = await Answer.query().insertAndFetch({
-    content: req.body.content, 
-    content_json: req.body.content_json, 
-    censor_status: 'pass',
-    author_id: req.body.author_id,
-    question_id: req.body.question_id
-  })
-  .eager('author');
-
-
-  res.json({
-      msg:"answer created",
-      answer,
-      code:0,
-  })
-
-
-
-}))
-
 
 router.patch('/q', jwt.auth(), hasPermission('censor'),
   wrap(async function(req, res, next) {
@@ -209,27 +233,6 @@ router.patch('/q', jwt.auth(), hasPermission('censor'),
 
 
 }))
-
-router.patch('/a', jwt.auth(), hasPermission('censor'),
-  wrap(async function(req, res, next) {
-
-  if (checkSpam(req.body.content))  throw ERR.IS_SPAM
-
-  var answer = await Answer.query().patchAndFetchById(req.body.id,  {
-    content: req.body.content, 
-  })
-  .eager('author');
-
-  res.json({
-      msg:"answer patched",
-      answer,
-      code:0,
-  })
-
-
-
-}))
-
 
 
 // FIXED
@@ -299,111 +302,6 @@ router.post('/q/:qid', jwt.auth(), hasPermission('censor'),
 }))
 
 
-// CENSOR ANSWER
-router.post('/a/:aid', jwt.auth(), hasPermission('censor'),
-  wrap(async function(req, res, next) {
-    
-  if (req.body.action == undefined) throw ERR.NEED_ARGUMENT
-
-  await TrackA.query()
-     .insert({
-           answer_id:req.params.aid,
-           content: req.body.action, 
-           reason: req.body.reason, 
-           setter_id: null
-       })
-
-  await Answer.query()
-      .findById(req.params.aid)
-      .patch({
-        "censor_status": req.body.action
-      })
-  var answer = await Answer
-      .query()
-      .findById(req.params.aid)
-      .eager('[author, question, tracks(desc).setter]',{
-        desc:(builder)=>{
-          builder.orderBy('created_at', 'desc')
-        }
-      })
-
-  if (answer == undefined) throw ERR.NO_SUCH_TARGET
-  
-  res.json({
-      msg:"answer censor finish",
-      answer,
-      code:0,
-  })
-
-}))
-
-router.get('/a/:aid', hasPermission('censor'), wrap(async function(req, res, next) {
-
-  var answer = await Answer.query()
-                  .patchAndFetchById(req.params.aid, {
-                    "censor_status": "pass"
-                  })
-             .eager('[author, question]')
-
-  if (answer == undefined) throw ERR.NO_SUCH_TARGET
-
-  var tracks = await answer.$relatedQuery('tracks')
-     .insertAndFetch({content:'pass', setter_id:null})
-
-  
-  res.json({
-      msg:"got answer censor track",
-      answer,
-      tracks,
-      code:0,
-  })
-
-}))
-
-
-router.get('/answers', jwt.auth(), hasPermission('censor'),
-  wrap(async function(req, res, next) {
-
-  var answers = await Answer.query()
-          .modify(withQueryContent, req.query.title)
-          .modify(withQueryStatus, req.query.censor_status)
-          // .whereNull('censor_status')
-          // .orWhere('censor_status', 'reject_review')
-          .orderBy("created_at", "DESC")
-          .page(req.query.page||0, 10)
-             .eager('[author, question]')
-
-  res.json({
-      msg:"censor question list",
-      code:0,
-      answers,
-  })
-
-}))
-
-router.get('/answer_search', jwt.auth(), wrap(async function(req, res, next) {
-
-  var answers
-  if (req.query.q == undefined){
-    answers = await Answer.query()
-             .eager('[author, question]')
-            .page(req.query.page||0, 10)
-  } else {
-    answers = await Answer.query()
-            .where('content','like', '%'+req.query.q+'%')
-             .eager('[author, question]')
-            .page(req.query.page||0, 10)
-            
-  }
-
-  res.json({
-      msg:"censor answer search list",
-      code:0,
-      q:req.query.q,
-      answers,
-  })
-
-}))
 
 const withQueryName = function(queryBuilder, name) {
   if (name) {
@@ -456,7 +354,7 @@ router.post('/user', jwt.auth(),
             password: req.body.password,
             phone: req.body.phone,
             avatar: req.body.avatar,
-            r_type: 1,
+            r_type: "web",
           })
 
   res.json({
@@ -477,7 +375,7 @@ router.patch('/user/:uid', jwt.auth(),
             password: req.body.password,
             phone: req.body.phone,
             avatar: req.body.avatar,
-            r_type: 1,
+            r_type: "web",
           })
 
   res.json({

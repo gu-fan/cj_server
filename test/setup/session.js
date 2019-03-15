@@ -18,15 +18,21 @@ class Session {
     await knex.schema
             .dropTableIfExists('knex_migrations')
             .dropTableIfExists('knex_migrations_lock')
-            .dropTableIfExists('user')
-            .dropTableIfExists('question')
-            .dropTableIfExists('answer')
-            .dropTableIfExists('comment')
-            .dropTableIfExists('user_like_comment')
-            .dropTableIfExists('user_like_answer')
-            .dropTableIfExists('track_q')
-            .dropTableIfExists('track_a')
+            .dropTableIfExists('banner')
+            .dropTableIfExists('tag')
+            .dropTableIfExists('tag_topic')
+            .dropTableIfExists('post_with_tag')
+            .dropTableIfExists('tag_of_user')
+            .dropTableIfExists('message')
+            .dropTableIfExists('track')
             .dropTableIfExists('staff')
+            .dropTableIfExists('user_like_comment')
+            .dropTableIfExists('user_like_post')
+            .dropTableIfExists('comment')
+            .dropTableIfExists('post')
+            .dropTableIfExists('user_detail')
+            .dropTableIfExists('user')
+
   }
 }
 

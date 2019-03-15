@@ -52,11 +52,10 @@ function check_spamFast(content){
     // console.log("===========")
     // console.log(content)
     // console.log(hits)
-    // console.log(Object.keys(hits))
-    return Object.keys(hits).length > 0
+    return [Object.keys(hits), Object.keys(hits).length > 0]
   } catch (e) {
     console.log(e)
-    return false
+    return [null, false]
   }
 
 }
@@ -84,51 +83,76 @@ function check_spamRegExp(content){
 
 function check_spamADRegExp(content){
   try {
-
+    var word = null
     var k = ad_words.some(re=>{
-      return re.test(content)
+      if (re.test(content)) {
+        word = re
+        return true
+      } else {
+        return false
+      }
     })
 
-    return k
+    return [word, k]
 
   } catch (e) {
     console.log(e)
-    return false
-    
+    return [null, false]
   }
-
 }
 
 function check_spamPornRegExp(content){
   try {
-
+    var word = null
     var k = porn_words.some(re=>{
-      return re.test(content)
+      if (re.test(content)) {
+        word = re
+        return true
+      } else {
+        return false
+      }
     })
 
-    return k
+    return [word, k]
 
   } catch (e) {
     console.log(e)
-    return false
-    
+    return [null, false]
   }
+
 }
 
 function checkSpam(content){
   if (content == '' || content == null) return false
-  if (check_spamADRegExp(content) || check_spamPornRegExp(content) || check_spamFast(content)) {
+  if (check_spamADRegExp(content)[1] || check_spamPornRegExp(content)[1] || check_spamFast(content)[1]) {
     return true
   } else {
     return false
   }
 }
+function checkSpamExact(content){
+  if (content == '' || content == null) return false
+
+  var result1 =check_spamADRegExp(content) 
+  if (result1[1]) {
+    return result1
+  } else {
+    var result2 = check_spamPornRegExp(content) 
+    if (result2[1]) {
+      return result2
+    } else {
+      var result3 = check_spamFast(content) 
+      if (result3[1]) {
+        return result3
+      } else {
+        return [null, false]
+      }
+    }
+    return [null, false]
+  }
+}
 
 module.exports = {
   checkSpam,
-  check_spamFast,
-  check_spamRegExp,
-  check_spamIndex,
-  check_spamADRegExp,
-  check_spamPornRegExp
+  checkSpamExact,
 }

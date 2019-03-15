@@ -12,6 +12,10 @@ module.exports = {
           secret:key,
           credentialsRequired: false
         }),     // sync middleware
+  auth_only: ()=>auth({
+          secret:key,
+          credentialsRequired: true
+        }),     // sync middleware
   sign: (pay,opt)=>sign(pay, key, opt),  // async 
   signId: (id, opt) => sign({sub:id},key,{expiresIn:"15d"}),
   verify: token=>verify(token, key),     // async

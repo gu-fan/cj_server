@@ -10,6 +10,7 @@ const MSG_OBJ = {
   // USER_BANNED_7: {text:"用户被禁言7天"},
   // USER_BANNED_INF: {text:"用户被永久禁言"},
 
+  POST_SUCCESS: {text:"发布成功"},
   QUESTION_SUCCESS: {text:"成功发布问题"},
   ANSWER_SUCCESS: {text:"成功发布回答"},
   COMMENT_SUCCESS: {text:"成功发布评论"},
