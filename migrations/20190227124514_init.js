@@ -145,10 +145,10 @@ exports.up = function(knex, Promise) {
       // this should be updated by timed script
       table.integer('total_posts').unsigned().defaultTo(0)
 
-      table.integer('tag_topic_id').unsigned().nullable()
+      table.integer('tag_topic_id')
            .references('id')
            .inTable('tag_topic')
-           .onDelete('CASCADE')
+           .onDelete('NO ACTION')
 
     })
 
