@@ -132,7 +132,6 @@ exports.up = function(knex, Promise) {
       table.timestamps()
 
     })
-
     .createTable('tag', table=>{
       table.string('id', 50).primary()
       // table.increments('id').primary()
@@ -145,13 +144,11 @@ exports.up = function(knex, Promise) {
       // this should be updated by timed script
       table.integer('total_posts').unsigned().defaultTo(0)
 
-      table.string('tag_topic_fk_id')
+      table.string('tag_topic_id', 50)
            .references('id')
            .inTable('tag_topic')
            .onDelete('NO ACTION')
-
     })
-
     .createTable('post_with_tag', table=>{
       table.increments('id').primary();
 
