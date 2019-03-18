@@ -22,6 +22,7 @@ class Session {
             .dropTableIfExists('tag')
             .dropTableIfExists('tag_topic')
             .dropTableIfExists('post_with_tag')
+            .dropTableIfExists('tag_of_topic')
             .dropTableIfExists('tag_of_user')
             .dropTableIfExists('message')
             .dropTableIfExists('track')

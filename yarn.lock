@@ -423,6 +423,10 @@ dayjs@^1.7.8:
   version "1.7.8"
   resolved "http://registry.npm.taobao.org/dayjs/download/dayjs-1.7.8.tgz#05d288f8d4b2140110cc1519cfe317d6f1f11a3c"
 
+db-errors@^0.1.0:
+  version "0.1.1"
+  resolved "https://registry.npmjs.org/db-errors/-/db-errors-0.1.1.tgz#7fed5164f7822135ba655c73ed4f32277964920d"
+
 debug@2.6.9, debug@^2.1.2, debug@^2.2.0, debug@^2.3.3:
   version "2.6.9"
   resolved "http://registry.npm.taobao.org/debug/download/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
@@ -1588,6 +1592,12 @@ object.pick@^1.2.0, object.pick@^1.3.0:
   resolved "http://registry.npm.taobao.org/object.pick/download/object.pick-1.3.0.tgz#87a10ac4c1694bd2e1cbf53591a66141fb5dd747"
   dependencies:
     isobject "^3.0.1"
+
+objection-db-errors@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/objection-db-errors/-/objection-db-errors-1.0.0.tgz#199c11340acb68f747e84d68b3f288217e6ddc8c"
+  dependencies:
+    db-errors "^0.1.0"
 
 objection@^1.3.0:
   version "1.3.0"

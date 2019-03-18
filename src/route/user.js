@@ -55,6 +55,31 @@ router.post('/.grant', jwt.auth(), wrap(async function(req, res, next) {
 
 }))
 
+router.post('/set', jwt.auth(), wrap(async function(req, res, next) {
+
+  let {avatar, background, name} = req.body
+  if (name && name.length > 15) throw ERR.NAME_EXCEED_LIMIT_15
+
+  // assign to object only if it's valid
+  // https://stackoverflow.com/questions/11704267/in-javascript-how-to-conditionally-add-a-member-to-an-object
+  var user = await User.query()
+          .patchAndFetchById(req.user.sub, 
+          {
+            ... avatar && {avatar},
+            ... background && {background},
+            ... name && {name},
+          })
+          .pick(['id', 'name','avatar','background','created_at']);
+  
+
+  res.json({
+    msg:'user set',
+    user,
+    code:0
+  })
+
+}))
+
 // XXX: this should put before /:uid
 router.get('/checkpoint', jwt.auth(), wrap(async function(req, res, next) {
 
@@ -128,6 +153,7 @@ router.post('/:uid/thank', jwt.auth(), wrap(async function(req, res, next) {
     code:0
   })
 }))
+
 router.get('/:uid', jwt.auth(), wrap(async function(req, res, next) {
 
   var user
@@ -145,77 +171,60 @@ router.get('/:uid', jwt.auth(), wrap(async function(req, res, next) {
 
 }))
 
-router.get('/:uid/questions', jwt.auth(), wrap(async function(req, res, next) {
+// NOTE: NO DELETE FROM HERE
+router.delete('/:uid', jwt.auth(), wrap(async function(req, res, next) {
+
+  res.json({
+    msg: 'can not delete',
+    code: 0
+  })
+
+  // var user = await User.query()
+  //               .findById(req.params.uid)
+
+  // if (user == undefined) throw ERR.NO_SUCH_TARGET
+  // const numberOfDeletedRows = await User  
+  //         .query()
+  //         .deleteById(req.params.uid)
+
+  // res.json({
+  //     msg:"user delete",
+  //     numberOfDeletedRows,
+  //     code:0,
+  // })
+  
+}))
+
+
+router.get('/:uid/posts', jwt.auth(), wrap(async function(req, res, next) {
   var page = req.query.page || 0
-  var user ,questions
+  var user, posts
+
   user = await User.query()
                   .findById(req.params.uid)
 
   if (user == undefined) throw ERR.NO_SUCH_TARGET
 
-  if (req.user.sub == req.params.uid) {
-    questions = await user.$relatedQuery('questions')
-                    .eager('author')
+  if (req.user.sub == req.params.uid) { // is_author
+    posts = await user.$relatedQuery('posts')
+                    .eager('author(safe)')
+                    .orderBy('created_at', 'desc')
                     .page(page, 5)
   } else {
-    questions = await user.$relatedQuery('questions')
+    posts = await user.$relatedQuery('posts')
                     .where('censor_status', 'pass')
                     .where('is_deleted', false)
-                    .eager('author')
+                    .orderBy('created_at', 'desc')
+                    .eager('author(safe)')
                     .page(page, 5)
   }
   
   res.json({
-    msg:'user questions got',
-    questions,
+    msg:'user posts got',
+    posts,
     code:0
   })
+
 }))
-
-router.get('/:uid/answers', jwt.auth(), wrap(async function(req, res, next) {
-
-  var page = req.query.page || 0
-  var user ,answers
-    user = await User.query()
-                  .findById(req.params.uid)
-
-  if (req.user.sub == req.params.uid) {
-    answers = await user.$relatedQuery('answers')
-                  .eager('[author, question]')
-                  .page(page, 5)
-  } else {
-    answers = await user.$relatedQuery('answers')
-                .eager('[author, question]')
-                .where('is_deleted', false)
-                .where('censor_status', 'pass')
-                .page(page, 5)
-  }
-  
-  res.json({
-    msg:'user answers got',
-    answers,
-    code:0
-  })
-}))
-
-router.delete('/:uid', jwt.auth(), wrap(async function(req, res, next) {
-
-  var user = await User.query()
-                .findById(req.params.uid)
-
-  if (user == undefined) throw ERR.NO_SUCH_TARGET
-  const numberOfDeletedRows = await User  
-          .query()
-          .deleteById(req.params.uid)
-
-  res.json({
-      msg:"user delete",
-      numberOfDeletedRows,
-      code:0,
-  })
-  
-}))
-
-
 
 module.exports = router

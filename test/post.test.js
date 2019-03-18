@@ -131,5 +131,94 @@ describe('user tests', () => {
   })
 
 
+  test('post with tags', async () => {
+    expect.assertions(19)
+
+    try {
+      res = await http.post('/p', {content:'hello',
+        content_json: {
+          tags: ['aaaa', 'bbbb', 'cccc']
+        }
+      })
+      pid = res.data.post.id
+
+      res = await http.get('/t/hot')
+      expect(res.data.tags.plain.length).toBe(3)
+
+      res = await http.get('/u/.ping')
+      expect(res.data.user.tags.length).toBe(3)
+
+      res = await http.get('/p/'+pid)
+      expect(res.data.post.tags.length).toBe(3)
+
+      res = await http.post('/p', {content:'hello',
+        content_json: {
+          tags: ['dddd', 'bbbb', 'eeee']
+        }
+      })
+      pid = res.data.post.id
+
+      res = await http.get('/t/hot')
+      expect(res.data.tags.plain.length).toBe(5)
+
+      res = await http.get('/u/.ping')
+      expect(res.data.user.tags.length).toBe(3)
+      expect(res.data.user.tags[0].name).toBe('bbbb')
+      expect(res.data.user.tags[0].count).toBe(2)
+
+      res = await http.get('/p/'+pid)
+      expect(res.data.post.tags.length).toBe(3)
+
+
+
+      await signupAndLogin('test3')
+
+      res = await http.post('/p', {content:'hello3',
+        content_json: {
+          tags: ['aaaa', 'bbbb', 'kkkk']
+        }
+      })
+      pid = res.data.post.id
+
+      res = await http.get('/t/hot')
+      expect(res.data.tags.plain.length).toBe(6)
+
+      res = await http.get('/u/.ping')
+      expect(res.data.user.tags.length).toBe(3)
+
+      res = await http.get('/p/'+pid)
+      expect(res.data.post.tags.length).toBe(3)
+      expect(res.data.post.tags[0].name).toBe('aaaa')
+      expect(res.data.post.tags[0].total_posts).toBe(2)
+      expect(res.data.post.tags[1].name).toBe('bbbb')
+      expect(res.data.post.tags[1].total_posts).toBe(3)
+      expect(res.data.post.tags[2].name).toBe('kkkk')
+      expect(res.data.post.tags[2].total_posts).toBe(1)
+
+      try {
+        res = await http.post('/p', {content:'hello3',
+          content_json: {
+            tags: ['11111111111111111111111111', 'bbbb', 'kkkk']
+          }
+        })
+      } catch (e) {
+        expect(e.response.data.code).toBe(ERR.TAG_EXCEED_LIMIT_15)
+      }
+
+      try {
+        res = await http.post('/p', {content:'hello3',
+          content_json: {
+            tags: ['11', 'bbbb', 'kkkk','dddd']
+          }
+        })
+      } catch (e) {
+        expect(e.response.data.code).toBe(ERR.POST_LIMIT_3_TAG)
+      }
+      
+    } catch (e) {
+      console.log(e.response ? e.response.data : e)
+    }
+
+  })
 
 })

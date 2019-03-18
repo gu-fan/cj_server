@@ -5,6 +5,7 @@ const compression = require('compression');
 const cors = require('cors');
 const logger = require('morgan')
 const restc = require('restc');
+const path = require('path')
 
 const app = express()
 
@@ -19,6 +20,8 @@ app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(restc.express());
+app.use('/tmp',  express.static(path.join(__dirname, '../tmp')))
+
 
 const config = require('config')
 const { model } = require('./models')

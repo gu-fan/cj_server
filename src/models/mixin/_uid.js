@@ -34,6 +34,11 @@ function shortime(){
   var timestamp =pad((d.getTime()&0xFFFFFF).toString(36), 5)
   return timestamp
 }
+function longtime(){
+  var d = new Date()
+  var timestamp =pad((d.getTime()&0xFFFFFFFF).toString(36), 8)
+  return timestamp
+}
 
 var c = 0,
   blockSize = 4,
@@ -75,8 +80,12 @@ function fingerprint () {
 function uid(){
   return uid2(1) + shortime() + fingerprint() + counter() + uid2(4)
 }
+
+function uid_time(){
+  return longtime() +  uid2(1) + fingerprint() + counter() + uid2(4)
+}
 function slug(){
   return shortime().slice(-2) + fingerprint().slice(-1) +  safeCounter().toString(36).slice(-4) + uid2(3)
 }
 
-module.exports = {uid, slug};
+module.exports = {uid, uid_time, slug};

@@ -6,10 +6,11 @@ const {ERR, MSG} = require('../code')
 
 const {uid, slug}= require('../models/mixin/_uid')
 
-const {Question,Post, User, Answer}  = require('../models')
+const {Post, User, Tag}  = require('../models')
 
 const {getHotAnswers, getNewAnswers, getGoldAnswers,
        getMixedHot, getMixedNew} = require('../services/answer')
+const _ = require('lodash')
 
 router.get('/.ping', wrap(async function(req, res, next) {
   
@@ -47,10 +48,27 @@ router.get('/posts', wrap(async function(req, res, next) {
           .where('censor_status', 'pass')
           .where('is_deleted', false)
           .where('is_public', true)
-          .eager('author(safe)')
+          .eager('[author(safe)]')
           .orderBy('created_at', 'desc')
           .page(page, 5)
-
+  posts.results.map(item=>{
+    if (_.random(0,5)>1) {
+      if (_.random(0,3)>1) {
+        item.total_likes = _.random(0,6)
+        item.total_comments = _.random(0,3)
+        item.total_shares = _.random(0,2)
+      } else {
+        item.total_likes = _.random(0,200)
+        item.total_comments = _.random(0,80)
+        item.total_shares = _.random(0,20)
+      }
+    } else {
+      item.total_likes = _.random(10,600)
+      item.total_comments = _.random(10,300)
+      item.total_shares = _.random(0,100)
+    }
+    return item
+  })
 
   res.json({
       msg:"post list",
@@ -60,72 +78,19 @@ router.get('/posts', wrap(async function(req, res, next) {
 
 }))
 
-//////////////////////
-// CHECKED HERE
-//////////////////////
+router.get('/tags', wrap(async function(req, res, next) {
 
-router.get('/answers', wrap(async function(req, res, next) {
-  var page = req.query.page || 0
+  var seed = parseInt(req.query.seed) || 0
+  var tags = await Tag.query()
+          .orderBy('total_posts', 'desc')
+          .limit(50)
+  var len = tags.length / 5
+  tags = tags.slice(seed*len, (seed+1)*len)
 
-  var new_answers = await getNewAnswers(page)
-  var hot_answers = await getHotAnswers(page)
-  var gold_answers = await getGoldAnswers(page)
-
-  var newest = await getMixedNew(page)
-  var hottest = await getMixedHot(page)
-  
   res.json({
-      msg:"answerlist",
+      msg:"tag list",
       code:0,
-      new_answers,
-      hot_answers,
-      gold_answers,
-      newest,
-      hottest,
-      page,
-  })
-
-}))
-
-router.get('/gold_answers', wrap(async function(req, res, next) {
-  var page = req.query.page || 0
-  var gold_answers = await getGoldAnswers(page);
-  res.json({
-      msg:"answerlist gold",
-      code:0,
-      gold_answers,
-      page,
-  })
-
-}))
-router.get('/new_answers', wrap(async function(req, res, next) {
-  var page = req.query.page || 0
-
-  var new_answers = await getNewAnswers(page);
-  var newest = await getMixedNew(page)
-  
-  res.json({
-      msg:"answerlist new",
-      code:0,
-      new_answers,
-      newest,
-      page,
-  })
-
-}))
-
-router.get('/hot_answers', wrap(async function(req, res, next) {
-  var page = req.query.page || 0
-
-  var hot_answers = await getHotAnswers(page);
-  var hottest = await getMixedHot(page)
-  
-  res.json({
-      msg:"answerlist hot",
-      code:0,
-      hot_answers,
-      hottest,
-      page,
+      tags,
   })
 
 }))

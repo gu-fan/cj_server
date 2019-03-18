@@ -29,6 +29,8 @@ const RAW_CODE = {
   IS_SPAM: {text:"请不要包含色情或敏感内容", http: 400},
   NOT_RELATED: {text:"并没有关联", http: 400},
   TAG_EXCEED_LIMIT_15: {text:"标签不能大于15个字", http: 400},
+  NAME_EXCEED_LIMIT_15: {text:"名字不能大于15个字", http: 400},
+  POST_LIMIT_3_TAG: {text:"动态不能超过3个标签", http: 400},
   CONTENT_MIN_4: {text:"内容不能少于4个字", http: 400},
 }
 

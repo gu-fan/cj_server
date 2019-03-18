@@ -6,6 +6,7 @@ const {ERR, MSG} = require('../code')
 
 const { User, Tag, TagTopic, Post }  = require('../models')
 const { checkSpam,checkSpamExact } = require('../common/spam')
+const {relateTagNameWithPost,relateTagWithUser} = require('../services/tag')
 
 module.exports = router
 
@@ -105,7 +106,7 @@ router.post('/set_topic',  wrap(async function(req, res, next) {
   if (req.body.topic == '' || req.body.topic == null) 
     throw ERR.NEED_CONTENT
 
-  var topic = await TagTopic.query()
+  let topic = await TagTopic.query()
                           .findOne({name: req.body.topic})
 
   if (topic == null) {
@@ -113,25 +114,23 @@ router.post('/set_topic',  wrap(async function(req, res, next) {
                     .insert({name: req.body.topic})
   }
 
-  var tag = await Tag.query()
+  let tag = await Tag.query()
                       .findOne({name: req.body.tag})
   if (tag == null) {
     tag = await Tag.query()
       .insert({
         name: req.body.tag,
-        tag_topic_id: topic.id,
-      })
-  } else {
-    tag = await tag.$query()
-      .patchAndFetch({
-        tag_topic_id: topic.id,
       })
   }
+  await tag
+      .$relatedQuery('topics')
+      .relate(topic.id)
 
+  tag = await tag.$query()
+                .eager('topics')
 
   res.json({
       msg:"tag topic set",
-      topic,
       tag,
       code:0,
   })
@@ -146,32 +145,34 @@ router.post('/unset_topic',  wrap(async function(req, res, next) {
     throw ERR.NEED_CONTENT
 
 
-  var topic = await TagTopic.query()
+  let topic = await TagTopic.query()
                           .findOne({name: req.body.topic})
 
   if (topic == null) {
     throw ERR.NOT_FOUND
   }
 
-  var tag = await Tag.query()
+  let tag = await Tag.query()
                           .findOne({name: req.body.tag})
+                          .eager('topics')
 
+  console.log(tag.topics)
   if (tag == null) {
     throw ERR.NOT_FOUND
-  } else if (tag.tag_topic_id != topic.id){ 
-    throw ERR.NOT_RELATED
   } else {
-    tag = await tag.$query()
-      .patchAndFetch({
-        tag_topic_id: null,
-      })
+    await tag.$relatedQuery('topics')
+              .unrelate()
+              .where('tag_topic.id', topic.id);
+    console.log('unrelate')
+    console.log(topic.id)
+    console.log(tag.id)
   }
 
-  
+  tag = await tag.$query()
+                .eager('topics')
 
   res.json({
       msg:"tag topic unset",
-      topic,
       tag,
       code:0,
   })
@@ -180,9 +181,10 @@ router.post('/unset_topic',  wrap(async function(req, res, next) {
 
 router.get('/tags',  wrap(async function(req, res, next) {
 
+  var page = req.query.page || 0
   var tags = await Tag.query()
                         .orderBy('total_posts', 'desc')
-                        .page(10)
+                        .page(page, 10)
 
   res.json({
       msg:"tags get",
@@ -206,50 +208,15 @@ router.post('/set_post', jwt.auth(), wrap(async function(req, res, next) {
     throw ERR.NOT_FOUND
   }
 
-  var tag = await Tag.query()
-                      .findOne({name: req.body.tag})
-  if (tag == null) {
-    tag = await Tag.query()
-      .insertAndFetch({
-        name: req.body.tag,
-        total_posts: 1,
-      })
-  } else {
-    await tag.$query()
-      .patch({total_posts:tag.total_posts+1})
-  }
+  var {tag,is_unique}= await relateTagNameWithPost(req.body.tag, post) 
 
-  // PART: SETUP POST TAGS
-  await post.$relatedQuery('tags')
-    .relate({
-      id: tag.id,
-    })
-  
   post = await Post.query()
                   .findById(req.body.pid)
                   .eager('tags')
 
 
-  // PART: SETUP USRE TAGS
-  var user = await User.query().findById(req.user.sub)
-  var u_tag = await user.$relatedQuery('tags')
-                    .findById(tag.id)
 
-  if (u_tag != null)  {
-    // XXX
-    // can not use u_tag.$query() which return Tag model
-    // should use $relateQuery() that use the through model
-    await user.$relatedQuery('tags')
-      .findById(tag.id)
-      .patch({count:u_tag.count+1})
-  } else {
-    await user.$relatedQuery('tags')
-        .relate({
-          id: tag.id,
-          count: 1,
-        })
-  }
-
+  await relateTagWithUser(tag.id, req.user.sub, is_unique)
 
   // user = await User.query().findById(req.user.sub)
   //                   .eager('tags')

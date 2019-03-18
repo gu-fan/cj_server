@@ -1,10 +1,14 @@
 const { mixin, Model } = require('objection')
+const { DbErrors } = require('objection-db-errors');
 
 const timestamp = require('./mixin/timestamp')
 const uid = require('./mixin/uid')
 
+class BaseModel extends DbErrors(Model) {
 
-class Base extends mixin(Model, [timestamp,uid()]) {
+}
+
+class Base extends mixin(BaseModel, [timestamp,uid()]) {
 
   static get namedFilters() {
     return {

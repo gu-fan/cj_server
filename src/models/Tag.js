@@ -4,13 +4,17 @@ const { Model, mixin } = require('objection');
 const timestamp = require('./mixin/timestamp')
 const uid = require('./mixin/uid')
 
-// track the control history of question
-class Tag extends mixin(Model, [timestamp, uid()]) {
+const Base = require('./Base')
+
+class Tag extends Base {
 
   static get tableName(){
      return 'tag'
   } 
 
+  // TODO:
+  // ADD: background image
+  // ADD: is_verified tag, only verified can be searched
   static get jsonSchema() {
     return {
       type: 'object',
@@ -29,13 +33,16 @@ class Tag extends mixin(Model, [timestamp, uid()]) {
   static get relationMappings() {
 
     return {
-
-      topic: {
-        relation: Model.BelongsToOneRelation,
+      topics: {
+        relation: Model.ManyToManyRelation,
         modelClass: __dirname + '/TagTopic',
         join: {
-          from: 'tag.tag_topic_id',
-          to: 'tag_topic.id'
+          from: 'tag_topic.id',
+          through: {
+            from: 'tag_of_topic.tpid',
+            to: 'tag_of_topic.tgid',
+          },
+          to: 'tag.id',
         }
       },
 

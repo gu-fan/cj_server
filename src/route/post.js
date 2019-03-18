@@ -7,6 +7,7 @@ const {ERR, MSG} = require('../code')
 const moment = require('moment')
 
 const {Post, User }  = require('../models')
+const {relateTagNameWithPost,relateTagWithUser} = require('../services/tag')
 
 // const commentRoute = require('./comment')
 
@@ -14,7 +15,7 @@ const { getUser } = require('../services/user')
 const { getAnswer } = require('../services/answer')
 const { getPost } = require('../services/post')
 
-const { checkSpam,checkSpamExact } = require('../common/spam')
+const { checkSpam, checkSpamExact } = require('../common/spam')
 const { getCount } = require('../common')
 
 router.get('/', jwt.auth(), wrap(async function(req, res, next) {
@@ -33,7 +34,6 @@ router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 
 router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
-
   if (req.body.content =='' || req.body.content == null) {
     if (req.body.content_json == null) throw ERR.NEED_CONTENT
     if (req.body.content_json.images == null) throw ERR.NEED_CONTENT
@@ -42,7 +42,10 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
   if (checkSpam(req.body.content)) throw ERR.IS_SPAM
 
-  var posts = await Post.query().insert([{
+  var tags = req.body.content_json ? req.body.content_json.tags : null
+  if (tags && tags.length > 3) throw ERR.POST_LIMIT_3_TAG
+
+  var post = await Post.query().insert({
     content: req.body.content, 
     content_json: req.body.content_json, 
     weather: req.body.weather,
@@ -53,10 +56,17 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
     author_id: req.user.sub,
     is_public: req.body.is_public || true,
     censor_status: 'pass',
-  }])
+  })
     .eager('author(safe)');
 
-  var post = posts[0]
+
+  if (tags && tags.length>0) {
+    for (var i in tags) {
+      var tagname = tags[i]
+      var {tag,is_unique} = await relateTagNameWithPost(tagname, post)
+      await relateTagWithUser(tag.id, req.user.sub, is_unique)
+    }
+  }
 
   res.json({
       post,
@@ -119,10 +129,9 @@ router.get('/:pid', jwt.auth(), wrap(async function(req, res, next) {
     })
   } else {
 
-
     var post = await Post.query()
                           .findById(req.params.pid)
-                          .eager('[author(safe)]')
+                          .eager('[author(safe),tags]')
 
     if (post == undefined) throw ERR.NO_SUCH_TARGET
 
@@ -406,9 +415,56 @@ router.get('/:pid/unset_choice', jwt.auth(), wrap(async function(req, res, next)
 
 }))
 
-////////////////////////////////////////////
-// CHECKED TO HERE
-////////////////////////////////////////////
+router.get('/:pid/comments', jwt.auth(), wrap(async function(req, res, next) {
+
+    var post = await Post.query()
+                          .findById(req.params.pid)
+                          .eager('[author(safe),tags]')
+
+    if (post == undefined) throw ERR.NO_SUCH_TARGET
+
+    if (!post.is_public) {
+      if (req.user.sub != post.author_id) throw ERR.NOT_AUTHOR
+    }
+
+    var comments = await post
+      .$relatedQuery('comments')
+      .where('is_root', true)
+      .naiveEager()     // XXX, this is slow, but can use 'limit'
+      .eager(`[author(safe), 
+                liked_by_users(byMe), 
+                child_count(count),
+                child_comments(limit5, timeDesc).[author(safe), comment_reply_to.author(safe)]]`, {
+          byMe: builder=>{
+            builder.where('uid', req.user.sub)
+          }
+        })
+        .orderBy('created_at', 'desc')
+        .page(req.query.page||0,5)
+
+    // CHECK COMMENT IS LIKE BY ME
+    // GET CHILD COUNT
+    comments.results.map((comment)=>{
+      if (comment.liked_by_users.length>0) {
+        comment.is_like_by_me = true
+      } else {
+        comment.is_like_by_me = false
+      }
+      delete comment.liked_by_users
+
+      comment.child_count = getCount(comment.child_count)
+
+    })
+
+  
+    res.json({
+        msg:"post comments got",
+        comments,
+        code:0,
+    })
+
+}))
+
 
 
 

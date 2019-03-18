@@ -29,14 +29,17 @@ class TagTopic extends mixin(Model, [timestamp, uid()]) {
     return {
 
       tags: {
-        relation: Model.HasManyRelation,
+        relation: Model.ManyToManyRelation,
         modelClass: __dirname + '/Tag',
         join: {
-          from: 'tag_topic.id',
-          to: 'tag.tag_topic_id'
+          from: 'tag.id',
+          through: {
+            from: 'tag_of_topic.tgid',
+            to: 'tag_of_topic.tpid',
+          },
+          to: 'tag_topic.id',
         }
       },
-
     }
   }
 

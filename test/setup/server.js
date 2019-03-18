@@ -2,7 +2,6 @@ const axios = require('axios')
 const { Model } = require('objection')
 
 const Session= require('./session')
-const app = require('../../src/app')
 const path = require('path')
 
 const { getPort } = require('../common/util')
@@ -24,13 +23,24 @@ async function setupTables(name){
     Model.knex(session.knex)
     await session.clearTables()
     await session.createTables()
+    return session
 }
 
 function setupServerFac(name, port){
   return async ()=>{
-    await setupTables(name)
+    var session = await setupTables(name)
+
+
+    // XXX: FIXED
+    // this db is different in test mode for app
+    // we should set env before load it
+
+    process.env.TEST_DB = name
+
+    const app = require('../../src/app')
 
     server = app.listen(port)
+
     await server.once('listening', () =>{})
   }
 }

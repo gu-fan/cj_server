@@ -4,7 +4,8 @@ const ERR = require('../src/code').ERR_CODE
 
 const _TEST_ = require('path').basename(__filename);
 const { http, setupServer, closeServer } = require('./setup/server')(_TEST_)
-const { signup, signupAndLogin, signupAndLoginWX } = require('./common')(http)
+const { login, signup, signupAndLogin, signupAndLoginWX } = require('./common')(http)
+const {logError} = require('./common/error')
 
 describe('user tests', () => {
   let clock
@@ -20,9 +21,9 @@ describe('user tests', () => {
 
   test('signup and only once', async () => {
     try {
-      var res = await signup('A1', http)
+      res = await signup('A1', http)
       expect(res.status).toBe(200)
-      var res = await signup('A1', http)
+      res = await signup('A1', http)
     } catch (e) {
       expect(e.response.data.code).toBe(ERR.PHONE_REGISTERED)
     }
@@ -30,9 +31,9 @@ describe('user tests', () => {
 
   test('signup and login with wechat ', async () => {
     try {
-      var res = await signupAndLoginWX('A1', http)
+      res = await signupAndLoginWX('A1', http)
       expect(res.status).toBe(200)
-      var res = await signupAndLoginWX('A1', http)
+      res = await signupAndLoginWX('A1', http)
     } catch (e) {
       console.log(e.response.data)
       expect(e.response.data.code).toBe(ERR.PHONE_REGISTERED)
@@ -53,7 +54,6 @@ describe('user tests', () => {
   })
 
   test('token is expired after 20d', async ()=>{
-    var res
 
     try {
       clock = sinon.useFakeTimers(new Date(2019,1,21,0,0,1))
@@ -65,5 +65,38 @@ describe('user tests', () => {
     expect(res.status).toBe(401)
     expect(res.data.code).toBe('token_expired')
   })
+
+  test('set user setting', async () => {
+    expect.assertions(11)
+    try {
+      await login('A1')
+      res = await http.post('/u/set', {avatar:'hhhh'})
+      expect(res.data.user.avatar).toBe('hhhh')
+      res = await http.post('/u/set', {background:'BBBB'})
+      expect(res.data.user.avatar).toBe('hhhh')
+      expect(res.data.user.background).toBe('BBBB')
+      res = await http.post('/u/set', {background:''})
+      expect(res.data.user.avatar).toBe('hhhh')
+      expect(res.data.user.background).toBe('BBBB')
+      res = await http.post('/u/set', {background:false})
+      expect(res.data.user.avatar).toBe('hhhh')
+      expect(res.data.user.background).toBe('BBBB')
+
+      res = await http.post('/u/set', {name:'XXXX'})
+      expect(res.data.user.avatar).toBe('hhhh')
+      expect(res.data.user.background).toBe('BBBB')
+      expect(res.data.user.name).toBe('XXXX')
+
+      try {
+        res = await http.post('/u/set', {name:'xxjaiojsidjoijfiefiajweofijaweif'})
+      } catch (e) {
+        expect(e.response.data.code).toBe(ERR.NAME_EXCEED_LIMIT_15)
+      }
+
+    } catch (e) {
+      logError(e)
+    }
+  })
+
 
 })

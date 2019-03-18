@@ -78,6 +78,7 @@ exports.up = function(knex, Promise) {
 
       table.integer('total_likes').unsigned().defaultTo(0)
       table.integer('total_comments').unsigned().defaultTo(0)
+      table.integer('total_shares').unsigned().defaultTo(0)
 
       // private, for validation tag < 3
       table.integer('total_tags').unsigned().defaultTo(0)
@@ -121,8 +122,8 @@ exports.up = function(knex, Promise) {
         .inTable('post')
         .onDelete('CASCADE')
     })
-
     .createTable('tag_topic', table=>{
+      // tag of tag
       table.string('id', 50).primary()
       // table.increments('id').primary()
       
@@ -144,10 +145,24 @@ exports.up = function(knex, Promise) {
       // this should be updated by timed script
       table.integer('total_posts').unsigned().defaultTo(0)
 
-      table.string('tag_topic_id', 50)
-           .references('id')
-           .inTable('tag_topic')
-           .onDelete('NO ACTION')
+    })
+    .createTable('tag_of_topic', table=>{
+      table.increments('id').primary();
+
+      table.unique(['tgid', 'tpid'])
+
+      table
+        .string('tgid', 50)
+        .references('id')
+        .inTable('tag')
+        .onDelete('CASCADE');
+
+      table
+        .string('tpid', 50)
+        .references('id')
+        .inTable('tag_topic')
+        .onDelete('CASCADE');
+
     })
     .createTable('post_with_tag', table=>{
       table.increments('id').primary();
@@ -349,6 +364,7 @@ exports.down = function(knex, Promise) {
     .dropTableIfExists('tag')
     .dropTableIfExists('tag_topic')
     .dropTableIfExists('post_with_tag')
+    .dropTableIfExists('tag_of_topic')
     .dropTableIfExists('tag_of_user')
     .dropTableIfExists('message')
     .dropTableIfExists('track')
