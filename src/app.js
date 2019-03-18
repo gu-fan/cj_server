@@ -19,8 +19,8 @@ app.use(cors());
 app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(restc.express());
 app.use('/tmp',  express.static(path.join(__dirname, '../tmp')))
+app.use(restc.express());
 
 
 const config = require('config')
