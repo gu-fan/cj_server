@@ -141,6 +141,13 @@ exports.up = function(knex, Promise) {
       table.timestamps()
       table.unique('name')
 
+
+      table.boolean('is_verified').defaultTo(false)
+      table.boolean('is_blocked').defaultTo(false)
+
+      table.integer('value').unsigned().defaultTo(0)
+
+
       // NOTE
       // this should be updated by timed script
       table.integer('total_posts').unsigned().defaultTo(0)

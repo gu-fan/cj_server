@@ -15,7 +15,7 @@ function normalizeUser(user){
     return user
 }
 
-const SAFE_COLUMN = ['id', 'name','avatar','background','created_at','posts','permission','tags','detail','count','content']
+const SAFE_COLUMN = ['id', 'name','avatar','background','created_at','posts','permission','tags','detail','count','content','total_points','content_json','weather','city']
 
 const EAGER_MOD = {
   limit3: builder=>builder.limit(3),
