@@ -20,8 +20,9 @@ app.use(cors());
 app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-console.log(config.tmp_path)
-app.use('/tmp',  express.static(config.tmp_path))
+if (app.get('env')!='development') {
+  app.use('/tmp',  express.static(config.tmp_path))
+}
 app.use(restc.express());
 
 
