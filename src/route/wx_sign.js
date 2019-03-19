@@ -46,7 +46,7 @@ router.post('/mini_code', jwt.auth(), wrap(async function(req, res, next) {
     throw new Error(resp.data.errcode + resp.data.errmsg)
   }
 
-  resp = await http.post(`https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${ACCESS_TOKEN}`,{scene:'test'}, {
+  resp = await http.post(`https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=${ACCESS_TOKEN}`,{scene:'test',path:req.query.path||'/pages/index/main'}, {
 	responseType:"stream"
   })
 
