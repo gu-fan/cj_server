@@ -2,6 +2,7 @@ const path = require('path')
 
 module.exports = {
   "key": "MY_STAGING",
+  tmp_path: '/home/ubuntu/public/tmp/',
   db:{
     client: 'mysql',
     connection: {

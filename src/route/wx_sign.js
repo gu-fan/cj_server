@@ -9,6 +9,7 @@ const User = require('../models/User')
 const isEmpty = require('lodash').isEmpty
 const jwt = require('../common/jwt-auth')
 const {uid_time} = require('../models/mixin/_uid')
+const config = require('config')
 
 // help functions
 const {wrap, delay} = require('../common/promise')
@@ -51,7 +52,7 @@ router.post('/mini_code', jwt.auth(), wrap(async function(req, res, next) {
 
   if (resp.headers['content-type']=='image/jpeg') {
     let _pth = uid_time() + '.png'
-    fs.writeFileSync(path.join(__dirname, '../../tmp/')+_pth, resp.data);
+    fs.writeFileSync(config.tmp_path+_pth, resp.data);
     
     res.json({
       code:0,

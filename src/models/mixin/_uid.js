@@ -36,7 +36,7 @@ function shortime(){
 }
 function longtime(){
   var d = new Date()
-  var timestamp =pad((d.getTime()&0xFFFFFFFF).toString(36), 8)
+  var timestamp =pad((d.getTime()&0xFFFFFFFFFF).toString(36), 8)
   return timestamp
 }
 

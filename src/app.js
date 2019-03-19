@@ -6,6 +6,7 @@ const cors = require('cors');
 const logger = require('morgan')
 const restc = require('restc');
 const path = require('path')
+const config = require('config')
 
 const app = express()
 
@@ -19,11 +20,11 @@ app.use(cors());
 app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/tmp',  express.static(path.join(__dirname, '../tmp')))
+console.log(config.tmp_path)
+app.use('/tmp',  express.static(config.tmp_path))
 app.use(restc.express());
 
 
-const config = require('config')
 const { model } = require('./models')
 const route = require('./route')
 const code = require('./code')

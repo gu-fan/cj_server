@@ -2,6 +2,7 @@ const path = require('path')
 
 module.exports = {
   "key": "MY_DEV_KEY",
+  tmp_path: path.join(__dirname, '../../tmp/'),
   // db:{
   //   client: 'sqlite3',
   //   connection: {

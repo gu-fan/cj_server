@@ -2,6 +2,8 @@ FROM node:10.8.0
 
 RUN mkdir -p /opt/app
 
+RUN mkdir -p /opt/tmp
+
 RUN apt-get -q update && apt-get -qy install netcat
 
 
