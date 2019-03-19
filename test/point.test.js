@@ -28,7 +28,7 @@ describe('user tests', () => {
   test('send points ', async () => {
     expect.assertions(7)
     try {
-      
+      clock = sinon.useFakeTimers(new Date(2000,1,1,10))
       await signupAndLoginWX(1)
 
         
@@ -45,6 +45,7 @@ describe('user tests', () => {
       
       res = await http.get('/u/.ping')
       var u1 = res.data.user.id
+
         
       await signupAndLoginWX(2)
       res = await http.get('/u/.ping')
@@ -59,7 +60,6 @@ describe('user tests', () => {
       res = await http.get('/u/'+u2)
       expect(res.data.user.detail.total_points).toBe(90)
 
-      clock = sinon.useFakeTimers(new Date(2000,1,1,10))
       res = await http.get('/u/checkpoint')
       expect(res.data.user.detail.total_points).toBe(91)
 

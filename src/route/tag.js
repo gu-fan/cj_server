@@ -3,6 +3,7 @@ const router = express.Router({mergeParams: true})
 const {promisify, wrap, delay} = require('../common/promise')
 const jwt = require('../common/jwt-auth')
 const {ERR, MSG} = require('../code')
+const { UniqueViolationError} = require('objection-db-errors');
 
 const { User, Tag, TagTopic, Post }  = require('../models')
 const { checkSpam,checkSpamExact } = require('../common/spam')
@@ -41,6 +42,56 @@ router.post('/',  wrap(async function(req, res, next) {
   })
 
 }))
+
+router.get('/:tid/posts', wrap(async function(req, res, next) {
+
+
+  let tag = await Tag
+                .query()
+                .findById(req.params.tid)
+
+  if (tag == undefined) throw ERR.NO_SUCH_TARGET
+
+  if (tag.is_blocked) throw ERR.TARGET_LOCKED
+
+  let page = req.query.page || 0
+  
+  let posts = await tag.$relatedQuery('posts')
+          .where('censor_status', 'pass')
+          .where('is_deleted', false)
+          .where('is_public', true)
+          .eager('[author(safe)]')
+          .orderBy('created_at', 'desc')
+          .page(page, 5)
+
+  res.json({
+      msg:"tag posts",
+      code:0,
+      posts,
+      tag,
+  })
+
+}))
+router.get('/of', wrap(async function(req, res, next) {
+
+
+  if (req.query.name == '' || req.query.name == null)
+    throw ERR.NEED_ARGUMENT
+
+  let tag = await Tag
+                .query()
+                .findOne({name: req.query.name})
+  if (tag==null) {
+    throw ERR.NOT_FOUND
+  }
+  res.json({
+    msg: 'get tag by name',
+    tag,
+    code:0,
+  })
+
+}))
+
 router.post('/check',  wrap(async function(req, res, next) {
 
   if (req.body.name == '' || req.body.name == null) 
@@ -122,9 +173,27 @@ router.post('/set_topic',  wrap(async function(req, res, next) {
         name: req.body.tag,
       })
   }
+  try {
+    
   await tag
       .$relatedQuery('topics')
       .relate(topic.id)
+  } catch (e) {
+    if (e instanceof UniqueViolationError) {
+      // skip
+      tag = await tag.$query()
+                    .eager('topics')
+
+      return res.json({
+          msg:"tag topic already set",
+          tag,
+          code:0,
+      })
+    } else {
+      throw e
+    }
+
+  }
 
   tag = await tag.$query()
                 .eager('topics')
@@ -156,16 +225,12 @@ router.post('/unset_topic',  wrap(async function(req, res, next) {
                           .findOne({name: req.body.tag})
                           .eager('topics')
 
-  console.log(tag.topics)
   if (tag == null) {
     throw ERR.NOT_FOUND
   } else {
     await tag.$relatedQuery('topics')
               .unrelate()
               .where('tag_topic.id', topic.id);
-    console.log('unrelate')
-    console.log(topic.id)
-    console.log(tag.id)
   }
 
   tag = await tag.$query()

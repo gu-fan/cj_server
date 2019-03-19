@@ -93,6 +93,9 @@ async function relateTagWithUser(tid, uid, is_unique){
       // console.log('skip')
     }
   } else {
+    let tag = await Tag.query()
+                        .findById(tid)
+
     await user.$relatedQuery('tags')
         .relate({
           id: tid,

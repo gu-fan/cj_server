@@ -3,9 +3,10 @@ const { Model, mixin } = require('objection');
 
 const timestamp = require('./mixin/timestamp')
 const uid = require('./mixin/uid')
+const Base = require('./Base')
 
 // track the control history of answer
-class Message extends mixin(Model, [timestamp, uid()]) {
+class Message extends Base {
 
   static get tableName(){
      return 'message'

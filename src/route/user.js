@@ -94,16 +94,19 @@ router.get('/checkpoint', jwt.auth(), wrap(async function(req, res, next) {
   var hr = today.diff(last, 'hours') 
 
   if (user.detail.last_checkin_at == null || (last.isBefore(today) && hr > 7) ) {
+
     user.detail = await user.detail.$query()
                 .patchAndFetch({
                   last_checkin_at:moment().format(),
                   total_points:user.detail.total_points+1,
                 })
+
     res.json({
       msg:'check success',
       user,
       code:0
     })
+
   } else {
     throw ERR.ALREADY_CHECKED
   }

@@ -4,8 +4,10 @@ const { Model, mixin } = require('objection');
 const timestamp = require('./mixin/timestamp')
 const uid = require('./mixin/uid')
 
+const Base = require('./Base')
+
 // track the control history of question
-class TagTopic extends mixin(Model, [timestamp, uid()]) {
+class TagTopic extends Base {
 
   static get tableName(){
      return 'tag_topic'
@@ -32,12 +34,12 @@ class TagTopic extends mixin(Model, [timestamp, uid()]) {
         relation: Model.ManyToManyRelation,
         modelClass: __dirname + '/Tag',
         join: {
-          from: 'tag.id',
+          from: 'tag_topic.id',
           through: {
-            from: 'tag_of_topic.tgid',
-            to: 'tag_of_topic.tpid',
+            to: 'tag_of_topic.tgid',
+            from: 'tag_of_topic.tpid',
           },
-          to: 'tag_topic.id',
+          to: 'tag.id',
         }
       },
     }

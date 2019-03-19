@@ -1,0 +1,27 @@
+version: "3.7"
+
+services:
+  mysql-db:
+    # use this
+    image: mysql:5.6
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: dev1234
+      MYSQL_DATABASE: test
+    ports:
+      - "3408:3306"
+    expose:
+      - "3408"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./mycustom.cnf:/etc/mysql/conf.d/custom.cnf
+    networks:
+      - node-network
+
+volumes:
+  db_data:
+
+networks:
+  node-network:
+    driver: bridge

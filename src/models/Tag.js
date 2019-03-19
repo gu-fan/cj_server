@@ -23,8 +23,9 @@ class Tag extends Base {
         id: { type: 'string' },
 
         name: { type: 'string'},
-
         total_posts: { type: 'integer'},
+        is_verified: {type: 'boolean'},
+        is_blocked: {type: 'boolean'},
 
       },
     }
@@ -33,16 +34,28 @@ class Tag extends Base {
   static get relationMappings() {
 
     return {
+      posts: {
+        relation: Model.ManyToManyRelation,
+        modelClass: __dirname + '/Post',
+        join: {
+          from: 'tag.id',
+          through: {
+            from: 'post_with_tag.tid',
+            to: 'post_with_tag.pid',
+          },
+          to: 'post.id',
+        }
+      },
       topics: {
         relation: Model.ManyToManyRelation,
         modelClass: __dirname + '/TagTopic',
         join: {
-          from: 'tag_topic.id',
+          from: 'tag.id',
           through: {
-            from: 'tag_of_topic.tpid',
-            to: 'tag_of_topic.tgid',
+            from: 'tag_of_topic.tgid',
+            to: 'tag_of_topic.tpid',
           },
-          to: 'tag.id',
+          to: 'tag_topic.id',
         }
       },
 

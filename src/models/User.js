@@ -5,11 +5,10 @@ const uid = require('./mixin/uid')
 const password = require('./mixin/password')
 
 const UserDetail = require('./UserDetail')
+const Base = require('./Base')
 
-class User extends mixin(Model, [
-    timestamp,
+class User extends mixin(Base, [
     password(),
-    uid(),
     uid({field:'name', type:'slug'}),
 ]) {
 
@@ -60,7 +59,6 @@ class User extends mixin(Model, [
 
   static get relationMappings() {
     return {
-      // XXX: tags 
       posts: {
         relation: Model.HasManyRelation,
         modelClass: __dirname + '/Post',
@@ -69,17 +67,20 @@ class User extends mixin(Model, [
           to: 'post.author_id'
         }
       },
+      // XXX:
+      // should have right order,
+      // or will cause contraint error
       tags: {
         relation: Model.ManyToManyRelation,
         modelClass: __dirname + '/Tag',
         join: {
-          from: 'tag.id',
+          from: 'user.id',
           through: {
-            from: 'tag_of_user.tid',
-            to: 'tag_of_user.uid',
+            from: 'tag_of_user.uid',
+            to: 'tag_of_user.tid',
             extra: ["count"],
           },
-          to: 'user.id'
+          to: 'tag.id',
         }
       },
       detail: {

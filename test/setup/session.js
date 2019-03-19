@@ -18,9 +18,6 @@ class Session {
     await knex.schema
             .dropTableIfExists('knex_migrations')
             .dropTableIfExists('knex_migrations_lock')
-            .dropTableIfExists('banner')
-            .dropTableIfExists('tag')
-            .dropTableIfExists('tag_topic')
             .dropTableIfExists('post_with_tag')
             .dropTableIfExists('tag_of_topic')
             .dropTableIfExists('tag_of_user')
@@ -29,10 +26,13 @@ class Session {
             .dropTableIfExists('staff')
             .dropTableIfExists('user_like_comment')
             .dropTableIfExists('user_like_post')
+            .dropTableIfExists('banner')
             .dropTableIfExists('comment')
             .dropTableIfExists('post')
             .dropTableIfExists('user_detail')
             .dropTableIfExists('user')
+            .dropTableIfExists('tag_topic')
+            .dropTableIfExists('tag')
 
   }
 }

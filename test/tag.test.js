@@ -73,6 +73,12 @@ describe('user tests', () => {
       res = await http.post('/t/set_topic', {tag:'test',topic:'test'})
       expect(res.data.tag.topics.length).toBe(1)
       expect(res.data.tag.topics[0].name).toBe('test')
+
+      res = await http.post('/t/set_topic', {tag:'test',topic:'test'})
+      expect(res.data.tag.topics.length).toBe(1)
+      res = await http.post('/t/set_topic', {tag:'test',topic:'test2'})
+      expect(res.data.tag.topics.length).toBe(2)
+
     } catch (e) {
       console.log(e.response ? e.response.data : e)
     }
@@ -84,15 +90,15 @@ describe('user tests', () => {
     try {
 
       res = await http.post('/t/unset_topic', {tag:'test',topic:'test'})
-      expect(res.data.tag.topics.length).toBe(0)
+      expect(res.data.tag.topics.length).toBe(1)
 
-      try {
         
       res = await http.post('/t/unset_topic', {tag:'test',topic:'test'})
-      } catch (e) {
-        // expect(e.response.data.code).toBe(ERR.NOT_RELATED)
+      expect(res.data.tag.topics.length).toBe(1)
+
+      res = await http.post('/t/unset_topic', {tag:'test',topic:'test2'})
+      expect(res.data.tag.topics.length).toBe(0)
         
-      }
 
     } catch (e) {
       console.log(e.response ? e.response.data : e)

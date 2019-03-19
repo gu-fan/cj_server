@@ -35,7 +35,7 @@ exports.up = function(knex, Promise) {
       table.integer('total_post_likes').unsigned().defaultTo(0)
       table.integer('total_user_likes').unsigned().defaultTo(0)
       table.integer('total_points').unsigned().defaultTo(100)
-      table.timestamp('last_checkin_at')
+      table.timestamp('last_checkin_at').nullable()
 
       // lock
       table.string('censor_status', 50)
@@ -141,9 +141,12 @@ exports.up = function(knex, Promise) {
       table.timestamps()
       table.unique('name')
 
+      table.string('avatar')
+      table.string('background')
 
       table.boolean('is_verified').defaultTo(false)
       table.boolean('is_blocked').defaultTo(false)
+
 
       table.integer('value').unsigned().defaultTo(0)
 
@@ -368,8 +371,6 @@ exports.up = function(knex, Promise) {
 exports.down = function(knex, Promise) {
   return Promise.all([
     knex.schema
-    .dropTableIfExists('tag')
-    .dropTableIfExists('tag_topic')
     .dropTableIfExists('post_with_tag')
     .dropTableIfExists('tag_of_topic')
     .dropTableIfExists('tag_of_user')
@@ -378,6 +379,8 @@ exports.down = function(knex, Promise) {
     .dropTableIfExists('staff')
     .dropTableIfExists('user_like_comment')
     .dropTableIfExists('user_like_post')
+    .dropTableIfExists('tag')
+    .dropTableIfExists('tag_topic')
     .dropTableIfExists('comment')
     .dropTableIfExists('post')
     .dropTableIfExists('user_detail')

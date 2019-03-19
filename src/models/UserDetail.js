@@ -2,11 +2,9 @@ const _ = require('lodash');
 const { mixin, Model, ref } = require('objection')
 const timestamp = require('./mixin/timestamp')
 const uid = require('./mixin/uid')
+const Base = require('./Base')
 
-class UserDetail extends mixin(Model, [
-    timestamp,
-    uid(),
-]) {
+class UserDetail extends Base {
 
   static get tableName() {
     return 'user_detail';

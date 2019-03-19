@@ -3,11 +3,10 @@ const { mixin, Model, ref } = require('objection')
 const timestamp = require('./mixin/timestamp')
 const uid = require('./mixin/uid')
 const password = require('./mixin/password')
+const Base = require('./Base')
 
-class Staff extends mixin(Model, [
-    timestamp,
+class Staff extends mixin(Base, [
     password(),
-    uid(),
 ]) {
 
   static get tableName() {

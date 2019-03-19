@@ -7,6 +7,7 @@ const User = require('../models/User')
 // app specific
 const jwt = require('../common/jwt-auth')
 const {ERR, MSG} = require('../code')
+const { UniqueViolationError} = require('objection-db-errors');
 
 // help functions
 const {wrap, delay} = require('../common/promise')
@@ -32,12 +33,14 @@ router.post('/signup', wrap(async function(req, res, next) {
   if (isEmpty(req.body.password)) throw ERR.NEED_PASSWORD
 
   try {
+    
     const k = await User
       .query()
       .insert({
          phone: req.body.phone,
          password: req.body.password,
       })
+
     // 300 ms, on generate hash, which should be slow
     // logTime('insert')
     
@@ -47,9 +50,7 @@ router.post('/signup', wrap(async function(req, res, next) {
     res.json({...MSG.REGISTER_SUCCESS, t:token})
 
   } catch (e) {
-    if (e.name === 'Error' && e.code === 'SQLITE_CONSTRAINT') {
-      throw ERR.PHONE_REGISTERED
-    } else if (e.name === 'error' && e.code === '23505') {
+    if (e instanceof UniqueViolationError) {
       throw ERR.PHONE_REGISTERED
     } else {
       throw e

@@ -5,21 +5,23 @@ const Session= require('./session')
 const path = require('path')
 
 const { getPort } = require('../common/util')
+const config = require('config')
 
-var session, server
+var server, session
 
 function getDB(name){
-  return {
-    client: 'sqlite3',
-    connection: {
-      filename: path.join(__dirname, '../../data/' + name + '.sqlite3')
-    },
-    useNullAsDefault: true
-  }
+  return config.db
+  // return {
+  //   client: 'sqlite3',
+  //   connection: {
+  //     filename: path.join(__dirname, '../../data/' + name + '.sqlite3')
+  //   },
+  //   useNullAsDefault: true
+  // }
 }
 
 async function setupTables(name){
-    var session = new Session(getDB(name))
+    session = new Session(getDB(name))
     Model.knex(session.knex)
     await session.clearTables()
     await session.createTables()
@@ -28,7 +30,7 @@ async function setupTables(name){
 
 function setupServerFac(name, port){
   return async ()=>{
-    var session = await setupTables(name)
+    await setupTables(name)
 
 
     // XXX: FIXED
@@ -41,18 +43,27 @@ function setupServerFac(name, port){
 
     server = app.listen(port)
 
-    await server.once('listening', () =>{})
+    await server.once('listening', () =>{
+      // console.log('start')
+    })
   }
 }
 
 async function closeServer(){
-    server.close()
-    await clearTables()
+    
+  // XXX process is not exit,
+  // use jest --forceExit
+    server.close(()=>{
+        // console.log('Closed out remaining connections')
+        session.knex.destroy()
+        .then(e=>{
+          // console.log('destroy knex over')
+          setTimeout(() => process.exit(), 1000)
+        })
+    })
+
 }
 
-async function clearTables(){
-    await session.clearTables()
-}
 
 module.exports = function(name){
 

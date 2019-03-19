@@ -6,6 +6,14 @@ const _TEST_ = require('path').basename(__filename);
 const { http, setupServer, closeServer } = require('./setup/server')(_TEST_)
 
 const { signupAndLogin, staffSignup, staffLogin } = require('./common')(http)
+const { 
+    NotNullViolationError,
+    UniqueViolationError,
+    ConstraintViolationError,
+    ForeignKeyViolationError,
+    CheckViolationError,
+    DataError
+  } = require('objection-db-errors');
 
 const { User } = require('../src/models')
 
@@ -32,7 +40,7 @@ describe('model tests', () => {
       var u2 = await User.query()
           .insert({id:'01'})
     } catch (e) {
-      expect(e.code).toBe('SQLITE_CONSTRAINT')
+      expect(e instanceof UniqueViolationError).toBe(true)
     }
 
   })
@@ -44,7 +52,7 @@ describe('model tests', () => {
       var u2 = await User.query()
           .insert({id:'04', phone: '111'})
     } catch (e) {
-      expect(e.code).toBe('SQLITE_CONSTRAINT')
+      expect(e instanceof UniqueViolationError).toBe(true)
     }
 
   })

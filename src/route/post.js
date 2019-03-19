@@ -42,28 +42,28 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
 
   if (checkSpam(req.body.content)) throw ERR.IS_SPAM
 
-  var tags = req.body.content_json ? req.body.content_json.tags : null
+  let tags = req.body.content_json ? req.body.content_json.tags : null
   if (tags && tags.length > 3) throw ERR.POST_LIMIT_3_TAG
 
-  var post = await Post.query().insert({
-    content: req.body.content, 
-    content_json: req.body.content_json, 
-    weather: req.body.weather,
-    country: req.body.country,
-    city: req.body.city,
-    lat: req.body.lat,
-    lon: req.body.lon,
-    author_id: req.user.sub,
-    is_public: req.body.is_public || true,
-    censor_status: 'pass',
-  })
+  let post = await Post.query()
+    .insert({
+      content: req.body.content, 
+      content_json: req.body.content_json, 
+      weather: req.body.weather,
+      country: req.body.country,
+      city: req.body.city,
+      lat: req.body.lat,
+      lon: req.body.lon,
+      author_id: req.user.sub,
+      is_public: req.body.is_public || true,
+      censor_status: 'pass',
+    })
     .eager('author(safe)');
 
-
   if (tags && tags.length>0) {
-    for (var i in tags) {
-      var tagname = tags[i]
-      var {tag,is_unique} = await relateTagNameWithPost(tagname, post)
+    for (let i in tags) {
+      let tagname = tags[i]
+      let {tag, is_unique} = await relateTagNameWithPost(tagname, post)
       await relateTagWithUser(tag.id, req.user.sub, is_unique)
     }
   }
@@ -299,7 +299,6 @@ router.post('/:pid/like', jwt.auth(), wrap(async function(req, res, next) {
   var u = await post
                   .$relatedQuery('liked_by_users')
                   .findById(req.user.sub)
-
 
   if (u==null || u==undefined) {
     await post.$relatedQuery('liked_by_users')

@@ -7,6 +7,7 @@ const Staff = require('../models/Staff')
 // app specific
 const jwt = require('../common/jwt-auth')
 const {ERR, MSG} = require('../code')
+const { UniqueViolationError} = require('objection-db-errors');
 
 // help functions
 const {wrap, delay} = require('../common/promise')
@@ -61,9 +62,7 @@ router.post('/signup', wrap(async function(req, res, next) {
     res.json({...MSG.REGISTER_SUCCESS, t:token})
 
   } catch (e) {
-    if (e.name === 'Error' && e.code === 'SQLITE_CONSTRAINT') {
-      throw ERR.NAME_REGISTERED
-    } else if (e.name === 'error' && e.code === '23505') {
+    if (e instanceof UniqueViolationError) {
       throw ERR.NAME_REGISTERED
     } else {
       throw e

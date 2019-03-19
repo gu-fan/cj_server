@@ -2,18 +2,20 @@ version: "3.7"
 
 services:
   mysql-db:
-    image: mysql/mysql-server:5.6
+    # use this
+    image: mysql:5.6
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: dbuser
-      MYSQL_PASSWORD: dbuserpwd
-      MYSQL_DATABASE: boilerplate_db
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: dev1234
+      MYSQL_DATABASE: dev
     ports:
       - "3306:3306"
     expose:
       - "3306"
     volumes:
       - db_data:/var/lib/mysql
+      - ./mycustom.cnf:/etc/mysql/conf.d/custom.cnf
     networks:
       - node-network
 
@@ -24,18 +26,18 @@ services:
     depends_on:
       - mysql-db
     ports:
-      - "5000:5000"
+      - "8090:8090"
     expose:
-      - "5000"
+      - "8090"
     volumes:
-      - ./server:/opt/app:delegated
+      - ../.:/opt/app:delegated
       # bind-mounting these two files in will let you add packages during development without rebuilding
       # for example, to add bower to your app while developing, just install it inside the container
       # and then nodemon will restart. Your changes will last until you "docker-compose down" and will
       # be saved on host for next build
       # docker-compose exec node npm install --save bower
-      - ./server/package.json:/opt/package.json
-      - ./server/package-lock.json:/opt/package-lock.json
+      - ../package.json:/opt/package.json
+      # - ../package-lock.json:/opt/package-lock.json
       # this is a workaround to prevent host node_modules from accidently getting mounted in container
       # in case you want to use node/npm both outside container for test/lint etc. and also inside container
       # this will overwrite the default node_modules dir in container so it won't conflict with our

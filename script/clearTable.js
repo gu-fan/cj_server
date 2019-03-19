@@ -1,4 +1,3 @@
-
 const { Model } = require('objection')
 const Session= require('../test/setup/session')
 
