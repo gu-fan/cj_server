@@ -3,6 +3,7 @@ const router = express.Router()
 const {promisify, wrap, delay} = require('../common/promise')
 const jwt = require('../common/jwt-auth')
 const {ERR, MSG} = require('../code')
+const moment = require('moment')
 
 const {uid, slug}= require('../models/mixin/_uid')
 
@@ -43,6 +44,8 @@ router.get('/grant', wrap(async function(req, res, next) {
 
 router.get('/posts', wrap(async function(req, res, next) {
 
+  var day_before = moment().subtract(7, 'day').format()
+
   var page = req.query.page || 0
   var posts = await Post.query()
           .where('censor_status', 'pass')
@@ -50,6 +53,7 @@ router.get('/posts', wrap(async function(req, res, next) {
           .where('is_public', true)
           .eager('[author(safe)]')
           .orderBy('created_at', 'desc')
+          .where('created_at', '>', day_before)
           .page(page, 5)
   // posts.results.map(item=>{
   //   if (_.random(0,5)>1) {

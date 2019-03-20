@@ -211,6 +211,7 @@ router.get('/:uid/posts', jwt.auth(), wrap(async function(req, res, next) {
   if (req.user.sub == req.params.uid) { // is_author
     posts = await user.$relatedQuery('posts')
                     .eager('author(safe)')
+                    .where('is_deleted', false)
                     .orderBy('created_at', 'desc')
                     .page(page, 5)
   } else {

@@ -183,8 +183,8 @@ router.get('/:pid', jwt.auth(), wrap(async function(req, res, next) {
 
 
     if (post.is_deleted) {
-      delete post.content
-      delete post.content_json
+      // delete post.content
+      // delete post.content_json
     }
   
     res.json({
@@ -260,6 +260,21 @@ router.delete('/:pid', jwt.auth(), wrap(async function(req, res, next) {
 }))
 
 
+router.get('/:pid/share', jwt.auth(), wrap(async function(req, res, next) {
+
+  var post = await Post.query()
+                        .findById(req.params.pid)
+
+  if (post== undefined) throw ERR.NO_SUCH_TARGET
+  await post.$query.increment('total_shares', 1)
+
+  res.json({
+      msg:"post share add",
+      code:0,
+  })
+
+
+}))
 router.get('/:pid/like', jwt.auth(), wrap(async function(req, res, next) {
 
   var post = await Post.query()
