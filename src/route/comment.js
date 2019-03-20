@@ -31,6 +31,8 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
   if (req.body.pid == null || req.body.pid == '') throw ERR.NEED_ARGUMENT
   var post = await Post.query().findById(req.body.pid)
 
+  if (req.body.content.length < 4) throw ERR.CONTENT_MIN_4
+
   if (post.censor_status == 'lock' ) {
      throw ERR.TARGET_LOCKED
   }
