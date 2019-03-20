@@ -42,19 +42,33 @@ router.get('/grant', wrap(async function(req, res, next) {
 
 }))
 
-router.get('/posts', wrap(async function(req, res, next) {
+router.get('/posts',  jwt.auth(), wrap(async function(req, res, next) {
 
   var day_before = moment().subtract(7, 'day').format()
 
+  let uid = req.user && req.user.sub || '0'
   var page = req.query.page || 0
   var posts = await Post.query()
           .where('censor_status', 'pass')
           .where('is_deleted', false)
           .where('is_public', true)
-          .eager('[author(safe)]')
+          .eager('[author(safe),liked_by_users(byMe)]', {
+            byMe: builder=>{
+              builder.where('uid', uid)
+            }
+          })
           .orderBy('created_at', 'desc')
           .where('created_at', '>', day_before)
           .page(page, 5)
+    posts.results.map((item)=>{
+      if (item.liked_by_users.length>0) {
+        item.is_like_by_me = true
+      } else {
+        item.is_like_by_me = false
+      }
+      delete item.liked_by_users
+    })
+  
   // posts.results.map(item=>{
   //   if (_.random(0,5)>1) {
   //     if (_.random(0,3)>1) {

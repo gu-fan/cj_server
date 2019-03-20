@@ -32,6 +32,7 @@ const RAW_CODE = {
   NAME_EXCEED_LIMIT_15: {text:"名字不能大于15个字", http: 400},
   POST_LIMIT_3_TAG: {text:"动态不能超过3个标签", http: 400},
   CONTENT_MIN_4: {text:"内容不能少于4个字", http: 400},
+  CONTENT_MIN_1: {text:"内容不能少于1个字", http: 400},
 }
 
 const ERR = Object.keys(RAW_CODE).map((name)=>{
