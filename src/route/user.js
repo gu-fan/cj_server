@@ -208,20 +208,39 @@ router.get('/:uid/posts', jwt.auth(), wrap(async function(req, res, next) {
 
   if (user == undefined) throw ERR.NO_SUCH_TARGET
 
+  let uid = req.user && req.user.sub || '0'
   if (req.user.sub == req.params.uid) { // is_author
     posts = await user.$relatedQuery('posts')
-                    .eager('author(safe)')
-                    .where('is_deleted', false)
-                    .orderBy('created_at', 'desc')
-                    .page(page, 5)
+      .eager('[author(safe),liked_by_users(byMe)]', {
+        byMe: builder=>{
+          builder.where('uid', uid)
+        }
+      })
+
+      .where('is_deleted', false)
+      .orderBy('created_at', 'desc')
+      .page(page, 5)
   } else {
     posts = await user.$relatedQuery('posts')
-                    .where('censor_status', 'pass')
-                    .where('is_deleted', false)
-                    .orderBy('created_at', 'desc')
-                    .eager('author(safe)')
-                    .page(page, 5)
+      .where('censor_status', 'pass')
+      .where('is_deleted', false)
+      .orderBy('created_at', 'desc')
+      .eager('[author(safe),liked_by_users(byMe)]', {
+        byMe: builder=>{
+          builder.where('uid', uid)
+        }
+      })
+
+      .page(page, 5)
   }
+    posts.results.map((item)=>{
+      if (item.liked_by_users.length>0) {
+        item.is_like_by_me = true
+      } else {
+        item.is_like_by_me = false
+      }
+      delete item.liked_by_users
+    })
   
   res.json({
     msg:'user posts got',
