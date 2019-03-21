@@ -128,6 +128,12 @@ router.get('/hot', jwt.auth(), wrap(async function(req, res, next) {
                         .orderBy('count', 'desc')
                         .limit(5)
 
+  let plain_u = u_tags.map(t=>{
+      return t.name
+    }) 
+  h_tags = h_tags.filter(item=>{
+      plain_u.indexOf(item.name) == -1
+  })
   var tags = {plain:[],results:[]}
 
   let total_tags = u_tags.concat(h_tags)
