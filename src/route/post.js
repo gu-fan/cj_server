@@ -45,6 +45,12 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
   let tags = req.body.content_json ? req.body.content_json.tags : null
   if (tags && tags.length > 3) throw ERR.POST_LIMIT_3_TAG
 
+  let is_public =req.body.is_public
+  if (is_public === undefined || is_public === null ) {
+    is_public = true
+  }
+  is_public = !!is_public
+
   let post = await Post.query()
     .insert({
       content: req.body.content, 
@@ -55,7 +61,7 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
       lat: req.body.lat,
       lon: req.body.lon,
       author_id: req.user.sub,
-      is_public: req.body.is_public || true,
+      is_public: is_public,
       censor_status: 'pass',
     })
     .eager('author(safe)');
@@ -183,8 +189,8 @@ router.get('/:pid', jwt.auth(), wrap(async function(req, res, next) {
 
 
     if (post.is_deleted) {
-      // delete post.content
-      // delete post.content_json
+      delete post.content
+      delete post.content_json
     }
   
     res.json({

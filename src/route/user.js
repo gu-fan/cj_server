@@ -216,7 +216,6 @@ router.get('/:uid/posts', jwt.auth(), wrap(async function(req, res, next) {
           builder.where('uid', uid)
         }
       })
-
       .where('is_deleted', false)
       .orderBy('created_at', 'desc')
       .page(page, 5)
@@ -224,6 +223,7 @@ router.get('/:uid/posts', jwt.auth(), wrap(async function(req, res, next) {
     posts = await user.$relatedQuery('posts')
       .where('censor_status', 'pass')
       .where('is_deleted', false)
+      .where('is_public', true)
       .orderBy('created_at', 'desc')
       .eager('[author(safe),liked_by_users(byMe)]', {
         byMe: builder=>{

@@ -6,7 +6,7 @@ const MSG = require('../src/code').MSG_CODE
 
 const _TEST_ = require('path').basename(__filename);
 const { http, setupServer, closeServer } = require('./setup/server')(_TEST_)
-const { signup, login, signupAndLogin } = require('./common')(http)
+const { logError, signup, login, signupAndLogin } = require('./common')(http)
 
 describe('user tests', () => {
   let clock
@@ -38,7 +38,6 @@ describe('user tests', () => {
       }
 
       res = await http.post('/p', post)
-
 
       expect(res.data.msg).toBe(MSG.POST_SUCCESS)
       expect(res.data.post.content_json.images[0].url).toBe('111')
@@ -218,6 +217,48 @@ describe('user tests', () => {
     } catch (e) {
       console.log(e.response ? e.response.data : e)
     }
+
+  })
+  test('user can view only own public', async () => {
+    expect.assertions(3)
+    try {
+
+      await signupAndLogin('p1')
+
+      res = await http.get('/u/.ping')
+      uid = res.data.user.id
+
+      var post = {
+        content: "HELLO WORLD",
+        is_public: true,
+      }
+
+      res = await http.post('/p', post)
+      pid = res.data.post.id
+      var post = {
+        content: "HELLO WORLD",
+        is_public: false,
+      }
+
+      res = await http.post('/p', post)
+      pid2 = res.data.post.id
+      res = await http.get('/u/'+uid+'/posts')
+      expect(res.data.posts.results.length).toBe(2)
+      await signupAndLogin('p2')
+      res = await http.get('/u/'+uid+'/posts')
+      expect(res.data.posts.results.length).toBe(1)
+
+      try {
+        res = await http.get('/p/'+pid2)
+      } catch (e) {
+        expect(e.response.data.code).toBe(ERR.NOT_AUTHOR)
+        
+      }
+
+    } catch (e) {
+      logError(e)
+    }
+
 
   })
 

@@ -9,7 +9,7 @@
     "migrate": "NODE_ENV=staging ./node_modules/knex/bin/cli.js migrate:latest",
     "rollback": "NODE_ENV=staging ./node_modules/knex/bin/cli.js migrate:rollback",
     "seed": "NODE_ENV=staging ./node_modules/knex/bin/cli.js seed:run",
-    "test": "cd test/compose_test && docker-compose up",
+    "test": "cd test/xyd_test && docker-compose up",
     "cover": "jest --coverage",
     "deploy": "sh ./deploy/dev.sh",
     "deploy_test": "sh ./deploy/test.sh",
