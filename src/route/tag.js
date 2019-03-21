@@ -112,13 +112,28 @@ router.post('/check',  wrap(async function(req, res, next) {
 // XXX?
 // 如何实现不同批次？
 // page = 1,2,3,4?
-router.get('/hot',  wrap(async function(req, res, next) {
+router.get('/hot', jwt.auth(), wrap(async function(req, res, next) {
 
-  var total_tags = await Tag.query()
+  let uid = req.user && req.user.sub
+
+  if (!uid) throw ERR.NOT_LOGIN
+
+  var h_tags = await Tag.query()
                       .orderBy('total_posts', 'desc')
-                      .limit(15)
+                      .limit(5)
 
-  var tags = {plain:[]}
+  var u = await User.query()
+                        .findById(req.user.sub)
+  let u_tags = await u.$relatedQuery('tags')
+                        .orderBy('count', 'desc')
+                        .limit(5)
+
+  var tags = {plain:[],results:[]}
+
+  let total_tags = u_tags.concat(h_tags)
+  
+  tags.user = u_tags
+  tags.hot = h_tags
   if (total_tags.length != 0) {
     tags.results = total_tags
     tags.plain = total_tags.map(tag=>{
