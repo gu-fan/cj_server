@@ -132,7 +132,7 @@ router.get('/hot', jwt.auth(), wrap(async function(req, res, next) {
       return t.name
     }) 
   h_tags = h_tags.filter(item=>{
-      plain_u.indexOf(item.name) == -1
+      return plain_u.indexOf(item.name) == -1
   })
   var tags = {plain:[],results:[]}
 
