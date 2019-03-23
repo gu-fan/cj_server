@@ -43,7 +43,7 @@ router.post('/',  wrap(async function(req, res, next) {
 
 }))
 
-router.get('/:tid/posts', wrap(async function(req, res, next) {
+router.get('/:tid/posts',jwt.auth(), wrap(async function(req, res, next) {
 
 
   let tag = await Tag
@@ -55,14 +55,26 @@ router.get('/:tid/posts', wrap(async function(req, res, next) {
   if (tag.is_blocked) throw ERR.TARGET_LOCKED
 
   let page = req.query.page || 0
-  
+  let uid = req.user && req.user.sub || '0'
   let posts = await tag.$relatedQuery('posts')
           .where('censor_status', 'pass')
           .where('is_deleted', false)
           .where('is_public', true)
-          .eager('[author(safe)]')
+          .eager('[author(safe),liked_by_users(byMe)]', {
+            byMe: builder=>{
+              builder.where('uid', uid)
+            }
+          })
           .orderBy('created_at', 'desc')
           .page(page, 5)
+    posts.results.map((item)=>{
+      if (item.liked_by_users.length>0) {
+        item.is_like_by_me = true
+      } else {
+        item.is_like_by_me = false
+      }
+      delete item.liked_by_users
+    })
 
   res.json({
       msg:"tag posts",
