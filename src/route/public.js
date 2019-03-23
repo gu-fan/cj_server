@@ -13,6 +13,7 @@ const {getHotAnswers, getNewAnswers, getGoldAnswers,
        getMixedHot, getMixedNew} = require('../services/answer')
 const _ = require('lodash')
 
+
 router.get('/.ping', wrap(async function(req, res, next) {
   
   res.json({
@@ -112,6 +113,37 @@ router.get('/tags', wrap(async function(req, res, next) {
   })
 
 }))
+
+router.get('/change', wrap(async function(req, res, next) {
+
+  let time0 = Date.now()
+  var posts = await Post.query()
+                .select('id','content_json')
+                .where('is_deleted', false)
+
+  for (var i = 0; i < posts.length; ++i) {
+    let post = posts[i]
+    post.content_json.images = post.content_json.images.map(img=>{
+      return img.replace('file.myqcloud.com', 'image.myqcloud.com')
+    }).filter(img=>{
+      return !/\/\/tmp/.test(img)
+    })
+
+    post = await post.$query()
+          .patch({content_json: post.content_json})
+  }
+
+  let time1 = Date.now()
+  let uses = time1-time0
+
+  res.json({
+    code:0,
+    posts,
+    uses
+  })
+
+}))
+
 
 
 
