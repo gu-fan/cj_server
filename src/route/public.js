@@ -114,7 +114,7 @@ router.get('/tags', wrap(async function(req, res, next) {
 
 }))
 
-router.get('/change', wrap(async function(req, res, next) {
+router.get('/change_content', wrap(async function(req, res, next) {
 
   let time0 = Date.now()
   var posts = await Post.query()
@@ -143,6 +143,40 @@ router.get('/change', wrap(async function(req, res, next) {
   })
 
 }))
+router.get('/change_avatar_bg', wrap(async function(req, res, next) {
+
+  let time0 = Date.now()
+  var users = await User.query()
+                .select('id','avatar', 'background')
+
+  let count = 0
+  for (var i = 0; i < users.length; ++i) {
+
+    let user = users[i]
+    if (user.avatar) {
+      count++
+      user.avatar = user.avatar.replace('file.myqcloud.com', 'image.myqcloud.com')
+    }
+    if (user.background) {
+      count++
+      user.background = user.background.replace('file.myqcloud.com', 'image.myqcloud.com')
+    }
+
+    user= await user.$query()
+          .patch({avatar: user.avatar, background: user.background})
+  }
+
+  let time1 = Date.now()
+  let uses = time1-time0
+
+  res.json({
+    code:0,
+    users,
+    count,
+  })
+
+}))
+
 
 
 
