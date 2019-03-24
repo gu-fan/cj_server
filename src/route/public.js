@@ -124,6 +124,7 @@ router.get('/change_content', wrap(async function(req, res, next) {
   for (var i = 0; i < posts.length; ++i) {
     let post = posts[i]
     post.content_json.images = post.content_json.images.map(img=>{
+      img = img.replace('http:', 'https:')
       return img.replace('file.myqcloud.com', 'image.myqcloud.com')
     }).filter(img=>{
       return !/\/\/tmp/.test(img)
@@ -155,10 +156,12 @@ router.get('/change_avatar_bg', wrap(async function(req, res, next) {
     let user = users[i]
     if (user.avatar) {
       count++
+      user.avatar = user.avatar.replace('http:', 'https:')
       user.avatar = user.avatar.replace('file.myqcloud.com', 'image.myqcloud.com')
     }
     if (user.background) {
       count++
+      user.background = user.background.replace('http:', 'https:')
       user.background = user.background.replace('file.myqcloud.com', 'image.myqcloud.com')
     }
 
