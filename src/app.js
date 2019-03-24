@@ -22,8 +22,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 if (app.get('env')=='development') {
   app.use('/tmp',  express.static(config.tmp_path))
+  app.use(restc.express());
 }
-app.use(restc.express());
 
 
 const { model } = require('./models')
