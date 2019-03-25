@@ -221,11 +221,14 @@ router.get('/:uid/posts', jwt.auth(), wrap(async function(req, res, next) {
       .orderBy('created_at', 'desc')
       .page(page, 5)
   } else {
+    var day_before = moment().subtract(7, 'day').format()
+
     posts = await user.$relatedQuery('posts')
       .where('censor_status', 'pass')
       .where('is_deleted', false)
       .where('is_public', true)
       .orderBy('created_at', 'desc')
+      .where('created_at', '>', day_before)
       .eager('[author(safe),liked_by_users(byMe)]', {
         byMe: builder=>{
           builder.where('uid', uid)
