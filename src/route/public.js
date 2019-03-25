@@ -69,8 +69,8 @@ router.get('/posts',  jwt.auth(), wrap(async function(req, res, next) {
         item.is_like_by_me = false
       }
       if (item.author.id == uid) {
-        let st = generateKey(post.id)
-        post.st = st
+        let st = generateKey(item.id)
+        item.st = st
       }
       delete item.liked_by_users
     })
