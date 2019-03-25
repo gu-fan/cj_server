@@ -12,6 +12,7 @@ const {Post, User, Tag}  = require('../models')
 const {getHotAnswers, getNewAnswers, getGoldAnswers,
        getMixedHot, getMixedNew} = require('../services/answer')
 const _ = require('lodash')
+const {encrypt, decrypt, generateKey, checkValid}  =require('../common/crypto')
 
 
 router.get('/.ping', wrap(async function(req, res, next) {
@@ -67,8 +68,13 @@ router.get('/posts',  jwt.auth(), wrap(async function(req, res, next) {
       } else {
         item.is_like_by_me = false
       }
+      if (item.author.id == uid) {
+        let st = generateKey(post.id)
+        post.st = st
+      }
       delete item.liked_by_users
     })
+   
   
   // posts.results.map(item=>{
   //   if (_.random(0,5)>1) {

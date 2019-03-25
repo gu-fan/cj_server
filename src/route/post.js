@@ -149,12 +149,15 @@ router.get('/:pid', jwt.auth(), wrap(async function(req, res, next) {
     // if st expire
     // share is expired
 
+    // XXX
+    // 如果我们这样设置，
+    // 生成public posts时也需要生成
     if (!post.is_public) {
       if (req.query.st) {
         // if not valid, it will throw error
         checkValid(post.id, req.query.st)
       } else {
-        if (req.user.sub != post.author_id) throw ERR.NOT_AUTHOR
+        if (req.user.sub != post.author_id) throw ERR.NOT_PUBLIC
       }
     }
     if (req.user.sub == post.author_id) {
