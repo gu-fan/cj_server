@@ -68,10 +68,13 @@ router.get('/posts',  jwt.auth(), wrap(async function(req, res, next) {
       } else {
         item.is_like_by_me = false
       }
-      if (item.author.id == uid) {
-        let st = generateKey(item.id)
-        item.st = st
-      }
+      // XXX
+      // SEEMS in public tag, it's already < 7 day or public,
+      // no need to use share token
+      // if (item.author.id == uid) {
+      //   let st = generateKey(item.id)
+      //   item.st = st
+      // }
       delete item.liked_by_users
     })
    
