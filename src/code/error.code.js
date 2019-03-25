@@ -7,6 +7,7 @@ const RAW_CODE = {
   CENSOR_NOT_PASS: {text:"目标未审核", http: 403},
   TARGET_LOCKED: {text:"目标已锁定", http: 400},
   NEED_ARGUMENT: {text:"需要参数", http: 400},
+  BAD_ARGUMENT: {text:"参数错误", http: 400},
   NO_PERMISSION: {text:"没有权限", http: 403},
   EXCEED_RANGE: {text:"超出范围", http: 400},
   NO_SUCH_USER: {text:"没有找到用户", http: 400},
@@ -34,6 +35,7 @@ const RAW_CODE = {
   POST_LIMIT_3_TAG: {text:"动态不能超过3个标签", http: 400},
   CONTENT_MIN_4: {text:"内容不能少于4个字", http: 400},
   CONTENT_MIN_1: {text:"内容不能少于1个字", http: 400},
+  SHARE_EXPIRED: {text:"分享内容已过期", http: 400},
 }
 
 const ERR = Object.keys(RAW_CODE).map((name)=>{

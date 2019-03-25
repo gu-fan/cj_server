@@ -17,6 +17,7 @@ const { getPost } = require('../services/post')
 
 const { checkSpam, checkSpamExact } = require('../common/spam')
 const { getCount } = require('../common')
+const {encrypt, decrypt, generateKey, checkValid}  =require('../common/crypto')
 
 router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 
@@ -65,6 +66,7 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
       censor_status: 'pass',
     })
     .eager('author(safe)');
+
 
   if (tags && tags.length>0) {
     for (let i in tags) {
@@ -141,8 +143,23 @@ router.get('/:pid', jwt.auth(), wrap(async function(req, res, next) {
 
     if (post == undefined) throw ERR.NO_SUCH_TARGET
 
+    // the share token
+    // req.query.st
+    // st = post.id + expire_time , sha with post.author.secrect
+    // if st expire
+    // share is expired
+
     if (!post.is_public) {
-      if (req.user.sub != post.author_id) throw ERR.NOT_AUTHOR
+      if (req.query.st) {
+        // if not valid, it will throw error
+        checkValid(post.id, req.query.st)
+      } else {
+        if (req.user.sub != post.author_id) throw ERR.NOT_AUTHOR
+      }
+    }
+    if (req.user.sub == post.author_id) {
+      let st = generateKey(post.id)
+      post.st = st
     }
 
     var comments = await post
