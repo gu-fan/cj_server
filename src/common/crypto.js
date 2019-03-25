@@ -19,8 +19,8 @@ function decrypt(text){
   return dec;
 }
     function generateKey(id){
-      // 1 day
-      let expire = Date.now() + 3600 * 24 * 1000
+      // 3 day
+      let expire = Date.now() + 3600 * 24 * 1000 * 3
       let key = encrypt(id+':'+expire)
       return key
     }

@@ -160,6 +160,8 @@ router.get('/:pid', jwt.auth(), wrap(async function(req, res, next) {
         if (req.user.sub != post.author_id) throw ERR.NOT_PUBLIC
       }
     }
+    // XXX
+    // should check if it's expire over 7 day?
     if (req.user.sub == post.author_id) {
       let st = generateKey(post.id)
       post.st = st

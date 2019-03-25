@@ -231,9 +231,9 @@ router.get('/:uid/posts', jwt.auth(), wrap(async function(req, res, next) {
           builder.where('uid', uid)
         }
       })
-
       .page(page, 5)
   }
+
     posts.results.map((item)=>{
       if (item.liked_by_users.length>0) {
         item.is_like_by_me = true
@@ -244,6 +244,12 @@ router.get('/:uid/posts', jwt.auth(), wrap(async function(req, res, next) {
         let st = generateKey(item.id)
         item.st = st
       }
+
+      let item_mmt = moment(item.created_at) 
+      let now = moment()
+                
+      item.days_from_now = now.diff(item_mmt, 'days')
+        
       delete item.liked_by_users
     })
   
