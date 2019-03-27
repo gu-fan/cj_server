@@ -18,17 +18,22 @@ function decrypt(text){
     dec += decipher.final('utf8');
   return dec;
 }
+// XXX
+// use the simplest encrypt
+// as minicode max is 32
     function generateKey(id){
       // 3 day
-      let expire = Date.now() + 3600 * 24 * 1000 * 3
-      let key = encrypt(id+':'+expire)
+      let expire = Date.now() / 1000 + 3600 * 24  * 3
+      // let key = encrypt(id+':'+expire)
+      let key = id.slice(1,3) +':'+ expire.toString(16) 
       return key
     }
 
     function checkValid(id, st){
       let out=''
       try {
-         out = decrypt(st)
+         // out = decrypt(st)
+         out = st
       } catch (e) {
         if (e.message=='Bad input string'){
           throw ERR.BAD_ARGUMENT
@@ -37,17 +42,17 @@ function decrypt(text){
         }
       }
       let arr = out.split(':')
-      if (arr.length == 0) {
+      if (arr.length != 2) {
         throw ERR.BAD_ARGUMENT
       }
       let _id = arr[0]
-      let expire = arr[1]
+      let expire = parseInt(arr[1], 16)
 
-      if (_id != id ) {
+      if (_id != id.slice(1,3) ) {
         throw ERR.BAD_ARGUMENT
       }
 
-      if (expire < Date.now()) {
+      if (expire < (Date.now() /1000)) {
         throw ERR.SHARE_EXPIRED
       } else {
         return true

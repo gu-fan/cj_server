@@ -42,6 +42,7 @@ describe('crypto tests', () => {
 
   })
   test('test key', async ()=>{
+    expect.assertions(3)
     let id = 'aaabbb'
     clock = sinon.useFakeTimers(new Date(2000,1,2, 8))
     let st = generateKey(id)
@@ -49,14 +50,13 @@ describe('crypto tests', () => {
     let ret
     clock = sinon.useFakeTimers(new Date(2000,1,2, 10))
     ret = checkValid(id, st)
-    console.log(ret)
 
     try {
-      clock = sinon.useFakeTimers(new Date(2000,1,3, 10))
+      clock = sinon.useFakeTimers(new Date(2000,1,6, 10))
+      
       ret = checkValid(id, st)
     } catch (e) {
       expect(e.code).toBe(ERR.SHARE_EXPIRED)
-      
     }
 
     try {
