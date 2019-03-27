@@ -28,11 +28,11 @@ const {User, Staff, Question, Answer}= require('../models')
  * @throw NO_SUCH_USER
  */
 
-  // moment:sunday is 0 mysql:sunday is 6
-  // moment:monday is 1 mysql:monday is 0
-  function momentWeek(i){
-    return i==0 ? 6 : i-1
-  }
+// moment:sunday is 0 mysql:sunday is 6
+// moment:monday is 1 mysql:monday is 0
+function momentWeek(i){
+  return i==0 ? 6 : i-1
+}
 function normalizeWeekCount(count){
 
   var c = _.reduce(count,

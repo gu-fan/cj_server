@@ -248,10 +248,12 @@ router.get('/:uid/posts', jwt.auth(), wrap(async function(req, res, next) {
         item.st = st
       }
 
-      let item_mmt = moment(item.created_at) 
-      let now = moment()
+      // XXX
+      // seems only user need it, and can calc locally
+      // let item_mmt = moment(item.created_at) 
+      // let now = moment()
                 
-      item.days_from_now = now.diff(item_mmt, 'days')
+      // item.days_from_now_s = now.diff(item_mmt, 'days')
         
       delete item.liked_by_users
     })

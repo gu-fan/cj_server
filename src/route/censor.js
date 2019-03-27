@@ -385,6 +385,24 @@ router.patch('/user/:uid', jwt.auth(),
   })
 
 }))
+router.post('/user/:uid/verify', jwt.auth(),
+  hasPermission('censor'),
+  wrap(async function(req, res, next) {
+
+  var user = await User.query()
+          .patchAndFetchById(req.params.uid, {
+            is_verified: req.body.is_verified,
+            verify_quote: req.body.verify_quote,
+          })
+
+  res.json({
+      msg:"user verified",
+      code:0,
+      user,
+  })
+
+}))
+
 
 
 

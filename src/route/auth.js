@@ -34,9 +34,9 @@ router.post('/signup', wrap(async function(req, res, next) {
 
   try {
     
-    const k = await User
+    let user = await User
       .query()
-      .insert({
+      .insertAndFetch({
          phone: req.body.phone,
          password: req.body.password,
       })
@@ -44,10 +44,10 @@ router.post('/signup', wrap(async function(req, res, next) {
     // 300 ms, on generate hash, which should be slow
     // logTime('insert')
     
-    var token = await jwt.signId(k.id)
+    let token = await jwt.signId(user.id)
     // logTime('sign')
    
-    res.json({...MSG.REGISTER_SUCCESS, t:token})
+    res.json({...MSG.REGISTER_SUCCESS, t:token, user:user})
 
   } catch (e) {
     if (e instanceof UniqueViolationError) {
