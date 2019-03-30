@@ -4,9 +4,20 @@ const {promisify, wrap, delay} = require('../common/promise')
 const jwt = require('../common/jwt-auth')
 const {ERR, MSG} = require('../code')
 
-const { Banner }  = require('../models')
+const { Banner,Tag,Post }  = require('../models')
 
 module.exports = router
+
+function removeUndefined(target) {
+
+  Object.keys(target).map((key, index) => {
+    if(target[key] === undefined) {
+      delete target[key]
+    }
+  })
+
+  return target
+}
 
 router.get('/.ping',  wrap(async function(req, res, next) {
 
@@ -22,17 +33,56 @@ router.get('/.ping',  wrap(async function(req, res, next) {
 
 }))
 
-router.post('/',  wrap(async function(req, res, next) {
+router.get('/', wrap(async function(req, res, next){
 
-  if (req.body.title == '' || req.body.title == null) 
-    throw ERR.NEED_CONTENT
+  let banners = await Banner.query()
+                .where('is_deleted', false)
+                .orderBy('index', 'desc')
 
-  var banner = await Banner.query()
+  res.json({
+      msg:"banner get",
+      banners,
+      code:0,
+  })
+
+
+}))
+
+async function getLinkByTagPost(tagname, postname){
+  let link, image
+  
+  if (tagname) {
+    let tag = await Tag.query().findOne({name:tagname})
+    if (tag==null) throw ERR.TAG_NOT_FOUND
+    link = '/pages/tag/main?name=' + tag.name + '&t=' + tag.id
+  } else if (postname){
+    let post = await Post.query().findById(postname)
+    if (post == null) throw ERR.NOT_FOUND
+    link = '/pages/detail/main?p=' + post.id
+    image = post.content_json.images[0]
+  } else {
+    throw ERR.NEED_ARGUMENT
+  }
+  return {link,image}
+  
+}
+router.post('/',  jwt.auth(), wrap(async function(req, res, next) {
+
+  if (req.body.title == '' || req.body.title == null)
+      throw ERR.NEED_CONTENT
+
+  let {link, image}= await getLinkByTagPost(req.body.tag, req.body.post)
+
+  image = req.body.image || image
+  if (image == '' || image == null) throw ERR.NEED_IMAGE
+  let banner = await Banner.query()
     .insert({
       title: req.body.title,
-      image: req.body.image,
-      link: req.body.link,
-      index: req.body.index || 0,
+      image: image ,
+      tag: req.body.tag,
+      post:req.body.post,
+      link: link,
+      index: req.body.index || 10,
     })
 
   res.json({
@@ -43,25 +93,20 @@ router.post('/',  wrap(async function(req, res, next) {
 
 }))
 
-  function removeUndefined(target) {
-
-    Object.keys(target).map((key, index) => {
-      if(target[key] === undefined) {
-        delete target[key]
-      }
-    })
-
-    return target
-  }
-router.patch('/:bid',  wrap(async function(req, res, next) {
+router.put('/:bid',  wrap(async function(req, res, next) {
 
   if (req.params.bid == null) throw ERR.NEED_ARGUMENT
 
+
+  let {link,image} = await getLinkByTagPost(req.body.tag, req.body.post)
+
   var obj = removeUndefined({
       title: req.body.title,
-      image: req.body.image,
-      link: req.body.link,
+      image: req.body.image || image,
+      tag: req.body.tag,
+      post: req.body.post,
       index: req.body.index,
+      link: link,
   })
 
 
@@ -79,14 +124,78 @@ router.delete('/:bid',  wrap(async function(req, res, next) {
 
   if (req.params.bid == null) throw ERR.NEED_ARGUMENT
 
-  var deleted = await Banner.query()
-    .deleteById(req.params.bid)
+  var banner = await Banner.query()
+          .patchAndFetchById(req.params.bid, {
+            is_deleted: true
+          })
 
   res.json({
       msg:"banner delete",
-      deleted,
+      deleted:banner.is_deleted,
       code:0,
   })
 
 }))
+router.post('/:bid/toggle_show',  wrap(async function(req, res, next) {
+
+  if (req.params.bid == null) throw ERR.NEED_ARGUMENT
+
+  let banner = await Banner.query().findById(req.params.bid)
+
+  if(banner==null) throw ERR.NOT_FOUND
+
+  banner = await banner.$query()
+          .patchAndFetch({
+            is_show: !banner.is_show
+          })
+
+  res.json({
+      msg:"banner toggle show",
+      is_show:banner.is_show,
+      code:0,
+  })
+
+}))
+router.post('/:bid/index/add',  wrap(async function(req, res, next) {
+
+  if (req.params.bid == null) throw ERR.NEED_ARGUMENT
+
+  let banner = await Banner.query().findById(req.params.bid)
+
+  if(banner==null) throw ERR.NOT_FOUND
+
+  banner = await banner.$query()
+          .patchAndFetch({
+            index: banner.index + 10,
+          })
+
+  res.json({
+      msg:"banner add index",
+      index:banner.index,
+      code:0,
+  })
+
+}))
+
+router.post('/:bid/index/sub',  wrap(async function(req, res, next) {
+
+  if (req.params.bid == null) throw ERR.NEED_ARGUMENT
+
+  let banner = await Banner.query().findById(req.params.bid)
+
+  if(banner==null) throw ERR.NOT_FOUND
+
+  banner = await banner.$query()
+          .patchAndFetch({
+            index: banner.index - 10,
+          })
+
+  res.json({
+      msg:"banner sub index",
+      index:banner.index,
+      code:0,
+  })
+
+}))
+
 

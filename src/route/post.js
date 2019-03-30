@@ -291,6 +291,49 @@ router.delete('/:pid', jwt.auth(), wrap(async function(req, res, next) {
 }))
 
 
+
+router.post('/:pid/hide', jwt.auth(), wrap(async function(req, res, next) {
+
+  var post = await Post.query()
+                        .findById(req.params.pid)
+
+  if (post== undefined) throw ERR.NO_SUCH_TARGET
+  if (req.user.sub != post.author_id) throw ERR.NOT_AUTHOR
+
+  post = await post.$query()
+            .patchAndFetch({is_public: false})
+    
+  res.json({
+      msg:"post hide",
+      post,
+      code:0,
+  })
+
+
+}))
+
+router.post('/:pid/toggle_pick', jwt.auth(), wrap(async function(req, res, next) {
+
+  var post = await Post.query()
+                        .findById(req.params.pid)
+
+  if (post== undefined) throw ERR.NO_SUCH_TARGET
+  
+  var user = await getUser(req.user.sub)
+  if (!user.is_staff) throw ERR.NO_PERMISSION
+
+  post = await post.$query()
+            .patchAndFetch({is_editor_choice: !post.is_editor_choice})
+    
+  res.json({
+      msg:"post pick",
+      post,
+      is_editor_choice: post.is_editor_choice,
+      code:0,
+  })
+
+
+}))
 router.get('/:pid/share', jwt.auth(), wrap(async function(req, res, next) {
 
   var post = await Post.query()

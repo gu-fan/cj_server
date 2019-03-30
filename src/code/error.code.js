@@ -1,6 +1,8 @@
 const APIError = require('./api.error')
 const RAW_CODE = {
   NOT_FOUND: {text:"没有找到目标", http: 404},
+  NEED_IMAGE: {text:"需要图片", http: 400},
+  TAG_NOT_FOUND: {text:"没有找到标签", http: 404},
   NOT_LOGIN: {text:"没有登录", http: 403},
   NOT_PUBLIC: {text:"该动态已被设为非公开", http: 403},
   ALREADY_GOT_PERM: {text:"已拥有权限", http: 403},

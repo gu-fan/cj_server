@@ -54,6 +54,7 @@ router.get('/posts',  jwt.auth(), wrap(async function(req, res, next) {
           .where('censor_status', 'pass')
           .where('is_deleted', false)
           .where('is_public', true)
+          .where('is_editor_choice', true)
           .eager('[author(safe),liked_by_users(byMe)]', {
             byMe: builder=>{
               builder.where('uid', uid)
@@ -79,24 +80,6 @@ router.get('/posts',  jwt.auth(), wrap(async function(req, res, next) {
     })
    
   
-  // posts.results.map(item=>{
-  //   if (_.random(0,5)>1) {
-  //     if (_.random(0,3)>1) {
-  //       item.total_likes = _.random(0,6)
-  //       item.total_comments = _.random(0,3)
-  //       item.total_shares = _.random(0,2)
-  //     } else {
-  //       item.total_likes = _.random(0,200)
-  //       item.total_comments = _.random(0,80)
-  //       item.total_shares = _.random(0,20)
-  //     }
-  //   } else {
-  //     item.total_likes = _.random(10,600)
-  //     item.total_comments = _.random(10,300)
-  //     item.total_shares = _.random(0,100)
-  //   }
-  //   return item
-  // })
 
   res.json({
       msg:"post list",

@@ -12,6 +12,8 @@ const { Post, Track, User, Answer, Comment, Question, Staff}  = require('../mode
 
 const { checkSpam } = require('../common/spam')
 
+const { getUser } = require('../services/user')
+
 router.get('/.ping', jwt.auth(), wrap(async function(req, res, next) {
 
   res.json({
@@ -147,6 +149,33 @@ router.get('/search', jwt.auth(), wrap(async function(req, res, next) {
   })
 
 }))
+
+
+router.get('/posts',  jwt.auth(), wrap(async function(req, res, next) {
+
+  var user = await getUser(req.user.sub)
+  if (!user.is_staff) throw ERR.NO_PERMISSION
+
+  var day_before = moment().subtract(7, 'day').format()
+
+  var page = req.query.page || 0
+  var posts = await Post.query()
+          .where('is_deleted', false)
+          .where('is_public', true)
+          .eager('[author(safe)]')
+          .orderBy('created_at', 'desc')
+          .where('created_at', '>', day_before)
+          .page(page, 5)
+
+  res.json({
+      msg:"post list",
+      code:0,
+      posts,
+  })
+
+}))
+
+
 
 //////////////////////
 // CHECKED HERE
