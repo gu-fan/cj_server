@@ -8,7 +8,7 @@ const RAW_CODE = {
   ALREADY_GOT_PERM: {text:"已拥有权限", http: 403},
   ALREADY_DELETED: {text:"已被删除", http: 400},
   CENSOR_NOT_PASS: {text:"目标未审核", http: 403},
-  TARGET_LOCKED: {text:"目标已锁定", http: 400},
+  TARGET_LOCKED: {text:"目标已被锁定", http: 400},
   NEED_ARGUMENT: {text:"需要参数", http: 400},
   BAD_ARGUMENT: {text:"参数错误", http: 400},
   NO_PERMISSION: {text:"没有权限", http: 403},
@@ -35,10 +35,13 @@ const RAW_CODE = {
   NOT_RELATED: {text:"并没有关联", http: 400},
   TAG_EXCEED_LIMIT_15: {text:"标签不能大于15个字", http: 400},
   NAME_EXCEED_LIMIT_15: {text:"名字不能大于15个字", http: 400},
+  MAX_ACCOUNT_EXCEEDS: {text:"超过最大账户限制", http: 400},
   POST_LIMIT_3_TAG: {text:"动态不能超过3个标签", http: 400},
   CONTENT_MIN_4: {text:"内容不能少于4个字", http: 400},
   CONTENT_MIN_1: {text:"内容不能少于1个字", http: 400},
   SHARE_EXPIRED: {text:"分享内容已过期", http: 400},
+  NO_RELATED_ACCOUNT: {text:"没有关联的账号", http: 400},
+  INVALID_ARGUMENT: {text:"参数错误", http: 400},
 }
 
 const ERR = Object.keys(RAW_CODE).map((name)=>{

@@ -13,6 +13,7 @@
     "cover": "jest --coverage",
     "deploy": "sh ./deploy/dev.sh",
     "deploy_test": "sh ./deploy/test.sh",
+    "it_dev": "docker exec -it compose_node-app_1 /bin/sh",
     "dev": "cd compose && docker-compose up"
   },
   "dependencies": {

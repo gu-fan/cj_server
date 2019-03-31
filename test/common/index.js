@@ -42,6 +42,12 @@ module.exports = function(http){
     return res
   }
 
+  async function loginAccount(id) {
+    var res = await http.post('/account/login', {id})
+    setupToken(http, res.data.t)
+    return res
+  }
+
   async function signupAndLogin(idx){
     var res = await http.post('/auth/signup',
       {
@@ -73,5 +79,6 @@ module.exports = function(http){
     staffSignup,
     staffLogin,
     bindUserWX,
+    loginAccount,
   }
 }

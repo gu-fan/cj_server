@@ -17,6 +17,7 @@ const banner  = require('./banner')
 const censor  = require('./censor')
 const kpass  = require('./kpass')
 const dashboard  = require('./dashboard')
+const user_account  = require('./user_account')
 
 module.exports = app => {
 
@@ -40,6 +41,7 @@ module.exports = app => {
   app.use('/kpass', kpass)      // qcloud cos
 
   app.use('/u', user)
+  app.use('/account', user_account)
   app.use('/p', post)
   app.use('/t', tag)
 

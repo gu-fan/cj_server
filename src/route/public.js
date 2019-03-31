@@ -94,6 +94,8 @@ router.get('/tags', wrap(async function(req, res, next) {
   var seed = parseInt(req.query.seed) || 0
   var tags = await Tag.query()
           .orderBy('total_posts', 'desc')
+          .where('is_blocked', false)
+          .where('is_public', true)
           .limit(50)
   var len = tags.length / 5
   tags = tags.slice(seed*len, (seed+1)*len)

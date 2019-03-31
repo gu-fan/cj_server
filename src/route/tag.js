@@ -8,6 +8,7 @@ const { UniqueViolationError} = require('objection-db-errors');
 const { User, Tag, TagTopic, Post }  = require('../models')
 const { checkSpam,checkSpamExact } = require('../common/spam')
 const {relateTagNameWithPost,relateTagWithUser} = require('../services/tag')
+const moment = require('moment')
 
 module.exports = router
 
@@ -52,10 +53,18 @@ router.get('/:tid/posts',jwt.auth(), wrap(async function(req, res, next) {
 
   if (tag == undefined) throw ERR.NO_SUCH_TARGET
 
-  if (tag.is_blocked) throw ERR.TARGET_LOCKED
+  if (tag.is_blocked) {
+    return  res.json({
+      msg:"tag posts locked",
+      code:1,
+      posts:{results:[],total:0},
+      tag,
+    })
+  }
 
   let page = req.query.page || 0
   let uid = req.user && req.user.sub || '0'
+  var day_before = moment().subtract(7, 'day').format()
   let posts = await tag.$relatedQuery('posts')
           .where('censor_status', 'pass')
           .where('is_deleted', false)
@@ -66,6 +75,7 @@ router.get('/:tid/posts',jwt.auth(), wrap(async function(req, res, next) {
             }
           })
           .orderBy('created_at', 'desc')
+          .where('created_at', '>', day_before)
           .page(page, 5)
     posts.results.map((item)=>{
       if (item.liked_by_users.length>0) {
@@ -132,12 +142,16 @@ router.get('/hot', jwt.auth(), wrap(async function(req, res, next) {
 
   var h_tags = await Tag.query()
                       .orderBy('total_posts', 'desc')
+                      .where('is_blocked', false)
+                      .where('is_public', true)
                       .limit(5)
 
   var u = await User.query()
                         .findById(req.user.sub)
+
   let u_tags = await u.$relatedQuery('tags')
                         .orderBy('count', 'desc')
+                        .where('is_blocked', false)
                         .limit(5)
 
   let plain_u = u_tags.map(t=>{
@@ -364,6 +378,50 @@ router.post('/unset_post',  wrap(async function(req, res, next) {
       tag,
       post,
       code:0,
+  })
+
+}))
+
+router.post('/:tid/toggle_public',jwt.auth(), wrap(async function(req, res, next) {
+
+  if (req.params.tid=='undefined' ) throw ERR.NEED_ARGUMENT
+
+  let tag = await Tag
+                .query()
+                .findById(req.params.tid)
+
+  if (tag == undefined) throw ERR.NO_SUCH_TARGET
+
+  tag = await tag.$query()
+          .patchAndFetch({is_public: !tag.is_public})
+
+
+  res.json({
+      msg:"tag toggle public",
+      code:0,
+      tag,
+  })
+
+}))
+
+router.post('/:tid/toggle_block',jwt.auth(), wrap(async function(req, res, next) {
+
+  if (req.params.tid=='undefined' ) throw ERR.NEED_ARGUMENT
+
+  let tag = await Tag
+                .query()
+                .findById(req.params.tid)
+
+  if (tag == undefined) throw ERR.NO_SUCH_TARGET
+
+  tag = await tag.$query()
+          .patchAndFetch({is_blocked: !tag.is_blocked})
+
+
+  res.json({
+      msg:"tag toggle lock",
+      code:0,
+      tag,
   })
 
 }))

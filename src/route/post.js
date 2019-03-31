@@ -63,6 +63,7 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
       lon: req.body.lon,
       author_id: req.user.sub,
       is_public: is_public,
+      is_editor_choice: true,       // NOTE: this should change when user grows more
       censor_status: 'pass',
     })
     .eager('author(safe)');

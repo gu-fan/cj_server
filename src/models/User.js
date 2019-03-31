@@ -91,6 +91,22 @@ class User extends mixin(Base, [
           to: 'user_detail.user_id'
         }
       },
+      parent_account: {
+        relation: Model.HasOneRelation,
+        modelClass: __dirname + '/User',
+        join: {
+          from: 'user.parent_id',
+          to: 'user.id',
+        }
+      },
+      child_accounts: {
+        relation: Model.HasManyRelation,
+        modelClass: __dirname + '/User',
+        join: {
+          from: 'user.id',
+          to: 'user.parent_id'
+        }
+      },
     };
   }
 
