@@ -4,7 +4,8 @@ const {promisify, wrap, delay} = require('../common/promise')
 const jwt = require('../common/jwt-auth')
 const {ERR, MSG} = require('../code')
 
-const { Banner,Tag,Post }  = require('../models')
+const { User, Banner,Tag,Post }  = require('../models')
+const {getUserWithCount, getUserWithCensorCount} = require('../services/user')
 
 module.exports = router
 
@@ -70,7 +71,12 @@ router.post('/',  jwt.auth(), wrap(async function(req, res, next) {
   if (req.body.title == '' || req.body.title == null)
       throw ERR.NEED_CONTENT
 
+  if (!req.user) throw ERR.NOT_LOGIN
+  let user = getUserWithCount(req.user.sub)
+  if (!user.is_staff) throw ERR.NO_PERMISSION
+
   let {link, image}= await getLinkByTagPost(req.body.tag, req.body.post)
+
 
   image = req.body.image || image
   if (image == '' || image == null) throw ERR.NEED_IMAGE
