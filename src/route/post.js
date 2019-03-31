@@ -183,7 +183,7 @@ router.get('/:pid', jwt.auth(), wrap(async function(req, res, next) {
             builder.where('uid', req.user.sub)
           }
         })
-        .orderBy('created_at', 'desc')
+        .orderBy('created_at', 'asc')
         .page(req.query.page||0,5)
 
     // CHECK COMMENT IS LIKE BY ME
@@ -529,7 +529,7 @@ router.get('/:pid/comments', jwt.auth(), wrap(async function(req, res, next) {
             builder.where('uid', req.user.sub)
           }
         })
-        .orderBy('created_at', 'desc')
+        .orderBy('created_at', 'asc')
         .page(req.query.page||0,5)
 
     // CHECK COMMENT IS LIKE BY ME
