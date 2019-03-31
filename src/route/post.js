@@ -337,11 +337,12 @@ router.post('/:pid/toggle_pick', jwt.auth(), wrap(async function(req, res, next)
 }))
 router.get('/:pid/share', jwt.auth(), wrap(async function(req, res, next) {
 
+  if (req.params.pid == 'undefined') throw ERR.INVALID_ARGUMENT
   var post = await Post.query()
                         .findById(req.params.pid)
 
   if (post== undefined) throw ERR.NO_SUCH_TARGET
-  await post.$query.increment('total_shares', 1)
+  await post.$query().increment('total_shares', 1)
 
   res.json({
       msg:"post share add",
