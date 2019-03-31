@@ -7,7 +7,7 @@ const moment = require('moment')
 
 const {uid, slug}= require('../models/mixin/_uid')
 
-const {Post, User, Tag}  = require('../models')
+const {Banner, Post, User, Tag}  = require('../models')
 
 const {getHotAnswers, getNewAnswers, getGoldAnswers,
        getMixedHot, getMixedNew} = require('../services/answer')
@@ -175,6 +175,21 @@ router.get('/change_avatar_bg', wrap(async function(req, res, next) {
 }))
 
 
+router.get('/banner', wrap(async function(req, res, next){
+
+  let banners = await Banner.query()
+                .where('is_deleted', false)
+                .where('is_show', true)
+                .orderBy('index', 'desc')
+
+  res.json({
+      msg:"pub banner get",
+      banners,
+      code:0,
+  })
+
+
+}))
 
 
 
