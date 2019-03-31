@@ -64,7 +64,7 @@ router.get('/:tid/posts',jwt.auth(), wrap(async function(req, res, next) {
 
   let page = req.query.page || 0
   let uid = req.user && req.user.sub || '0'
-  var day_before = moment().subtract(30, 'day').format()
+  var day_before = moment().subtract(7, 'day').format()
   let posts = await tag.$relatedQuery('posts')
           .where('censor_status', 'pass')
           .where('is_deleted', false)
