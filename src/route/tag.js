@@ -164,6 +164,7 @@ router.get('/:tid/relate_posts',jwt.auth(), wrap(async function(req, res, next) 
       msg:"tag realted posts",
       code:0,
       posts,
+      tag,
   })
 
 }))
