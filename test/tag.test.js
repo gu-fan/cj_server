@@ -217,7 +217,7 @@ describe('user tests', () => {
   let tag_id, topic_id
   test('get tag related posts', async () => {
 
-    expect.assertions(5)
+    expect.assertions(7)
 
     try {
 
@@ -229,24 +229,35 @@ describe('user tests', () => {
       res = await http.get(`/t/${tag_id}/relate_posts`)
       expect(res.data.posts.results.length).toBe(1)
 
-      res = await http.post('/t/set_topic', {tag:'aaa',topic:'bbb'})
+      res = await http.post('/t/set_topic', {tag:'aaa',topic:'AAA'})
 
       res = await http.get(`/t/${tag_id}/relate_posts`)
       expect(res.data.posts.results.length).toBe(1)
 
       res = await http.post('/p', {content:'hello', content_json: {tags:['bbb']}})
-      res = await http.post('/t/set_topic', {tag:'bbb',topic:'bbb'})
+      res = await http.post('/t/set_topic', {tag:'bbb',topic:'AAA'})
       res = await http.get(`/t/${tag_id}/relate_posts`)
       expect(res.data.posts.results.length).toBe(2)
 
       res = await http.post('/p', {content:'hello', content_json: {tags:['ccc']}})
-      res = await http.post('/t/set_topic', {tag:'ccc',topic:'bbb'})
+      res = await http.post('/t/set_topic', {tag:'ccc',topic:'AAA'})
       res = await http.get(`/t/${tag_id}/relate_posts`)
       expect(res.data.posts.results.length).toBe(3)
       res = await http.post('/p', {content:'hello', content_json: {tags:['ddd','aaa']}})
       res = await http.get(`/t/${tag_id}/relate_posts`)
       expect(res.data.posts.results.length).toBe(4)
 
+      // SET MORE TOPIC OF TAG aaa
+      res = await http.post('/t/set_topic', {tag:'aaa',topic:'KKK'})
+      res = await http.post('/p', {content:'hello', content_json: {tags:['kkk']}})
+      res = await http.post('/t/set_topic', {tag:'kkk',topic:'KKK'})
+      res = await http.get(`/t/${tag_id}/relate_posts`)
+      expect(res.data.posts.results.length).toBe(5)
+      res = await http.post('/p', {content:'hello', content_json: {tags:['kkk']}})
+      res = await http.get(`/t/${tag_id}/relate_posts`)
+      expect(res.data.posts.total).toBe(6)
+
+    
       
     } catch (e) {
       console.log(e.response ? e.response.data : e)

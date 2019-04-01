@@ -11,6 +11,7 @@ const {relateTagNameWithPost,relateTagWithUser} = require('../services/tag')
 const moment = require('moment')
 const {isAdmin} = require('../common/permission')
 const {PostQueryBuilder, setupItemLikeByMe} = require('./utils')
+const _ = require('lodash')
 
 module.exports = router
 //////////////////////////////////////////////
@@ -124,6 +125,15 @@ router.get('/:tid/relate_posts',jwt.auth(), wrap(async function(req, res, next) 
     tagnames = tags.map(t=>{
       return t.name
     })
+    if (tag.topics.length > 1) {
+      let tags2 = await tag.topics[1].$relatedQuery('tags')
+      
+      let _tagnames2 = tags2.map(t=>{
+        return t.name
+      })
+      tagnames = tagnames.concat(_tagnames2)
+      tagnames = _.uniq(tagnames)
+    }
   } else {
     tagnames = [tag.name]
   }

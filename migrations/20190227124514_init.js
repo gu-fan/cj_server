@@ -130,6 +130,10 @@ exports.up = function(knex, Promise) {
       table.string('name', 50)
       table.unique('name')
 
+      // TODO
+      // ADD VALUE IN THIS
+      // table.integer('value').unsigned().defaultTo(0)
+
       table.timestamps()
 
     })
