@@ -156,7 +156,7 @@ router.get('/:tid/relate_posts',jwt.auth(), wrap(async function(req, res, next) 
           }
         })
         .orderBy('post.created_at', 'desc')
-        .distinct('post.id')
+        .groupBy('post.id')
         .page(page, 5)
 
   setupItemLikeByMe(posts)

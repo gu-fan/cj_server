@@ -253,7 +253,7 @@ describe('user tests', () => {
       res = await http.post('/t/set_topic', {tag:'kkk',topic:'KKK'})
       res = await http.get(`/t/${tag_id}/relate_posts`)
       expect(res.data.posts.results.length).toBe(5)
-      res = await http.post('/p', {content:'hello', content_json: {tags:['kkk']}})
+      res = await http.post('/p', {content:'hello', content_json: {tags:['kkk','aaa']}})
       res = await http.get(`/t/${tag_id}/relate_posts`)
       expect(res.data.posts.total).toBe(6)
 
