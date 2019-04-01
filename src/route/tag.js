@@ -181,6 +181,7 @@ router.get('/of', wrap(async function(req, res, next) {
   let tag = await Tag
                 .query()
                 .findOne({name: req.query.name})
+                .eager('topics')
   if (tag==null) {
     throw ERR.NOT_FOUND
   }
