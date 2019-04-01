@@ -19,6 +19,8 @@ const { checkSpam, checkSpamExact } = require('../common/spam')
 const { getCount } = require('../common')
 const {encrypt, decrypt, generateKey, checkValid}  =require('../common/crypto')
 
+const {setupItemLikeByMe} = require('./utils')
+
 router.get('/', jwt.auth(), wrap(async function(req, res, next) {
 
   var count = await Post.query()

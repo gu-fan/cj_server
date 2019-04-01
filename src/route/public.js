@@ -14,6 +14,7 @@ const {getHotAnswers, getNewAnswers, getGoldAnswers,
 const _ = require('lodash')
 const {encrypt, decrypt, generateKey, checkValid}  =require('../common/crypto')
 
+const {setupItemLikeByMe} = require('./utils')
 
 router.get('/.ping', wrap(async function(req, res, next) {
   
@@ -63,21 +64,23 @@ router.get('/posts',  jwt.auth(), wrap(async function(req, res, next) {
           .orderBy('created_at', 'desc')
           .where('created_at', '>', day_before)
           .page(page, 5)
-    posts.results.map((item)=>{
-      if (item.liked_by_users.length>0) {
-        item.is_like_by_me = true
-      } else {
-        item.is_like_by_me = false
-      }
-      // XXX
-      // SEEMS in public tag, it's already < 7 day or public,
-      // no need to use share token
-      // if (item.author.id == uid) {
-      //   let st = generateKey(item.id)
-      //   item.st = st
-      // }
-      delete item.liked_by_users
-    })
+
+  setupItemLikeByMe(posts)
+    // posts.results.map((item)=>{
+    //   if (item.liked_by_users.length>0) {
+    //     item.is_like_by_me = true
+    //   } else {
+    //     item.is_like_by_me = false
+    //   }
+    //   // XXX
+    //   // SEEMS in public tag, it's already < 7 day or public,
+    //   // no need to use share token
+    //   // if (item.author.id == uid) {
+    //   //   let st = generateKey(item.id)
+    //   //   item.st = st
+    //   // }
+    //   delete item.liked_by_users
+    // })
    
   
 

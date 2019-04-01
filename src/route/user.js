@@ -17,6 +17,8 @@ const {Question, Answer, User}  = require('../models')
 const {getUserWithCount, getUserWithCensorCount} = require('../services/user')
 const {encrypt, decrypt, generateKey, checkValid}  =require('../common/crypto')
 
+const {PostQueryBuilder, setupItemLikeByMe} = require('./utils')
+
 router.use('/.ping', jwt.auth(), wrap(async function(req, res, next) {
 
   var user = await getUserWithCount(req.user.sub)
@@ -224,11 +226,8 @@ router.get('/:uid/posts', jwt.auth(), wrap(async function(req, res, next) {
     var day_before = moment().subtract(7, 'day').format()
 
     posts = await user.$relatedQuery('posts')
-      .where('censor_status', 'pass')
-      .where('is_deleted', false)
-      .where('is_public', true)
+      .where(PostQueryBuilder(day_before))
       .orderBy('created_at', 'desc')
-      .where('created_at', '>', day_before)
       .eager('[author(safe),liked_by_users(byMe)]', {
         byMe: builder=>{
           builder.where('uid', uid)
@@ -237,26 +236,30 @@ router.get('/:uid/posts', jwt.auth(), wrap(async function(req, res, next) {
       .page(page, 5)
   }
 
-    posts.results.map((item)=>{
-      if (item.liked_by_users.length>0) {
-        item.is_like_by_me = true
-      } else {
-        item.is_like_by_me = false
-      }
-      if (item.author.id == uid) {
-        let st = generateKey(item.id)
-        item.st = st
-      }
+    setupItemLikeByMe(posts)
 
-      // XXX
-      // seems only user need it, and can calc locally
-      // let item_mmt = moment(item.created_at) 
-      // let now = moment()
-                
-      // item.days_from_now_s = now.diff(item_mmt, 'days')
-        
-      delete item.liked_by_users
-    })
+    if (false) {
+      posts.results.map((item)=>{
+        if (item.liked_by_users.length>0) {
+          item.is_like_by_me = true
+        } else {
+          item.is_like_by_me = false
+        }
+        if (item.author.id == uid) {
+          let st = generateKey(item.id)
+          item.st = st
+        }
+
+        // XXX
+        // seems only user need it, and can calc locally
+        // let item_mmt = moment(item.created_at) 
+        // let now = moment()
+                  
+        // item.days_from_now_s = now.diff(item_mmt, 'days')
+          
+        delete item.liked_by_users
+      })
+    }
   
   res.json({
     msg:'user posts got',

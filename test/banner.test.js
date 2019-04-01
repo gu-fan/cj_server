@@ -25,12 +25,18 @@ describe('user tests', () => {
 
     try {
       
+      await signupAndLogin(1)
+      res = await http.get('/u/.ping')
+      uid = res.data.user.id
+      res = await http.get('/pub/grant', {params:{uid, code:'FZBB'}})
+
       res = await http.get('/banner/.ping')
       expect(res.data.count).toBe(0)
 
       res = await http.post('/banner/', {
         title:'aa',
         image:'xxx',
+        tag:'aaa',
         link:'/aaa/aa',
       })
       bid = res.data.banner.id
@@ -46,8 +52,9 @@ describe('user tests', () => {
 
     try {
       
-      res = await http.patch(`/banner/${bid}`, {
+      res = await http.put(`/banner/${bid}`, {
         title:'bb',
+        tag: 'aaa',
       })
 
       expect(res.data.banner.title).toBe('bb')

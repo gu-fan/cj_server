@@ -156,9 +156,9 @@ describe('user tests', () => {
       // console.log(res.data.comments.results)
       // console.log(res.data.comments.results[1].child_comments)
       
-      expect(res.data.comments.results[2].child_count).toBe(3)
-      expect(res.data.comments.results[2].child_comments[1].id).toBe(cid3)
-      expect(res.data.comments.results[2].child_comments[1].comment_reply_to.id).toBe(cid2)
+      expect(res.data.comments.results[0].child_count).toBe(3)
+      expect(res.data.comments.results[0].child_comments[1].id).toBe(cid3)
+      expect(res.data.comments.results[0].child_comments[1].comment_reply_to.id).toBe(cid2)
 
       expect(res.data.comments.results[1].child_count).toBe(7)
       expect(res.data.comments.results[1].child_comments.length).toBe(5)
@@ -167,7 +167,7 @@ describe('user tests', () => {
       expect(res.data.comments.results[1].child_comments[4].comment_reply_to.id).toBe(cid6)
       expect(res.data.comments.results[1].child_comments[0].content).toBe('comment13')
 
-      expect(res.data.comments.results[0].child_count).toBe(0)
+      expect(res.data.comments.results[2].child_count).toBe(0)
 
     } catch (e) {
       console.log(e.response ? e.response.data : e)

@@ -9,8 +9,19 @@ const { User, Tag, TagTopic, Post }  = require('../models')
 const { checkSpam,checkSpamExact } = require('../common/spam')
 const {relateTagNameWithPost,relateTagWithUser} = require('../services/tag')
 const moment = require('moment')
+const {isAdmin} = require('../common/permission')
+const {PostQueryBuilder, setupItemLikeByMe} = require('./utils')
 
 module.exports = router
+//////////////////////////////////////////////
+
+// XXX
+// CAN NOT USE THIS BUILDER DIRECTLY
+
+
+
+
+//////////////////////////////////////////////
 
 router.get('/.ping',  wrap(async function(req, res, next) {
 
@@ -66,25 +77,16 @@ router.get('/:tid/posts',jwt.auth(), wrap(async function(req, res, next) {
   let uid = req.user && req.user.sub || '0'
   var day_before = moment().subtract(7, 'day').format()
   let posts = await tag.$relatedQuery('posts')
-          .where('censor_status', 'pass')
-          .where('is_deleted', false)
-          .where('is_public', true)
+          .where(PostQueryBuilder(day_before))
           .eager('[author(safe),liked_by_users(byMe)]', {
             byMe: builder=>{
               builder.where('uid', uid)
             }
           })
           .orderBy('created_at', 'desc')
-          .where('created_at', '>', day_before)
           .page(page, 5)
-    posts.results.map((item)=>{
-      if (item.liked_by_users.length>0) {
-        item.is_like_by_me = true
-      } else {
-        item.is_like_by_me = false
-      }
-      delete item.liked_by_users
-    })
+
+  setupItemLikeByMe(posts)
 
   res.json({
       msg:"tag posts",
@@ -94,6 +96,68 @@ router.get('/:tid/posts',jwt.auth(), wrap(async function(req, res, next) {
   })
 
 }))
+
+
+// get all posts in topic
+router.get('/:tid/relate_posts',jwt.auth(), wrap(async function(req, res, next) {
+
+  let tag = await Tag
+                .query()
+                .findById(req.params.tid)
+                .eager('topics')
+  
+  if (tag == undefined) throw ERR.NO_SUCH_TARGET
+
+  if (tag.is_blocked) {
+    return  res.json({
+      msg:"tag posts locked",
+      code:1,
+      posts:{results:[],total:0},
+      tag,
+    })
+  }
+
+  // get first topic's tag
+  let tagnames= []
+  if (tag.topics.length) {
+    let tags = await tag.topics[0].$relatedQuery('tags')
+    tagnames = tags.map(t=>{
+      return t.name
+    })
+  } else {
+    tagnames = [tag.name]
+  }
+
+  let page = req.query.page || 0
+  let uid = req.user && req.user.sub || '0'
+  var day_before = moment().subtract(7, 'day').format()
+
+  let posts = await Post.query()
+        .joinRelation('[tags]')
+        .select('tags.name','post.*')
+        .whereIn('tags.name', tagnames)
+        .where('post.is_deleted', false)
+        .where('post.censor_status', 'pass')
+        .where('post.is_public', true)
+        .where('post.created_at', '>', day_before)
+        .eager('[author(safe),liked_by_users(byMe)]', {
+          byMe: builder=>{
+            builder.where('uid', uid)
+          }
+        })
+        .orderBy('post.created_at', 'desc')
+        .page(page, 5)
+
+  setupItemLikeByMe(posts)
+
+  res.json({
+      msg:"tag realted posts",
+      code:0,
+      posts,
+  })
+
+}))
+
 router.get('/of', wrap(async function(req, res, next) {
 
 
@@ -197,7 +261,7 @@ router.post('/topic',  wrap(async function(req, res, next) {
 
 }))
 
-router.post('/set_topic',  wrap(async function(req, res, next) {
+router.post('/set_topic', jwt.auth(), isAdmin(), wrap(async function(req, res, next) {
 
   if (req.body.tag == '' || req.body.tag == null) 
     throw ERR.NEED_CONTENT
@@ -253,7 +317,7 @@ router.post('/set_topic',  wrap(async function(req, res, next) {
 
 }))
 
-router.post('/unset_topic',  wrap(async function(req, res, next) {
+router.post('/unset_topic', jwt.auth(), isAdmin(),  wrap(async function(req, res, next) {
 
   if (req.body.tag == '' || req.body.tag == null) 
     throw ERR.NEED_CONTENT
@@ -306,7 +370,7 @@ router.get('/tags',  wrap(async function(req, res, next) {
 
 }))
 
-router.post('/set_post', jwt.auth(), wrap(async function(req, res, next) {
+router.post('/set_post', jwt.auth(),  wrap(async function(req, res, next) {
 
   if (req.body.tag == '' || req.body.tag == null) 
     throw ERR.NEED_CONTENT

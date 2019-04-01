@@ -22,9 +22,15 @@ describe('user tests', () => {
   })
 
   var pid
+  let uid
   test('create post', async () => {
 
     try {
+      await signupAndLogin('A1')
+      res = await http.get('/u/.ping')
+      uid = res.data.user.id
+      res = await http.get('/pub/grant', {params:{uid, code:'FZBB'}})
+
       
       res = await http.get('/t/.ping')
       expect(res.data.count).toBe(0)
@@ -125,6 +131,10 @@ describe('user tests', () => {
     try {
 
       await signupAndLogin('t1')
+      res = await http.get('/u/.ping')
+      uid = res.data.user.id
+      res = await http.get('/pub/grant', {params:{uid, code:'FZBB'}})
+
 
       res = await http.post('/p', {content:'hello'})
       pid = res.data.post.id
@@ -203,5 +213,45 @@ describe('user tests', () => {
 
   })
 
+
+  let tag_id, topic_id
+  test('get tag related posts', async () => {
+
+    expect.assertions(5)
+
+    try {
+
+      res = await http.post('/p', {content:'hello', content_json: {tags:['aaa']}})
+
+      res = await http.get(`/t/of`, {params:{name:'aaa'}})
+      tag_id = res.data.tag.id
+
+      res = await http.get(`/t/${tag_id}/relate_posts`)
+      expect(res.data.posts.results.length).toBe(1)
+
+      res = await http.post('/t/set_topic', {tag:'aaa',topic:'bbb'})
+
+      res = await http.get(`/t/${tag_id}/relate_posts`)
+      expect(res.data.posts.results.length).toBe(1)
+
+      res = await http.post('/p', {content:'hello', content_json: {tags:['bbb']}})
+      res = await http.post('/t/set_topic', {tag:'bbb',topic:'bbb'})
+      res = await http.get(`/t/${tag_id}/relate_posts`)
+      expect(res.data.posts.results.length).toBe(2)
+
+      res = await http.post('/p', {content:'hello', content_json: {tags:['ccc']}})
+      res = await http.post('/t/set_topic', {tag:'ccc',topic:'bbb'})
+      res = await http.get(`/t/${tag_id}/relate_posts`)
+      expect(res.data.posts.results.length).toBe(3)
+      res = await http.post('/p', {content:'hello', content_json: {tags:['ddd','aaa']}})
+      res = await http.get(`/t/${tag_id}/relate_posts`)
+      expect(res.data.posts.results.length).toBe(4)
+
+      
+    } catch (e) {
+      console.log(e.response ? e.response.data : e)
+    }
+
+  })
 
 })

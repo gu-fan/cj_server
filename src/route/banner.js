@@ -7,6 +7,8 @@ const {ERR, MSG} = require('../code')
 const { User, Banner,Tag,Post }  = require('../models')
 const {getUserWithCount, getUserWithCensorCount} = require('../services/user')
 
+const {isAdmin} = require('../common/permission')
+
 module.exports = router
 
 function removeUndefined(target) {
@@ -66,14 +68,10 @@ async function getLinkByTagPost(tagname, postname){
   return {link,image}
   
 }
-router.post('/',  jwt.auth(), wrap(async function(req, res, next) {
+router.post('/',  jwt.auth(), isAdmin(), wrap(async function(req, res, next) {
 
   if (req.body.title == '' || req.body.title == null)
       throw ERR.NEED_CONTENT
-
-  if (!req.user) throw ERR.NOT_LOGIN
-  let user = getUserWithCount(req.user.sub)
-  if (!user.is_staff) throw ERR.NO_PERMISSION
 
   let {link, image}= await getLinkByTagPost(req.body.tag, req.body.post)
 

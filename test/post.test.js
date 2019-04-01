@@ -3,10 +3,11 @@ const sinon = require('sinon')
 
 const ERR = require('../src/code').ERR_CODE
 const MSG = require('../src/code').MSG_CODE
+const {delay} = require('../src/common/promise')
 
 const _TEST_ = require('path').basename(__filename);
 const { http, setupServer, closeServer } = require('./setup/server')(_TEST_)
-const { logError, signup, login, signupAndLogin } = require('./common')(http)
+const { signup, login, signupAndLogin } = require('./common')(http)
 
 describe('user tests', () => {
   let clock
@@ -180,7 +181,7 @@ describe('user tests', () => {
       pid = res.data.post.id
 
       res = await http.get('/t/hot')
-      expect(res.data.tags.plain.length).toBe(6)
+      expect(res.data.tags.plain.length).toBe(5)
 
       res = await http.get('/u/.ping')
       expect(res.data.user.tags.length).toBe(3)
@@ -220,7 +221,7 @@ describe('user tests', () => {
 
   })
   test('user can view only own public', async () => {
-    expect.assertions(3)
+    expect.assertions(2)
     try {
 
       await signupAndLogin('p1')
@@ -248,15 +249,17 @@ describe('user tests', () => {
       res = await http.get('/u/'+uid+'/posts')
       expect(res.data.posts.results.length).toBe(1)
 
+      // CHANGED IN 0.2
+      // OTHERS CAN VIEW IT TOO!
+      // AS SHARE TOKEN CAN NOT BE USED
       try {
         res = await http.get('/p/'+pid2)
       } catch (e) {
-        expect(e.response.data.code).toBe(ERR.NOT_AUTHOR)
-        
+        // expect(e.response.data.code).toBe(ERR.NOT_AUTHOR)
       }
 
     } catch (e) {
-      logError(e)
+      console.log(e.response ? e.response.data : e)
     }
 
 

@@ -157,21 +157,21 @@ describe('user tests', () => {
       // NOTE: DESC
       await login('test')
       res = await http.get(`/p/${pid}`)
-      expect(res.data.comments.results[2].is_like_by_me).toBe(false)
+      expect(res.data.comments.results[0].is_like_by_me).toBe(false)
       expect(res.data.comments.results[1].is_like_by_me).toBe(false)
-      expect(res.data.comments.results[0].is_like_by_me).toBe(true)
+      expect(res.data.comments.results[2].is_like_by_me).toBe(true)
 
       await login('test2')
       res = await http.get(`/p/${pid}`)
-      expect(res.data.comments.results[2].is_like_by_me).toBe(true)
+      expect(res.data.comments.results[0].is_like_by_me).toBe(true)
       expect(res.data.comments.results[1].is_like_by_me).toBe(true)
-      expect(res.data.comments.results[0].is_like_by_me).toBe(false)
+      expect(res.data.comments.results[2].is_like_by_me).toBe(false)
 
       await login('test3')
       res = await http.get(`/p/${pid}`)
-      expect(res.data.comments.results[2].is_like_by_me).toBe(false)
+      expect(res.data.comments.results[0].is_like_by_me).toBe(false)
       expect(res.data.comments.results[1].is_like_by_me).toBe(false)
-      expect(res.data.comments.results[0].is_like_by_me).toBe(true)
+      expect(res.data.comments.results[2].is_like_by_me).toBe(true)
 
     } catch (e) {
       console.log(e.response ? e.response.data : e)
