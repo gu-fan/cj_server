@@ -76,9 +76,10 @@ router.get('/:tid/posts',jwt.auth(), wrap(async function(req, res, next) {
 
   let page = req.query.page || 0
   let uid = req.user && req.user.sub || '0'
-  var day_before = moment().subtract(7, 'day').format()
+  // var day_before = moment().subtract(7, 'day').format()
   let posts = await tag.$relatedQuery('posts')
-          .where(PostQueryBuilder(day_before))
+          // .where(PostQueryBuilder(day_before))
+          .where(PostQueryBuilder())
           .eager('[author(safe),liked_by_users(byMe)]', {
             byMe: builder=>{
               builder.where('uid', uid)
@@ -140,7 +141,7 @@ router.get('/:tid/relate_posts',jwt.auth(), wrap(async function(req, res, next) 
 
   let page = req.query.page || 0
   let uid = req.user && req.user.sub || '0'
-  var day_before = moment().subtract(7, 'day').format()
+  // var day_before = moment().subtract(7, 'day').format()
 
   let posts = await Post.query()
         .joinRelation('[tags]')
@@ -149,7 +150,7 @@ router.get('/:tid/relate_posts',jwt.auth(), wrap(async function(req, res, next) 
         .where('post.is_deleted', false)
         .where('post.censor_status', 'pass')
         .where('post.is_public', true)
-        .where('post.created_at', '>', day_before)
+        // .where('post.created_at', '>', day_before)
         .eager('[author(safe),liked_by_users(byMe)]', {
           byMe: builder=>{
             builder.where('uid', uid)

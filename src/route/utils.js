@@ -4,7 +4,7 @@ function PostQueryBuilder(day_before){
       .where('censor_status', 'pass')
       .where('is_deleted', false)
       .where('is_public', true)
-      .where('created_at', '>', day_before)
+      // .where('created_at', '>', day_before)
   }
 }
 

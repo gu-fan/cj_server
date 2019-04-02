@@ -47,7 +47,7 @@ router.get('/grant', wrap(async function(req, res, next) {
 
 router.get('/posts',  jwt.auth(), wrap(async function(req, res, next) {
 
-  var day_before = moment().subtract(7, 'day').format()
+  // var day_before = moment().subtract(7, 'day').format()
 
   let uid = req.user && req.user.sub || '0'
   var page = req.query.page || 0
@@ -62,7 +62,7 @@ router.get('/posts',  jwt.auth(), wrap(async function(req, res, next) {
             }
           })
           .orderBy('created_at', 'desc')
-          .where('created_at', '>', day_before)
+          // .where('created_at', '>', day_before)
           .page(page, 5)
 
   setupItemLikeByMe(posts)

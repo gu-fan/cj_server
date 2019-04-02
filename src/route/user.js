@@ -223,10 +223,11 @@ router.get('/:uid/posts', jwt.auth(), wrap(async function(req, res, next) {
       .orderBy('created_at', 'desc')
       .page(page, 5)
   } else {
-    var day_before = moment().subtract(7, 'day').format()
+    // var day_before = moment().subtract(7, 'day').format()
 
     posts = await user.$relatedQuery('posts')
-      .where(PostQueryBuilder(day_before))
+      // .where(PostQueryBuilder(day_before))
+      .where(PostQueryBuilder())
       .orderBy('created_at', 'desc')
       .eager('[author(safe),liked_by_users(byMe)]', {
         byMe: builder=>{
