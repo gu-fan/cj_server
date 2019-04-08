@@ -199,10 +199,12 @@ router.get('/:pid', jwt.auth(), wrap(async function(req, res, next) {
       delete comment.liked_by_users
 
       comment.child_count = getCount(comment.child_count)
+      if (comment.is_deleted) {
+        comment.content = '[已被删除]'
+      }
 
     })
     delete post.comments
-
 
     // CHECK POST IS LIKE BY ME
     var u = await post.$relatedQuery('liked_by_users')
