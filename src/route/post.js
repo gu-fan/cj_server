@@ -70,7 +70,6 @@ router.post('/', jwt.auth(), wrap(async function(req, res, next) {
     })
     .eager('author(safe)');
 
-
   if (tags && tags.length>0) {
     for (let i in tags) {
       let tagname = tags[i]
